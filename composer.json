@@ -73,6 +73,11 @@
     "prefer-stable": true,
     "repositories": [
         {
+            "name": "private-packagist",
+            "type": "composer",
+            "url": "https://hyva-themes.repo.packagist.com/hengxinxuan-sh-4oodl/"
+        },
+        {
             "type": "composer",
             "url": "https://repo.magento.com/"
         }
@@ -81,4 +86,3 @@
         "magento-force": "override"
     }
 }
-

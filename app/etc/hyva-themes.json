@@ -5,6 +5,9 @@
         },
         {
             "src": "vendor/mollie/magento2-hyva-compatibility/src/Mollie_HyvaCompatibility"
+        },
+        {
+            "src": "vendor/hyva-themes/magento2-hyva-widgets/src"
         }
     ]
 }

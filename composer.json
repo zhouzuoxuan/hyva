@@ -18,10 +18,16 @@
     },
     "version": "2.4.8-p4",
     "require": {
+        "hyva-themes/magento2-cms-tailwind-jit": "^1.2",
         "hyva-themes/magento2-default-theme": "^1.4",
+        "hyva-themes/magento2-hyva-widgets": "^1.0",
+        "hyva-themes/magento2-page-builder": "^1.0",
+        "hyva-themes/magento2-wysiwyg-svg": "^1.0",
+        "hyva-themes/module-magento2-admin": "^1.1",
         "magento/composer-dependency-version-audit-plugin": "~0.1",
         "magento/composer-root-update-plugin": "^2.0.4",
-        "magento/product-community-edition": "2.4.8-p4"
+        "magento/product-community-edition": "2.4.8-p4",
+        "yireo/magento2-hyva-theme-auto-registration": "^1.0"
     },
     "autoload": {
         "exclude-from-classmap": [

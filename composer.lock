@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5026b355b5f6b5dbe79733bab9a7a74e",
+    "content-hash": "850e15f0a2af50ca6ff483a06b2eda09",
     "packages": [
         {
             "name": "2tvenom/cborencode",
@@ -2568,6 +2568,50 @@
             "time": "2026-01-06T11:26:31+01:00"
         },
         {
+            "name": "hyva-themes/magento2-cms-tailwind-jit",
+            "version": "1.2.4",
+            "dist": {
+                "type": "zip",
+                "url": "https://hyva-themes.repo.packagist.com/hengxinxuan-sh-4oodl/dists/hyva-themes/magento2-cms-tailwind-jit/1.2.4.0/500efaa609a8ae6a50f6c8e0fba6719c97dc9ad0.zip",
+                "reference": "500efaa609a8ae6a50f6c8e0fba6719c97dc9ad0",
+                "mirrors": [
+                    {
+                        "url": "https://hyva-themes.repo.packagist.com/hengxinxuan-sh-4oodl/dists/%package%/%version%/r%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
+            },
+            "require": {
+                "ext-json": "*",
+                "php": "^7.4.0||>=8.0"
+            },
+            "type": "magento2-module",
+            "autoload": {
+                "files": [
+                    "src/registration.php"
+                ],
+                "psr-4": {
+                    "Hyva\\CmsTailwindJit\\": "src/"
+                }
+            },
+            "notification-url": "https://hyva-themes.repo.packagist.com/hengxinxuan-sh-4oodl/downloads/",
+            "license": [
+                "proprietary"
+            ],
+            "authors": [
+                {
+                    "name": "Hyvä Themes B.V.",
+                    "email": "info@hyva.io"
+                }
+            ],
+            "description": "Automatic TailwindCSS classes for CMS content in Hyvä Themes.",
+            "support": {
+                "source": "https://gitlab.hyva.io/hyva-themes/magento2-cms-tailwind-jit/-/tree/1.2.4",
+                "issues": "https://gitlab.hyva.io/hyva-themes/magento2-cms-tailwind-jit/-/issues"
+            },
+            "time": "2025-11-10T12:43:10+01:00"
+        },
+        {
             "name": "hyva-themes/magento2-compat-module-fallback",
             "version": "1.1.4",
             "dist": {
@@ -2804,6 +2848,55 @@
             "time": "2023-03-13T17:01:18+00:00"
         },
         {
+            "name": "hyva-themes/magento2-hyva-widgets",
+            "version": "1.0.3",
+            "dist": {
+                "type": "zip",
+                "url": "https://hyva-themes.repo.packagist.com/hengxinxuan-sh-4oodl/dists/hyva-themes/magento2-hyva-widgets/1.0.3.0/9c8c302c2d8c791078cc3b799d5fea5c09161b85.zip",
+                "reference": "9c8c302c2d8c791078cc3b799d5fea5c09161b85",
+                "mirrors": [
+                    {
+                        "url": "https://hyva-themes.repo.packagist.com/hengxinxuan-sh-4oodl/dists/%package%/%version%/r%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
+            },
+            "require": {
+                "hyva-themes/magento2-default-theme": ">=1.1.10",
+                "magento/framework": ">=102.0.0",
+                "php": ">=7.4.0"
+            },
+            "type": "magento2-module",
+            "autoload": {
+                "files": [
+                    "src/registration.php"
+                ],
+                "psr-4": {
+                    "Hyva\\Widgets\\": "src/"
+                }
+            },
+            "notification-url": "https://hyva-themes.repo.packagist.com/hengxinxuan-sh-4oodl/downloads/",
+            "license": [
+                "See LICENSE.md or https://hyva.io/license"
+            ],
+            "authors": [
+                {
+                    "name": "Goran Horvat",
+                    "email": "goran@bemeir.com"
+                },
+                {
+                    "name": "Willem Wigman",
+                    "email": "willem@hyva.io"
+                }
+            ],
+            "description": "Hyvä Themes Magento 2 module that adds a simple widget CMS system",
+            "support": {
+                "source": "https://gitlab.hyva.io/hyva-themes/magento2-hyva-widgets/-/tree/1.0.3",
+                "issues": "https://gitlab.hyva.io/hyva-themes/magento2-hyva-widgets/-/issues"
+            },
+            "time": "2024-08-28T14:23:14+00:00"
+        },
+        {
             "name": "hyva-themes/magento2-mollie-theme-bundle",
             "version": "1.0.3",
             "dist": {
@@ -2900,6 +2993,52 @@
             "time": "2025-11-04T17:06:08+01:00"
         },
         {
+            "name": "hyva-themes/magento2-page-builder",
+            "version": "1.0.6",
+            "dist": {
+                "type": "zip",
+                "url": "https://hyva-themes.repo.packagist.com/hengxinxuan-sh-4oodl/dists/hyva-themes/magento2-page-builder/1.0.6.0/5f4d1af3cf1b8ec329a3632d270836e1679bd575.zip",
+                "reference": "5f4d1af3cf1b8ec329a3632d270836e1679bd575",
+                "mirrors": [
+                    {
+                        "url": "https://hyva-themes.repo.packagist.com/hengxinxuan-sh-4oodl/dists/%package%/%version%/r%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
+            },
+            "require": {
+                "hyva-themes/magento2-theme-module": "^1.3.11",
+                "magento/framework": "*",
+                "magento/module-catalog-widget": ">=100.4.2",
+                "magento/module-page-builder": ">=2.2.0"
+            },
+            "type": "magento2-module",
+            "autoload": {
+                "psr-4": {
+                    "Hyva\\PageBuilder\\": ""
+                },
+                "files": [
+                    "registration.php"
+                ]
+            },
+            "notification-url": "https://hyva-themes.repo.packagist.com/hengxinxuan-sh-4oodl/downloads/",
+            "license": [
+                "see LICENSE.md"
+            ],
+            "authors": [
+                {
+                    "name": "Hyvä Themes B.V.",
+                    "email": "info@hyva.io"
+                }
+            ],
+            "description": "A Magento 2 module that adds Page Builder compatibility for Hyvä Themes projects",
+            "support": {
+                "source": "https://gitlab.hyva.io/hyva-themes/magento2-page-builder/-/tree/1.0.6",
+                "issues": "https://gitlab.hyva.io/hyva-themes/magento2-page-builder/-/issues"
+            },
+            "time": "2025-04-24T13:51:05+00:00"
+        },
+        {
             "name": "hyva-themes/magento2-theme-module",
             "version": "1.4.5",
             "dist": {
@@ -2957,6 +3096,96 @@
                 "issues": "https://gitlab.hyva.io/hyva-themes/magento2-theme-module/-/issues"
             },
             "time": "2026-03-16T10:02:27+00:00"
+        },
+        {
+            "name": "hyva-themes/magento2-wysiwyg-svg",
+            "version": "1.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hyva-themes/magento2-wysiwyg-svg.git",
+                "reference": "03685752ce1041b2c3399f47d2cf4fcb6886d7b5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hyva-themes/magento2-wysiwyg-svg/zipball/03685752ce1041b2c3399f47d2cf4fcb6886d7b5",
+                "reference": "03685752ce1041b2c3399f47d2cf4fcb6886d7b5",
+                "shasum": ""
+            },
+            "require": {
+                "php": "~7.4.0||~8.1.0||~8.2.0||~8.3.0||~8.4.0"
+            },
+            "type": "magento2-module",
+            "autoload": {
+                "files": [
+                    "src/registration.php"
+                ],
+                "psr-4": {
+                    "Hyva\\WysiwygSvg\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Hyvä Themes B.V.",
+                    "email": "info@hyva.io"
+                }
+            ],
+            "description": "Allow SVGs and all tailwind classes in CMS block and page content.",
+            "support": {
+                "issues": "https://github.com/hyva-themes/magento2-wysiwyg-svg/issues",
+                "source": "https://github.com/hyva-themes/magento2-wysiwyg-svg/tree/1.0.4"
+            },
+            "time": "2025-08-21T08:42:32+00:00"
+        },
+        {
+            "name": "hyva-themes/module-magento2-admin",
+            "version": "1.1.27",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hyva-themes/magento2-hyva-admin.git",
+                "reference": "65e306a714dc624182f0579bac02df91e3a33498"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hyva-themes/magento2-hyva-admin/zipball/65e306a714dc624182f0579bac02df91e3a33498",
+                "reference": "65e306a714dc624182f0579bac02df91e3a33498",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "laminas/laminas-code": ">=3.0.0",
+                "magento/framework": ">=101.0.0",
+                "magento/module-backend": ">=101.0.0",
+                "php": "^7.3.0||>=8.0"
+            },
+            "type": "magento2-module",
+            "autoload": {
+                "files": [
+                    "registration.php"
+                ],
+                "psr-4": {
+                    "Hyva\\Admin\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "This module aims to make creating grids and forms in the Magento 2 adminhtml area for developers joyful and fast",
+            "support": {
+                "issues": "https://github.com/hyva-themes/magento2-hyva-admin/issues",
+                "source": "https://github.com/hyva-themes/magento2-hyva-admin/tree/1.1.27"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/vinai",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-10-23T20:03:43+00:00"
         },
         {
             "name": "justinrainbow/json-schema",
@@ -25907,6 +26136,43 @@
                 "source": "https://github.com/wikimedia/less.php/tree/v5.5.1"
             },
             "time": "2026-02-14T00:12:28+00:00"
+        },
+        {
+            "name": "yireo/magento2-hyva-theme-auto-registration",
+            "version": "1.0.7",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yireo/Yireo_HyvaThemeAutoRegistration.git",
+                "reference": "139f0dfb5619ccd92bb1ecf36a74c6fe7942a1b8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yireo/Yireo_HyvaThemeAutoRegistration/zipball/139f0dfb5619ccd92bb1ecf36a74c6fe7942a1b8",
+                "reference": "139f0dfb5619ccd92bb1ecf36a74c6fe7942a1b8",
+                "shasum": ""
+            },
+            "require": {
+                "magento/framework": "^102.0|^103.0",
+                "php": "^8.1"
+            },
+            "type": "magento2-module",
+            "autoload": {
+                "files": [
+                    "registration.php"
+                ],
+                "psr-4": {
+                    "Yireo\\HyvaThemeAutoRegistration\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "OSL-3.0"
+            ],
+            "description": "Automatically include modules in the Hyvä Theme registration",
+            "support": {
+                "source": "https://github.com/yireo/Yireo_HyvaThemeAutoRegistration/tree/1.0.7"
+            },
+            "time": "2025-10-22T11:26:41+00:00"
         }
     ],
     "packages-dev": [

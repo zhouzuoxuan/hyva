@@ -22,25 +22,35 @@ class ImageChooser extends AbstractField
         }
 
         $sourceUrl = $this->getUrl('cms/wysiwyg_images/index', [
-            'target_element_id' => $element->getId(),
-            'type' => 'file',
-            'static_urls_allowed' => 1,
+            'target_element_id'    => $element->getId(),
+            'type'                 => 'file',
+            'static_urls_allowed'  => 1,
         ]);
 
         $escapedSourceUrl = $this->escapeJs($sourceUrl);
 
-        $button = $this->getLayout()->createBlock(\Magento\Backend\Block\Widget\Button::class)
+        $button = $this->getLayout()
+            ->createBlock(\Magento\Backend\Block\Widget\Button::class)
             ->setType('button')
             ->setClass('btn-chooser')
             ->setLabel($buttonLabel)
-            ->setOnClick("require(['mage/adminhtml/browser'], function () { MediabrowserUtility.openDialog('{$escapedSourceUrl}'); }); return false;")
+            ->setOnClick(
+                "require(['mage/adminhtml/browser'], function () {"
+                . "if (typeof MediabrowserUtility !== 'undefined') {"
+                . "MediabrowserUtility.openDialog('{$escapedSourceUrl}');"
+                . "} else {"
+                . "console.error('MediabrowserUtility is not available');"
+                . "}"
+                . "}); return false;"
+            )
             ->setDisabled($element->getReadonly());
 
         $previewId = $element->getId() . '_preview';
-        $inputId = $element->getId();
+        $inputId   = $element->getId();
+
         $script = <<<HTML
 <script>
-require(['jquery', 'mage/adminhtml/browser'], function ($) {
+require(['jquery'], function ($) {
     var input = $('#{$inputId}');
     var preview = $('#{$previewId}');
 

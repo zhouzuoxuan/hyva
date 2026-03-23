@@ -1,6 +1,6 @@
 {
   "name": "lencarta/module-cms",
-  "description": "Lencarta CMS widgets and content components",
+  "description": "Lencarta CMS widgets for Magento 2 + Hyva",
   "type": "magento2-module",
   "license": ["proprietary"],
   "autoload": {

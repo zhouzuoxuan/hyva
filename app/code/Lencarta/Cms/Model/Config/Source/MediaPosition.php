@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace Lencarta\Cms\Model\Config\Source;
@@ -11,8 +10,8 @@ class MediaPosition implements OptionSourceInterface
     public function toOptionArray(): array
     {
         return [
-            ['value' => 'right', 'label' => __('Right')],
-            ['value' => 'left', 'label' => __('Left')],
+            ['value' => 'right', 'label' => __('Image Right')],
+            ['value' => 'left', 'label' => __('Image Left')],
         ];
     }
 }

@@ -1,40 +1,52 @@
 <?xml version="1.0"?>
 <widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Widget:etc/widget_file.xsd">
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Widget:etc/widget.xsd">
+
     <widget id="lencarta_content_section"
             class="Lencarta\Cms\Block\Widget\ContentSection"
             is_email_compatible="true"
             placeholder_image="Magento_Cms::images/widget_pagebuilder.png">
         <label translate="true">Lencarta - Content Section</label>
-        <description translate="true">Reusable text and media section with optional CTA.</description>
+        <description translate="true">Reusable content section with friendlier content and image inputs.</description>
         <parameters>
             <parameter name="eyebrow" xsi:type="text" visible="true" required="false" sort_order="10">
                 <label translate="true">Eyebrow</label>
+                <description translate="true">Optional short text above the title.</description>
             </parameter>
             <parameter name="title" xsi:type="text" visible="true" required="true" sort_order="20">
                 <label translate="true">Title</label>
             </parameter>
-            <parameter name="content" xsi:type="text" visible="true" required="false" sort_order="30">
-                <label translate="true">Content</label>
-                <description translate="true">Supports plain text. Use line breaks in widget directive only if needed.</description>
+            <parameter name="content" xsi:type="block" visible="true" required="false" sort_order="30">
+                <label translate="true">Intro Text</label>
+                <description translate="true">Use a multi-line text field instead of a single-line widget input.</description>
+                <block class="Lencarta\Cms\Block\Adminhtml\Widget\Field\Textarea"/>
             </parameter>
             <parameter name="button_label" xsi:type="text" visible="true" required="false" sort_order="40">
-                <label translate="true">Button Label</label>
+                <label translate="true">Button Text</label>
             </parameter>
             <parameter name="button_url" xsi:type="text" visible="true" required="false" sort_order="50">
-                <label translate="true">Button URL</label>
+                <label translate="true">Button Link</label>
             </parameter>
-            <parameter name="image_url" xsi:type="text" visible="true" required="false" sort_order="60">
-                <label translate="true">Image URL</label>
+            <parameter name="image_url" xsi:type="block" visible="true" required="false" sort_order="60">
+                <label translate="true">Image</label>
+                <description translate="true">Choose an image from the media gallery or paste a media URL.</description>
+                <block class="Lencarta\Cms\Block\Adminhtml\Widget\Field\ImageChooser">
+                    <data>
+                        <item name="button" xsi:type="array">
+                            <item name="open" xsi:type="string">Choose Image...</item>
+                        </item>
+                    </data>
+                </block>
             </parameter>
             <parameter name="image_alt" xsi:type="text" visible="true" required="false" sort_order="70">
                 <label translate="true">Image Alt Text</label>
+                <description translate="true">If left empty, the widget title will be used.</description>
             </parameter>
             <parameter name="media_position" xsi:type="select" visible="true" required="false" sort_order="80" source_model="Lencarta\Cms\Model\Config\Source\MediaPosition">
-                <label translate="true">Media Position</label>
+                <label translate="true">Image Position</label>
             </parameter>
             <parameter name="theme_variant" xsi:type="select" visible="true" required="false" sort_order="90" source_model="Lencarta\Cms\Model\Config\Source\ThemeVariant">
-                <label translate="true">Theme Variant</label>
+                <label translate="true">Section Style</label>
             </parameter>
         </parameters>
     </widget>
@@ -44,14 +56,21 @@
             is_email_compatible="true"
             placeholder_image="Magento_Cms::images/widget_pagebuilder.png">
         <label translate="true">Lencarta - USP List</label>
-        <description translate="true">Simple USP list, one item per line.</description>
+        <description translate="true">USP list with repeatable rows in admin.</description>
         <parameters>
             <parameter name="title" xsi:type="text" visible="true" required="false" sort_order="10">
                 <label translate="true">Title</label>
             </parameter>
-            <parameter name="items" xsi:type="text" visible="true" required="true" sort_order="20">
-                <label translate="true">Items</label>
-                <description translate="true">Enter one item per line in the widget directive or CMS editor source mode.</description>
+            <parameter name="items" xsi:type="block" visible="true" required="true" sort_order="20">
+                <label translate="true">USP Items</label>
+                <description translate="true">Add one USP per row. The value is stored as JSON but remains backward compatible with line-based input.</description>
+                <block class="Lencarta\Cms\Block\Adminhtml\Widget\Field\Repeater">
+                    <data>
+                        <item name="button_label" xsi:type="string">Add USP Item</item>
+                        <item name="empty_text" xsi:type="string">No USP items added yet.</item>
+                        <item name="row_placeholder" xsi:type="string">Enter USP text</item>
+                    </data>
+                </block>
             </parameter>
             <parameter name="columns" xsi:type="select" visible="true" required="false" sort_order="30" source_model="Lencarta\Cms\Model\Config\Source\Columns">
                 <label translate="true">Columns</label>
@@ -69,17 +88,18 @@
             <parameter name="title" xsi:type="text" visible="true" required="true" sort_order="10">
                 <label translate="true">Title</label>
             </parameter>
-            <parameter name="content" xsi:type="text" visible="true" required="false" sort_order="20">
+            <parameter name="content" xsi:type="block" visible="true" required="false" sort_order="20">
                 <label translate="true">Content</label>
+                <block class="Lencarta\Cms\Block\Adminhtml\Widget\Field\Textarea"/>
             </parameter>
             <parameter name="button_label" xsi:type="text" visible="true" required="false" sort_order="30">
-                <label translate="true">Button Label</label>
+                <label translate="true">Button Text</label>
             </parameter>
             <parameter name="button_url" xsi:type="text" visible="true" required="false" sort_order="40">
-                <label translate="true">Button URL</label>
+                <label translate="true">Button Link</label>
             </parameter>
             <parameter name="theme_variant" xsi:type="select" visible="true" required="false" sort_order="50" source_model="Lencarta\Cms\Model\Config\Source\ThemeVariant">
-                <label translate="true">Theme Variant</label>
+                <label translate="true">Banner Style</label>
             </parameter>
         </parameters>
     </widget>

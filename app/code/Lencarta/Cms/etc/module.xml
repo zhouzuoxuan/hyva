@@ -3,10 +3,9 @@
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
     <module name="Lencarta_Cms">
         <sequence>
-            <module name="Lencarta_Core"/>
-            <module name="Lencarta_Ui"/>
-            <module name="Magento_Widget"/>
+            <module name="Magento_Backend"/>
             <module name="Magento_Cms"/>
+            <module name="Magento_Widget"/>
         </sequence>
     </module>
 </config>

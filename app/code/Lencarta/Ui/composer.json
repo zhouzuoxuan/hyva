@@ -1,0 +1,21 @@
+{
+    "name": "lencarta/module-ui",
+    "description": "Reusable frontend UI components for Lencarta Hyva themes.",
+    "type": "magento2-module",
+    "license": [
+        "proprietary"
+    ],
+    "require": {
+        "php": "^8.1 || ^8.2 || ^8.3",
+        "magento/framework": "*",
+        "lencarta/module-core": "*"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Lencarta\\Ui\\": ""
+        }
+    }
+}

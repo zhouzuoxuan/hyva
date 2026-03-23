@@ -1,0 +1,31 @@
+<?php
+declare(strict_types=1);
+
+use Lencarta\Ui\ViewModel\Component;
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
+
+/** @var Template $block */
+/** @var Escaper $escaper */
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+/** @var Component $componentViewModel */
+$componentViewModel = $objectManager->get(Component::class);
+
+$title = trim((string) $block->getData('title'));
+$message = trim((string) $block->getData('message'));
+$variant = trim((string) ($block->getData('variant') ?: 'info'));
+
+if ($message === '') {
+    return;
+}
+?>
+<div class="<?= $escaper->escapeHtmlAttr($componentViewModel->classes([
+    'rounded-xl border px-4 py-3 text-sm leading-6',
+    $componentViewModel->alertClasses($variant),
+])) ?>">
+    <?php if ($title !== ''): ?>
+        <div class="mb-1 font-semibold"><?= $escaper->escapeHtml($title) ?></div>
+    <?php endif; ?>
+    <div><?= nl2br($escaper->escapeHtml($message)) ?></div>
+</div>

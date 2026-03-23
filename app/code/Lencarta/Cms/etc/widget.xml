@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Widget:etc/widget_file.xsd">
+
+    <widget id="lencarta_content_section"
+            class="Lencarta\Cms\Block\Widget\ContentSection"
+            is_email_compatible="true"
+            placeholder_image="Magento_Cms::images/widget_pagebuilder.png">
+        <label translate="true">Lencarta - Content Section</label>
+        <description translate="true">A reusable promo/content block with text, CTA and optional image.</description>
+        <parameters>
+            <parameter name="eyebrow" xsi:type="text" visible="true" required="false" sort_order="10">
+                <label translate="true">Eyebrow</label>
+            </parameter>
+            <parameter name="title" xsi:type="text" visible="true" required="true" sort_order="20">
+                <label translate="true">Title</label>
+            </parameter>
+            <parameter name="content" xsi:type="text" visible="true" required="false" sort_order="30">
+                <label translate="true">Content</label>
+            </parameter>
+            <parameter name="button_label" xsi:type="text" visible="true" required="false" sort_order="40">
+                <label translate="true">Button Label</label>
+            </parameter>
+            <parameter name="button_url" xsi:type="text" visible="true" required="false" sort_order="50">
+                <label translate="true">Button URL</label>
+            </parameter>
+            <parameter name="image_url" xsi:type="text" visible="true" required="false" sort_order="60">
+                <label translate="true">Image URL</label>
+            </parameter>
+            <parameter name="image_alt" xsi:type="text" visible="true" required="false" sort_order="70">
+                <label translate="true">Image Alt Text</label>
+            </parameter>
+            <parameter name="media_position"
+                       xsi:type="select"
+                       visible="true"
+                       required="false"
+                       sort_order="80"
+                       source_model="Lencarta\Cms\Model\Config\Source\MediaPosition">
+                <label translate="true">Media Position</label>
+            </parameter>
+            <parameter name="theme_variant"
+                       xsi:type="select"
+                       visible="true"
+                       required="false"
+                       sort_order="90"
+                       source_model="Lencarta\Cms\Model\Config\Source\ThemeVariant">
+                <label translate="true">Theme Variant</label>
+            </parameter>
+        </parameters>
+    </widget>
+
+    <widget id="lencarta_usp_list"
+            class="Lencarta\Cms\Block\Widget\UspList"
+            is_email_compatible="true"
+            placeholder_image="Magento_Cms::images/widget_pagebuilder.png">
+        <label translate="true">Lencarta - USP List</label>
+        <description translate="true">A simple repeatable USP / feature list using one item per line.</description>
+        <parameters>
+            <parameter name="title" xsi:type="text" visible="true" required="false" sort_order="10">
+                <label translate="true">Title</label>
+            </parameter>
+            <parameter name="items" xsi:type="text" visible="true" required="true" sort_order="20">
+                <label translate="true">Items</label>
+                <description translate="true">Enter one item per line.</description>
+            </parameter>
+            <parameter name="columns"
+                       xsi:type="select"
+                       visible="true"
+                       required="false"
+                       sort_order="30"
+                       source_model="Lencarta\Cms\Model\Config\Source\Columns">
+                <label translate="true">Columns</label>
+            </parameter>
+        </parameters>
+    </widget>
+
+</widgets>

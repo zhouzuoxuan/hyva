@@ -1,0 +1,27 @@
+<?php
+declare(strict_types=1);
+
+use Lencarta\Ui\ViewModel\Component;
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
+
+/** @var Template $block */
+/** @var Escaper $escaper */
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+/** @var Component $componentViewModel */
+$componentViewModel = $objectManager->get(Component::class);
+
+$label = trim((string) $block->getData('label'));
+$variant = trim((string) ($block->getData('variant') ?: 'default'));
+
+if ($label === '') {
+    return;
+}
+?>
+<span class="<?= $escaper->escapeHtmlAttr($componentViewModel->classes([
+    'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-wide',
+    $componentViewModel->badgeClasses($variant),
+])) ?>">
+    <?= $escaper->escapeHtml($label) ?>
+</span>

@@ -1,0 +1,86 @@
+<?php
+declare(strict_types=1);
+
+use Lencarta\Ui\ViewModel\Component;
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
+
+/** @var Template $block */
+/** @var Escaper $escaper */
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+/** @var Component $componentViewModel */
+$componentViewModel = $objectManager->get(Component::class);
+
+$eyebrow = trim((string) $block->getData('eyebrow'));
+$title = trim((string) $block->getData('title'));
+$content = trim((string) $block->getData('content'));
+$buttonLabel = trim((string) $block->getData('button_label'));
+$buttonUrl = trim((string) $block->getData('button_url'));
+$imageUrl = trim((string) $block->getData('image_url'));
+$imageAlt = trim((string) $block->getData('image_alt'));
+
+$themeClassMap = [
+    'light' => 'bg-white text-gray-900',
+    'muted' => 'bg-gray-50 text-gray-900',
+    'dark'  => 'bg-gray-900 text-white',
+];
+
+$themeVariant = method_exists($block, 'getThemeVariant') ? $block->getThemeVariant() : 'light';
+$themeClass = $themeClassMap[$themeVariant] ?? $themeClassMap['light'];
+
+$wrapperClasses = [
+    'my-8 overflow-hidden rounded-2xl px-6 py-8 md:px-10 md:py-10',
+    $themeClass,
+];
+
+$gridClasses = [
+    'grid items-center gap-8 md:gap-10',
+    method_exists($block, 'hasImage') && $block->hasImage() ? 'md:grid-cols-2' : 'md:grid-cols-1',
+];
+
+if (method_exists($block, 'hasImage') && $block->hasImage() && method_exists($block, 'isMediaRight') && !$block->isMediaRight()) {
+    $gridClasses[] = 'md:[&>*:first-child]:order-2 md:[&>*:last-child]:order-1';
+}
+?>
+<section class="<?= $escaper->escapeHtmlAttr($componentViewModel->classes($wrapperClasses)) ?>">
+    <div class="<?= $escaper->escapeHtmlAttr($componentViewModel->classes($gridClasses)) ?>">
+        <div>
+            <?php if ($eyebrow !== ''): ?>
+                <div class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] opacity-70">
+                    <?= $escaper->escapeHtml($eyebrow) ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($title !== ''): ?>
+                <h2 class="text-2xl font-semibold leading-tight md:text-4xl">
+                    <?= $escaper->escapeHtml($title) ?>
+                </h2>
+            <?php endif; ?>
+
+            <?php if ($content !== ''): ?>
+                <div class="mt-4 text-sm leading-7 md:text-base">
+                    <?= nl2br($escaper->escapeHtml($content)) ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($buttonLabel !== '' && $buttonUrl !== ''): ?>
+                <div class="mt-6">
+                    <a href="<?= $escaper->escapeUrl($buttonUrl) ?>"
+                       class="<?= $escaper->escapeHtmlAttr($componentViewModel->buttonLinkClasses('primary')) ?>">
+                        <?= $escaper->escapeHtml($buttonLabel) ?>
+                    </a>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <?php if ($imageUrl !== ''): ?>
+            <div>
+                <img class="h-auto w-full rounded-2xl object-cover"
+                     src="<?= $escaper->escapeUrl($imageUrl) ?>"
+                     alt="<?= $escaper->escapeHtmlAttr($imageAlt ?: $title) ?>"
+                     loading="lazy" />
+            </div>
+        <?php endif; ?>
+    </div>
+</section>

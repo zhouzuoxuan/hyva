@@ -15,6 +15,7 @@ class ImageChooser extends AbstractField
         $input = $this->createElement('text', $element, [
             'class' => 'widget-option input-text admin__control-text',
         ]);
+        $input->addCustomAttribute('data-force_static_path', '1');
 
         if ($element->getRequired()) {
             $input->addClass('required-entry');
@@ -23,22 +24,26 @@ class ImageChooser extends AbstractField
         $sourceUrl = $this->getUrl('cms/wysiwyg_images/index', [
             'target_element_id' => $element->getId(),
             'type' => 'file',
+            'static_urls_allowed' => 1,
         ]);
+
+        $escapedSourceUrl = $this->escapeJs($sourceUrl);
 
         $button = $this->getLayout()->createBlock(\Magento\Backend\Block\Widget\Button::class)
             ->setType('button')
             ->setClass('btn-chooser')
             ->setLabel($buttonLabel)
-            ->setOnClick('MediabrowserUtility.openDialog(\'' . $sourceUrl . '\')')
+            ->setOnClick("require(['mage/adminhtml/browser'], function () { MediabrowserUtility.openDialog('{$escapedSourceUrl}'); }); return false;")
             ->setDisabled($element->getReadonly());
 
         $previewId = $element->getId() . '_preview';
         $inputId = $element->getId();
         $script = <<<HTML
 <script>
-require(['jquery'], function ($) {
+require(['jquery', 'mage/adminhtml/browser'], function ($) {
     var input = $('#{$inputId}');
     var preview = $('#{$previewId}');
+
     function updatePreview() {
         var value = $.trim(input.val() || '');
         if (!value) {
@@ -47,6 +52,7 @@ require(['jquery'], function ($) {
         }
         preview.attr('src', value).show();
     }
+
     input.on('change keyup', updatePreview);
     updatePreview();
 });
@@ -61,7 +67,7 @@ HTML;
             . '</div>';
 
         $notice = '<p class="note"><span>'
-            . $this->escapeHtml((string) __('You can select a media file or paste a direct media URL.'))
+            . $this->escapeHtml((string) __('Choose an image from the media gallery. Static media paths are enforced for widget output.'))
             . '</span></p>';
 
         $html = $input->getElementHtml() . '&nbsp;' . $button->toHtml() . $previewHtml . $notice . $script;

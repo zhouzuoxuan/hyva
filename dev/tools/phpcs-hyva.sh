@@ -11,7 +11,7 @@ if [ ! -x "$PHPCS" ]; then
 fi
 
 if [ $# -gt 0 ]; then
-  "$PHPCS" --standard="$RULESET" "$@"
+  "$PHPCS" --standard="$RULESET" --extensions=php,phtml,xml "$@"
 else
-  "$PHPCS" --standard="$RULESET"
+  "$PHPCS" --standard="$RULESET" --extensions=php,phtml,xml
 fi

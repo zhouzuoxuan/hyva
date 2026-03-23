@@ -2,38 +2,38 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
-        <tab id="lencarta" translate="label" sortOrder="900">
+        <section id="lencarta_core" translate="label" sortOrder="900" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Lencarta</label>
-        </tab>
-
-        <section id="lencarta_core" translate="label" sortOrder="10"
-                 showInDefault="1" showInWebsite="1" showInStore="1">
-            <label>Core</label>
-            <tab>lencarta</tab>
+            <tab>general</tab>
             <resource>Lencarta_Core::core_config</resource>
-
-            <group id="general" translate="label" sortOrder="10"
-                   showInDefault="1" showInWebsite="1" showInStore="1">
+            <group id="general" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>General</label>
-
-                <field id="enabled" translate="label comment" type="select" sortOrder="10"
-                       showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Enable Lencarta Base Features</label>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Module Features</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>Global feature flag for custom Lencarta base modules.</comment>
                 </field>
-
-                <field id="debug_logging" translate="label comment" type="select" sortOrder="20"
-                       showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="brand_name" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Brand Name</label>
+                    <comment>Used by reusable view models and templates as a fallback project label.</comment>
+                </field>
+                <field id="debug_logging" translate="label comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enable Debug Logging</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>When enabled, custom modules can safely write debug entries into lencarta_core.log.</comment>
                 </field>
-
-                <field id="brand_name" translate="label comment" type="text" sortOrder="30"
-                       showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Brand Name</label>
-                    <comment>Useful for templates, emails and frontend ViewModels that need a shared project name.</comment>
+            </group>
+            <group id="features" translate="label" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Feature Flags</label>
+                <field id="ui_components" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable UI Components</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="cms_widgets" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable CMS Widgets</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="experimental" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Experimental Features</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
             </group>
         </section>

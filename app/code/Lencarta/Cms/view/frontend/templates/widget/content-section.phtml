@@ -1,85 +1,53 @@
 <?php
-declare(strict_types=1);
-
-use Lencarta\Ui\ViewModel\Component;
-use Magento\Framework\Escaper;
-use Magento\Framework\View\Element\Template;
-
-/** @var Template $block */
-/** @var Escaper $escaper */
-
-$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-/** @var Component $componentViewModel */
-$componentViewModel = $objectManager->get(Component::class);
-
-$eyebrow = trim((string) $block->getData('eyebrow'));
-$title = trim((string) $block->getData('title'));
-$content = trim((string) $block->getData('content'));
-$buttonLabel = trim((string) $block->getData('button_label'));
-$buttonUrl = trim((string) $block->getData('button_url'));
-$imageUrl = trim((string) $block->getData('image_url'));
-$imageAlt = trim((string) $block->getData('image_alt'));
-
-$themeClassMap = [
-    'light' => 'bg-white text-gray-900',
-    'muted' => 'bg-gray-50 text-gray-900',
-    'dark'  => 'bg-gray-900 text-white',
-];
-
-$themeVariant = method_exists($block, 'getThemeVariant') ? $block->getThemeVariant() : 'light';
-$themeClass = $themeClassMap[$themeVariant] ?? $themeClassMap['light'];
-
-$wrapperClasses = [
-    'my-8 overflow-hidden rounded-2xl px-6 py-8 md:px-10 md:py-10',
-    $themeClass,
-];
-
-$gridClasses = [
-    'grid items-center gap-8 md:gap-10',
-    method_exists($block, 'hasImage') && $block->hasImage() ? 'md:grid-cols-2' : 'md:grid-cols-1',
-];
-
-if (method_exists($block, 'hasImage') && $block->hasImage() && method_exists($block, 'isMediaRight') && !$block->isMediaRight()) {
-    $gridClasses[] = 'md:[&>*:first-child]:order-2 md:[&>*:last-child]:order-1';
-}
+/** @var \Lencarta\Cms\Block\Widget\ContentSection $block */
+$eyebrow = (string) $block->getData('eyebrow');
+$title = (string) $block->getData('title');
+$content = (string) $block->getData('content');
+$buttonLabel = (string) $block->getData('button_label');
+$buttonUrl = (string) $block->getData('button_url');
+$imageUrl = (string) $block->getData('image_url');
+$imageAlt = (string) ($block->getData('image_alt') ?: $title);
+$mediaPosition = (string) ($block->getData('media_position') ?: 'right');
+$themeVariant = (string) ($block->getData('theme_variant') ?: 'light');
+$wrapperClass = [
+    'light' => 'bg-white',
+    'soft' => 'bg-gray-50',
+    'dark' => 'bg-gray-900 text-white',
+][$themeVariant] ?? 'bg-white';
+$orderContent = $mediaPosition === 'left' ? 'lg:order-2' : 'lg:order-1';
+$orderMedia = $mediaPosition === 'left' ? 'lg:order-1' : 'lg:order-2';
 ?>
-<section class="<?= $escaper->escapeHtmlAttr($componentViewModel->classes($wrapperClasses)) ?>">
-    <div class="<?= $escaper->escapeHtmlAttr($componentViewModel->classes($gridClasses)) ?>">
-        <div>
+<section class="rounded-2xl p-6 md:p-8 <?= $block->escapeHtmlAttr($wrapperClass) ?>">
+    <div class="grid gap-8 lg:grid-cols-2 lg:items-center">
+        <div class="<?= $block->escapeHtmlAttr($orderContent) ?>">
             <?php if ($eyebrow !== ''): ?>
-                <div class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] opacity-70">
-                    <?= $escaper->escapeHtml($eyebrow) ?>
+                <div class="mb-2 text-xs font-semibold uppercase tracking-[0.15em] <?= $themeVariant === 'dark' ? 'text-gray-300' : 'text-gray-500' ?>">
+                    <?= $block->escapeHtml($eyebrow) ?>
                 </div>
             <?php endif; ?>
-
             <?php if ($title !== ''): ?>
-                <h2 class="text-2xl font-semibold leading-tight md:text-4xl">
-                    <?= $escaper->escapeHtml($title) ?>
-                </h2>
+                <h2 class="text-2xl font-semibold leading-tight md:text-3xl"><?= $block->escapeHtml($title) ?></h2>
             <?php endif; ?>
-
             <?php if ($content !== ''): ?>
-                <div class="mt-4 text-sm leading-7 md:text-base">
-                    <?= nl2br($escaper->escapeHtml($content)) ?>
+                <div class="mt-4 text-sm leading-7 md:text-base <?= $themeVariant === 'dark' ? 'text-gray-200' : 'text-gray-700' ?>">
+                    <?= nl2br($block->escapeHtml($content)) ?>
                 </div>
             <?php endif; ?>
-
             <?php if ($buttonLabel !== '' && $buttonUrl !== ''): ?>
                 <div class="mt-6">
-                    <a href="<?= $escaper->escapeUrl($buttonUrl) ?>"
-                       class="<?= $escaper->escapeHtmlAttr($componentViewModel->buttonLinkClasses('primary')) ?>">
-                        <?= $escaper->escapeHtml($buttonLabel) ?>
+                    <a href="<?= $block->escapeUrl($buttonUrl) ?>"
+                       class="inline-flex items-center justify-center rounded-lg px-5 py-3 text-sm font-medium transition <?= $themeVariant === 'dark' ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:opacity-90' ?>">
+                        <?= $block->escapeHtml($buttonLabel) ?>
                     </a>
                 </div>
             <?php endif; ?>
         </div>
-
         <?php if ($imageUrl !== ''): ?>
-            <div>
-                <img class="h-auto w-full rounded-2xl object-cover"
-                     src="<?= $escaper->escapeUrl($imageUrl) ?>"
-                     alt="<?= $escaper->escapeHtmlAttr($imageAlt ?: $title) ?>"
-                     loading="lazy" />
+            <div class="<?= $block->escapeHtmlAttr($orderMedia) ?>">
+                <img src="<?= $block->escapeUrl($imageUrl) ?>"
+                     alt="<?= $block->escapeHtmlAttr($imageAlt) ?>"
+                     loading="lazy"
+                     class="h-auto w-full rounded-2xl object-cover" />
             </div>
         <?php endif; ?>
     </div>

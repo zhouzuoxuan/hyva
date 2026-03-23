@@ -1,23 +1,12 @@
 {
-    "name": "lencarta/module-core",
-    "description": "Core foundation module for Lencarta Magento projects.",
-    "type": "magento2-module",
-    "license": [
-        "proprietary"
-    ],
-    "require": {
-        "php": "^8.1 || ^8.2 || ^8.3",
-        "magento/framework": "*",
-        "magento/module-store": "*",
-        "magento/module-config": "*",
-        "magento/module-backend": "*"
-    },
-    "autoload": {
-        "files": [
-            "registration.php"
-        ],
-        "psr-4": {
-            "Lencarta\\Core\\": ""
-        }
+  "name": "lencarta/module-core",
+  "description": "Lencarta Core base module",
+  "type": "magento2-module",
+  "license": ["proprietary"],
+  "autoload": {
+    "files": ["registration.php"],
+    "psr-4": {
+      "Lencarta\\Core\\": ""
     }
+  }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Lencarta\Cms\Model\Config\Source;
@@ -11,7 +12,7 @@ class ThemeVariant implements OptionSourceInterface
     {
         return [
             ['value' => 'light', 'label' => __('Light')],
-            ['value' => 'muted', 'label' => __('Muted')],
+            ['value' => 'soft', 'label' => __('Soft')],
             ['value' => 'dark', 'label' => __('Dark')],
         ];
     }

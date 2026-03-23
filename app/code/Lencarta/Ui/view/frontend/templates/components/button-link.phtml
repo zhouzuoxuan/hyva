@@ -1,0 +1,18 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+$label = (string) $block->getData('label');
+$url = (string) ($block->getData('url') ?: '#');
+$variant = (string) ($block->getData('variant') ?: 'primary');
+$classes = [
+    'primary' => 'bg-black text-white hover:opacity-90',
+    'secondary' => 'bg-white text-black border border-black hover:bg-gray-50',
+    'soft' => 'bg-gray-100 text-black hover:bg-gray-200',
+];
+$linkClass = $classes[$variant] ?? $classes['primary'];
+?>
+<?php if ($label !== ''): ?>
+    <a href="<?= $block->escapeUrl($url) ?>"
+       class="inline-flex items-center justify-center rounded-lg px-5 py-3 text-sm font-medium transition <?= $block->escapeHtmlAttr($linkClass) ?>">
+        <?= $block->escapeHtml($label) ?>
+    </a>
+<?php endif; ?>

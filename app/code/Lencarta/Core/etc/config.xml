@@ -1,13 +1,18 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/config.xsd">
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
         <lencarta_core>
             <general>
                 <enabled>1</enabled>
-                <debug_logging>0</debug_logging>
                 <brand_name>Lencarta</brand_name>
+                <debug_logging>0</debug_logging>
             </general>
+            <features>
+                <ui_components>1</ui_components>
+                <cms_widgets>1</cms_widgets>
+                <experimental>0</experimental>
+            </features>
         </lencarta_core>
     </default>
 </config>

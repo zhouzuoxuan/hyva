@@ -1,0 +1,9 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+$title = (string) ($block->getData('title') ?: 'Nothing to show yet');
+$message = (string) ($block->getData('message') ?: 'Content will appear here once it is available.');
+?>
+<div class="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-8 text-center">
+    <div class="text-lg font-semibold text-gray-900"><?= $block->escapeHtml($title) ?></div>
+    <div class="mt-2 text-sm leading-6 text-gray-600"><?= $block->escapeHtml($message) ?></div>
+</div>

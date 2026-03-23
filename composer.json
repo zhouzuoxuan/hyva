@@ -20,8 +20,10 @@
     "require": {
         "hyva-themes/magento2-cms-tailwind-jit": "^1.2",
         "hyva-themes/magento2-default-theme": "^1.4",
+        "hyva-themes/magento2-default-theme-csp": "^1.4",
         "hyva-themes/magento2-hyva-widgets": "^1.0",
         "hyva-themes/magento2-page-builder": "^1.0",
+        "hyva-themes/magento2-theme-module": "^1.4",
         "hyva-themes/magento2-wysiwyg-svg": "^1.0",
         "hyva-themes/module-magento2-admin": "^1.1",
         "magento/composer-dependency-version-audit-plugin": "~0.1",

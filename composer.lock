@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "850e15f0a2af50ca6ff483a06b2eda09",
+    "content-hash": "5de2a08a1c4f4db3cb2b573d9a5e0680",
     "packages": [
         {
             "name": "2tvenom/cborencode",
@@ -2717,6 +2717,69 @@
                 "issues": "https://gitlab.hyva.io/hyva-themes/magento2-default-theme/-/issues"
             },
             "time": "2026-03-16T10:05:49+00:00"
+        },
+        {
+            "name": "hyva-themes/magento2-default-theme-csp",
+            "version": "1.4.5",
+            "dist": {
+                "type": "zip",
+                "url": "https://hyva-themes.repo.packagist.com/hengxinxuan-sh-4oodl/dists/hyva-themes/magento2-default-theme-csp/1.4.5.0/4ce268d988f989d5e5530678e7ed0d593517f9f3.zip",
+                "reference": "4ce268d988f989d5e5530678e7ed0d593517f9f3",
+                "mirrors": [
+                    {
+                        "url": "https://hyva-themes.repo.packagist.com/hengxinxuan-sh-4oodl/dists/%package%/%version%/r%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
+            },
+            "require": {
+                "hyva-themes/magento2-base-layout-reset": "^2.0.1",
+                "hyva-themes/magento2-email-module": "*",
+                "hyva-themes/magento2-graphql-tokens": "*",
+                "hyva-themes/magento2-graphql-view-model": ">=1.0.1",
+                "hyva-themes/magento2-order-cancellation-webapi": "^1.0.0",
+                "hyva-themes/magento2-theme-module": ">=1.4.5",
+                "magento/framework": ">=102.0.0",
+                "magento/module-catalog-rule-graph-ql": "*",
+                "magento/module-customer-graph-ql": "*",
+                "magento/module-directory-graph-ql": "*",
+                "magento/module-graph-ql": "*",
+                "magento/module-quote-graph-ql": "*",
+                "php": ">=7.3.0"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "dev-master",
+                "magento/magento-coding-standard": "dev-master",
+                "phpro/grumphp": "dev-master"
+            },
+            "type": "magento2-theme",
+            "autoload": {
+                "files": [
+                    "registration.php"
+                ]
+            },
+            "notification-url": "https://hyva-themes.repo.packagist.com/hengxinxuan-sh-4oodl/downloads/",
+            "archive": {
+                "exclude": [
+                    ".gitlab"
+                ]
+            },
+            "license": [
+                "OSL-3.0",
+                "AFL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "Hyvä Themes B.V.",
+                    "email": "info@hyva.io"
+                }
+            ],
+            "description": "Default Hyvä Theme (CSP compatible)",
+            "support": {
+                "source": "https://gitlab.hyva.io/hyva-themes/magento2-default-theme-csp/-/tree/1.4.5",
+                "issues": "https://gitlab.hyva.io/hyva-themes/magento2-default-theme-csp/-/issues"
+            },
+            "time": "2026-03-16T10:08:10+00:00"
         },
         {
             "name": "hyva-themes/magento2-email-module",

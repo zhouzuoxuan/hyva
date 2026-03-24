@@ -1,0 +1,8 @@
+<theme xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="urn:magento:framework:Config/etc/theme.xsd">
+    <title>Lencarta Hyvä CSP</title>
+    <parent>Hyva/default-csp</parent>
+    <media>
+        <preview_image>media/preview.png</preview_image>
+    </media>
+</theme>

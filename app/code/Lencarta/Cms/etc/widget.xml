@@ -11,14 +11,13 @@
         <parameters>
             <parameter name="eyebrow" xsi:type="text" visible="true" required="false" sort_order="10">
                 <label translate="true">Eyebrow</label>
-                <description translate="true">Optional short text above the title.</description>
             </parameter>
             <parameter name="title" xsi:type="text" visible="true" required="true" sort_order="20">
                 <label translate="true">Title</label>
             </parameter>
             <parameter name="content" xsi:type="block" visible="true" required="false" sort_order="30">
-                <label translate="true">Intro Text</label>
-                <description translate="true">Use a multi-line text field instead of a single-line widget input.</description>
+                <label translate="true">Intro Text / HTML</label>
+                <description translate="true">Supports multiple lines and basic HTML such as &lt;br&gt;, &lt;strong&gt;, &lt;em&gt; and links.</description>
                 <block class="Lencarta\Cms\Block\Adminhtml\Widget\Field\Textarea"/>
             </parameter>
             <parameter name="button_label" xsi:type="text" visible="true" required="false" sort_order="40">
@@ -40,7 +39,6 @@
             </parameter>
             <parameter name="image_alt" xsi:type="text" visible="true" required="false" sort_order="70">
                 <label translate="true">Image Alt Text</label>
-                <description translate="true">If left empty, the widget title will be used.</description>
             </parameter>
             <parameter name="media_position" xsi:type="select" visible="true" required="false" sort_order="80" source_model="Lencarta\Cms\Model\Config\Source\MediaPosition">
                 <label translate="true">Image Position</label>
@@ -83,24 +81,137 @@
             is_email_compatible="true"
             placeholder_image="Magento_Cms::images/widget_pagebuilder.png">
         <label translate="true">Lencarta - CTA Banner</label>
-        <description translate="true">Call to action banner with title, text and optional button.</description>
+        <description translate="true">CTA banner with optional desktop/mobile images, overlay and content positioning.</description>
         <parameters>
-            <parameter name="title" xsi:type="text" visible="true" required="true" sort_order="10">
+            <parameter name="eyebrow" xsi:type="text" visible="true" required="false" sort_order="10">
+                <label translate="true">Eyebrow</label>
+            </parameter>
+            <parameter name="title" xsi:type="text" visible="true" required="true" sort_order="20">
                 <label translate="true">Title</label>
             </parameter>
-            <parameter name="content" xsi:type="block" visible="true" required="false" sort_order="20">
-                <label translate="true">Content</label>
+            <parameter name="content" xsi:type="block" visible="true" required="false" sort_order="30">
+                <label translate="true">Content / HTML</label>
                 <block class="Lencarta\Cms\Block\Adminhtml\Widget\Field\Textarea"/>
             </parameter>
-            <parameter name="button_label" xsi:type="text" visible="true" required="false" sort_order="30">
+            <parameter name="button_label" xsi:type="text" visible="true" required="false" sort_order="40">
                 <label translate="true">Button Text</label>
             </parameter>
-            <parameter name="button_url" xsi:type="text" visible="true" required="false" sort_order="40">
+            <parameter name="button_url" xsi:type="text" visible="true" required="false" sort_order="50">
                 <label translate="true">Button Link</label>
             </parameter>
-            <parameter name="theme_variant" xsi:type="select" visible="true" required="false" sort_order="50" source_model="Lencarta\Cms\Model\Config\Source\ThemeVariant">
-                <label translate="true">Banner Style</label>
+            <parameter name="desktop_image" xsi:type="block" visible="true" required="false" sort_order="60">
+                <label translate="true">Desktop Banner Image</label>
+                <block class="Lencarta\Cms\Block\Adminhtml\Widget\Field\ImageChooser">
+                    <data>
+                        <item name="button" xsi:type="array">
+                            <item name="open" xsi:type="string">Choose Desktop Image...</item>
+                        </item>
+                    </data>
+                </block>
+            </parameter>
+            <parameter name="mobile_image" xsi:type="block" visible="true" required="false" sort_order="70">
+                <label translate="true">Mobile Banner Image</label>
+                <description translate="true">Optional. Falls back to the desktop image when empty.</description>
+                <block class="Lencarta\Cms\Block\Adminhtml\Widget\Field\ImageChooser">
+                    <data>
+                        <item name="button" xsi:type="array">
+                            <item name="open" xsi:type="string">Choose Mobile Image...</item>
+                        </item>
+                    </data>
+                </block>
+            </parameter>
+            <parameter name="image_alt" xsi:type="text" visible="true" required="false" sort_order="80">
+                <label translate="true">Image Alt Text</label>
+            </parameter>
+            <parameter name="content_position" xsi:type="select" visible="true" required="false" sort_order="90" source_model="Lencarta\Cms\Model\Config\Source\ContentPosition">
+                <label translate="true">Content Position</label>
+            </parameter>
+            <parameter name="overlay_style" xsi:type="select" visible="true" required="false" sort_order="100" source_model="Lencarta\Cms\Model\Config\Source\OverlayStyle">
+                <label translate="true">Overlay Style</label>
+            </parameter>
+            <parameter name="overlay_opacity" xsi:type="select" visible="true" required="false" sort_order="110" source_model="Lencarta\Cms\Model\Config\Source\OverlayOpacity">
+                <label translate="true">Overlay Opacity</label>
+            </parameter>
+            <parameter name="text_scheme" xsi:type="select" visible="true" required="false" sort_order="120" source_model="Lencarta\Cms\Model\Config\Source\TextScheme">
+                <label translate="true">Text Colour Scheme</label>
+            </parameter>
+            <parameter name="theme_variant" xsi:type="select" visible="true" required="false" sort_order="130" source_model="Lencarta\Cms\Model\Config\Source\ThemeVariant">
+                <label translate="true">Fallback Style (No Image)</label>
             </parameter>
         </parameters>
     </widget>
+
+    <widget id="lencarta_homepage_hero_banner"
+            class="Lencarta\Cms\Block\Widget\HeroBanner"
+            is_email_compatible="true"
+            placeholder_image="Magento_Cms::images/widget_pagebuilder.png">
+        <label translate="true">Lencarta - Homepage Hero Banner</label>
+        <description translate="true">Full-screen homepage hero with desktop/mobile images, HTML description, overlay and content position control.</description>
+        <parameters>
+            <parameter name="desktop_image" xsi:type="block" visible="true" required="true" sort_order="10">
+                <label translate="true">Desktop Background Image</label>
+                <block class="Lencarta\Cms\Block\Adminhtml\Widget\Field\ImageChooser">
+                    <data>
+                        <item name="button" xsi:type="array">
+                            <item name="open" xsi:type="string">Choose Desktop Image...</item>
+                        </item>
+                    </data>
+                </block>
+            </parameter>
+            <parameter name="mobile_image" xsi:type="block" visible="true" required="false" sort_order="20">
+                <label translate="true">Mobile Background Image</label>
+                <description translate="true">Optional. Falls back to the desktop image when empty.</description>
+                <block class="Lencarta\Cms\Block\Adminhtml\Widget\Field\ImageChooser">
+                    <data>
+                        <item name="button" xsi:type="array">
+                            <item name="open" xsi:type="string">Choose Mobile Image...</item>
+                        </item>
+                    </data>
+                </block>
+            </parameter>
+            <parameter name="image_alt" xsi:type="text" visible="true" required="false" sort_order="30">
+                <label translate="true">Image Alt Text</label>
+            </parameter>
+            <parameter name="eyebrow" xsi:type="text" visible="true" required="false" sort_order="40">
+                <label translate="true">Eyebrow</label>
+            </parameter>
+            <parameter name="title" xsi:type="text" visible="true" required="true" sort_order="50">
+                <label translate="true">Title</label>
+            </parameter>
+            <parameter name="description_html" xsi:type="block" visible="true" required="false" sort_order="60">
+                <label translate="true">Description (HTML)</label>
+                <description translate="true">Supports HTML such as &lt;br&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;span&gt; and links.</description>
+                <block class="Lencarta\Cms\Block\Adminhtml\Widget\Field\Textarea">
+                    <data>
+                        <item name="rows" xsi:type="string">8</item>
+                    </data>
+                </block>
+            </parameter>
+            <parameter name="button_text" xsi:type="text" visible="true" required="false" sort_order="70">
+                <label translate="true">Button Text</label>
+            </parameter>
+            <parameter name="button_link" xsi:type="text" visible="true" required="false" sort_order="80">
+                <label translate="true">Button Link</label>
+            </parameter>
+            <parameter name="content_position" xsi:type="select" visible="true" required="false" sort_order="90" source_model="Lencarta\Cms\Model\Config\Source\ContentPosition">
+                <label translate="true">Content Position</label>
+            </parameter>
+            <parameter name="overlay_style" xsi:type="select" visible="true" required="false" sort_order="100" source_model="Lencarta\Cms\Model\Config\Source\OverlayStyle">
+                <label translate="true">Overlay Style</label>
+            </parameter>
+            <parameter name="overlay_opacity" xsi:type="select" visible="true" required="false" sort_order="110" source_model="Lencarta\Cms\Model\Config\Source\OverlayOpacity">
+                <label translate="true">Overlay Opacity</label>
+            </parameter>
+            <parameter name="text_scheme" xsi:type="select" visible="true" required="false" sort_order="120" source_model="Lencarta\Cms\Model\Config\Source\TextScheme">
+                <label translate="true">Text Colour Scheme</label>
+            </parameter>
+            <parameter name="fullscreen" xsi:type="select" visible="true" required="false" sort_order="130" source_model="Magento\Config\Model\Config\Source\Yesno">
+                <label translate="true">Full Screen Hero</label>
+            </parameter>
+            <parameter name="show_scroll_hint" xsi:type="select" visible="true" required="false" sort_order="140" source_model="Magento\Config\Model\Config\Source\Yesno">
+                <label translate="true">Show Scroll Hint</label>
+            </parameter>
+        </parameters>
+    </widget>
+
 </widgets>

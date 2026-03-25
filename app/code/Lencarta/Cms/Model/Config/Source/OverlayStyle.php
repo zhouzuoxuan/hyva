@@ -5,14 +5,15 @@ namespace Lencarta\Cms\Model\Config\Source;
 
 use Magento\Framework\Data\OptionSourceInterface;
 
-class ThemeVariant implements OptionSourceInterface
+class OverlayStyle implements OptionSourceInterface
 {
     public function toOptionArray(): array
     {
         return [
-            ['value' => 'light', 'label' => __('Light')],
-            ['value' => 'soft', 'label' => __('Soft')],
             ['value' => 'dark', 'label' => __('Dark')],
+            ['value' => 'light', 'label' => __('Light')],
+            ['value' => 'brand', 'label' => __('Brand')],
+            ['value' => 'none', 'label' => __('None')],
         ];
     }
 }

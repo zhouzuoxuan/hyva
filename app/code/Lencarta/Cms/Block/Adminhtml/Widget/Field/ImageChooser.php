@@ -22,15 +22,13 @@ class ImageChooser extends AbstractField
         }
 
         $sourceUrl = $this->getUrl('cms/wysiwyg_images/index', [
-            'target_element_id'    => $element->getId(),
-            'type'                 => 'file',
-            'static_urls_allowed'  => 1,
+            'target_element_id' => $element->getId(),
+            'type' => 'file',
+            'static_urls_allowed' => 1,
         ]);
 
         $escapedSourceUrl = $this->escapeJs($sourceUrl);
-
-        $button = $this->getLayout()
-            ->createBlock(\Magento\Backend\Block\Widget\Button::class)
+        $button = $this->getLayout()->createBlock(\Magento\Backend\Block\Widget\Button::class)
             ->setType('button')
             ->setClass('btn-chooser')
             ->setLabel($buttonLabel)
@@ -46,7 +44,7 @@ class ImageChooser extends AbstractField
             ->setDisabled($element->getReadonly());
 
         $previewId = $element->getId() . '_preview';
-        $inputId   = $element->getId();
+        $inputId = $element->getId();
 
         $script = <<<HTML
 <script>

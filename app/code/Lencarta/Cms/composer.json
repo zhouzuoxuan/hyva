@@ -1,10 +1,14 @@
 {
   "name": "lencarta/module-cms",
-  "description": "Lencarta CMS widgets for Magento 2 + Hyva",
+  "description": "Reusable CMS widgets for Lencarta Magento + Hyva projects.",
   "type": "magento2-module",
-  "license": ["proprietary"],
+  "license": [
+    "proprietary"
+  ],
   "autoload": {
-    "files": ["registration.php"],
+    "files": [
+      "registration.php"
+    ],
     "psr-4": {
       "Lencarta\\Cms\\": ""
     }

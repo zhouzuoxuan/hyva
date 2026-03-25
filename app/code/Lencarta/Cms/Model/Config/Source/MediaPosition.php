@@ -10,8 +10,8 @@ class MediaPosition implements OptionSourceInterface
     public function toOptionArray(): array
     {
         return [
-            ['value' => 'right', 'label' => __('Image Right')],
-            ['value' => 'left', 'label' => __('Image Left')],
+            ['value' => 'right', 'label' => __('Right')],
+            ['value' => 'left', 'label' => __('Left')],
         ];
     }
 }

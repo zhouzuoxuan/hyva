@@ -1,0 +1,108 @@
+<?php
+/** @var \Lencarta\Cms\Block\Widget\HeroBanner $block */
+$desktopImage = $block->getField('desktop_image');
+$mobileImage = $block->getPictureFallback('mobile_image', 'desktop_image');
+$imageAlt = $block->getField('image_alt', $block->getField('title'));
+$eyebrow = $block->getField('eyebrow');
+$title = $block->getField('title');
+$descriptionHtml = $block->getHtmlField('description_html');
+$buttonText = $block->getField('button_text');
+$buttonLink = $block->getField('button_link');
+$contentPosition = $block->getField('content_position', 'right-bottom');
+$overlayStyle = $block->getField('overlay_style', 'dark');
+$overlayOpacity = $block->getField('overlay_opacity', '35');
+$textScheme = $block->getField('text_scheme', 'light');
+$fullscreen = $block->getBoolField('fullscreen', true);
+$showScrollHint = $block->getBoolField('show_scroll_hint', true);
+
+$positionClasses = [
+    'left-top' => 'items-start justify-start text-left',
+    'left-center' => 'items-center justify-start text-left',
+    'left-bottom' => 'items-end justify-start text-left',
+    'center-center' => 'items-center justify-center text-center',
+    'right-top' => 'items-start justify-end text-left',
+    'right-center' => 'items-center justify-end text-left',
+    'right-bottom' => 'items-end justify-end text-left',
+];
+$contentContainerClass = $positionClasses[$contentPosition] ?? $positionClasses['right-bottom'];
+
+$overlayBg = [
+    'dark' => 'bg-slate-950',
+    'light' => 'bg-white',
+    'brand' => 'bg-slate-900',
+    'none' => 'bg-transparent',
+];
+$overlayOpacityClass = [
+    '20' => 'opacity-20',
+    '35' => 'opacity-35',
+    '50' => 'opacity-50',
+    '65' => 'opacity-65',
+];
+
+$textSchemeClass = $textScheme === 'dark' ? 'text-slate-950' : 'text-white';
+$subTextClass = $textScheme === 'dark' ? 'text-slate-700' : 'text-white/85';
+$eyebrowClass = $textScheme === 'dark' ? 'text-slate-600' : 'text-white/75';
+$buttonClass = $textScheme === 'dark'
+    ? 'bg-slate-950 text-white hover:bg-slate-800'
+    : 'bg-white text-slate-950 hover:bg-slate-100';
+
+$heightClass = $fullscreen ? 'min-h-[100svh]' : 'min-h-[70svh]';
+?>
+<?php if ($desktopImage !== ''): ?>
+<section class="relative isolate overflow-hidden <?= $block->escapeHtmlAttr($heightClass) ?>">
+    <div class="absolute inset-0">
+        <picture>
+            <?php if ($mobileImage !== '' && $mobileImage !== $desktopImage): ?>
+                <source media="(max-width: 767px)" srcset="<?= $block->escapeUrl($mobileImage) ?>">
+            <?php endif; ?>
+            <img src="<?= $block->escapeUrl($desktopImage) ?>"
+                 alt="<?= $block->escapeHtmlAttr($imageAlt) ?>"
+                 class="h-full w-full object-cover"
+                 fetchpriority="high" />
+        </picture>
+    </div>
+
+    <?php if ($overlayStyle !== 'none'): ?>
+        <div class="absolute inset-0 <?= $block->escapeHtmlAttr(($overlayBg[$overlayStyle] ?? 'bg-slate-950') . ' ' . ($overlayOpacityClass[$overlayOpacity] ?? 'opacity-35')) ?>"></div>
+    <?php endif; ?>
+
+    <div class="relative z-10 mx-auto flex <?= $block->escapeHtmlAttr($heightClass . ' ' . $contentContainerClass) ?> px-6 py-10 md:px-10 md:py-14 lg:px-14 lg:py-16">
+        <div class="w-full max-w-2xl <?= $block->escapeHtmlAttr($textSchemeClass) ?>">
+            <?php if ($eyebrow !== ''): ?>
+                <div class="mb-4 text-xs font-semibold uppercase tracking-[0.22em] <?= $block->escapeHtmlAttr($eyebrowClass) ?>">
+                    <?= $block->escapeHtml($eyebrow) ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($title !== ''): ?>
+                <h1 class="max-w-[14ch] text-4xl font-semibold leading-[1.02] sm:text-5xl lg:text-6xl">
+                    <?= $block->escapeHtml($title) ?>
+                </h1>
+            <?php endif; ?>
+
+            <?php if ($descriptionHtml !== ''): ?>
+                <div class="prose mt-5 max-w-xl text-base leading-7 sm:text-lg <?= $block->escapeHtmlAttr($subTextClass) ?>">
+                    <?= /* @noEscape */ $descriptionHtml ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($buttonText !== '' && $buttonLink !== ''): ?>
+                <div class="mt-7">
+                    <a href="<?= $block->escapeUrl($buttonLink) ?>"
+                       class="inline-flex items-center justify-center rounded-xl px-6 py-3.5 text-sm font-medium transition <?= $block->escapeHtmlAttr($buttonClass) ?>">
+                        <?= $block->escapeHtml($buttonText) ?>
+                    </a>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <?php if ($showScrollHint): ?>
+        <div class="pointer-events-none absolute inset-x-0 bottom-5 z-10 flex justify-center">
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/40 text-white/80">
+                <span aria-hidden="true">↓</span>
+            </span>
+        </div>
+    <?php endif; ?>
+</section>
+<?php endif; ?>

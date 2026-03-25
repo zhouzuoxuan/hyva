@@ -5,5 +5,5 @@ namespace Lencarta\Cms\Block\Widget;
 
 class ContentSection extends AbstractWidget
 {
-    protected $_template = 'Lencarta_Cms::widget/content-section.phtml';
+    protected $_template = 'widget/content-section.phtml';
 }

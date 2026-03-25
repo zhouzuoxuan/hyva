@@ -5,5 +5,5 @@ namespace Lencarta\Cms\Block\Widget;
 
 class CtaBanner extends AbstractWidget
 {
-    protected $_template = 'Lencarta_Cms::widget/cta-banner.phtml';
+    protected $_template = 'widget/cta-banner.phtml';
 }

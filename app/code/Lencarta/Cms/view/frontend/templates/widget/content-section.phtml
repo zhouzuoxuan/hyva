@@ -1,42 +1,50 @@
 <?php
 /** @var \Lencarta\Cms\Block\Widget\ContentSection $block */
-$eyebrow = (string) $block->getData('eyebrow');
-$title = (string) $block->getData('title');
-$content = (string) $block->getData('content');
-$buttonLabel = (string) $block->getData('button_label');
-$buttonUrl = (string) $block->getData('button_url');
-$imageUrl = (string) $block->getData('image_url');
-$imageAlt = (string) ($block->getData('image_alt') ?: $title);
-$mediaPosition = (string) ($block->getData('media_position') ?: 'right');
-$themeVariant = (string) ($block->getData('theme_variant') ?: 'light');
+$eyebrow = $block->getField('eyebrow');
+$title = $block->getField('title');
+$contentHtml = $block->getHtmlField('content');
+$buttonLabel = $block->getField('button_label');
+$buttonUrl = $block->getField('button_url');
+$imageUrl = $block->getField('image_url');
+$imageAlt = $block->getField('image_alt', $title);
+$mediaPosition = $block->getField('media_position', 'right');
+$themeVariant = $block->getField('theme_variant', 'light');
+
 $wrapperClass = [
     'light' => 'bg-white',
     'soft' => 'bg-gray-50',
-    'dark' => 'bg-gray-900 text-white',
+    'dark' => 'bg-slate-900 text-white',
 ][$themeVariant] ?? 'bg-white';
+
+$bodyTextClass = $themeVariant === 'dark' ? 'text-slate-200' : 'text-slate-600';
+$eyebrowClass = $themeVariant === 'dark' ? 'text-slate-300' : 'text-slate-500';
+$buttonClass = $themeVariant === 'dark'
+    ? 'bg-white text-slate-950 hover:bg-slate-100'
+    : 'bg-slate-950 text-white hover:bg-slate-800';
+
 $orderContent = $mediaPosition === 'left' ? 'lg:order-2' : 'lg:order-1';
 $orderMedia = $mediaPosition === 'left' ? 'lg:order-1' : 'lg:order-2';
 ?>
-<section class="rounded-2xl p-6 md:p-8 <?= $block->escapeHtmlAttr($wrapperClass) ?>">
+<section class="rounded-3xl p-6 md:p-8 lg:p-10 <?= $block->escapeHtmlAttr($wrapperClass) ?>">
     <div class="grid gap-8 lg:grid-cols-2 lg:items-center">
         <div class="<?= $block->escapeHtmlAttr($orderContent) ?>">
             <?php if ($eyebrow !== ''): ?>
-                <div class="mb-2 text-xs font-semibold uppercase tracking-[0.15em] <?= $themeVariant === 'dark' ? 'text-gray-300' : 'text-gray-500' ?>">
+                <div class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] <?= $block->escapeHtmlAttr($eyebrowClass) ?>">
                     <?= $block->escapeHtml($eyebrow) ?>
                 </div>
             <?php endif; ?>
             <?php if ($title !== ''): ?>
-                <h2 class="text-2xl font-semibold leading-tight md:text-3xl"><?= $block->escapeHtml($title) ?></h2>
+                <h2 class="max-w-2xl text-3xl font-semibold leading-tight md:text-4xl"><?= $block->escapeHtml($title) ?></h2>
             <?php endif; ?>
-            <?php if ($content !== ''): ?>
-                <div class="mt-4 text-sm leading-7 md:text-base <?= $themeVariant === 'dark' ? 'text-gray-200' : 'text-gray-700' ?>">
-                    <?= nl2br($block->escapeHtml($content)) ?>
+            <?php if ($contentHtml !== ''): ?>
+                <div class="prose prose-slate mt-4 max-w-none text-base leading-7 <?= $block->escapeHtmlAttr($bodyTextClass) ?>">
+                    <?= /* @noEscape */ $contentHtml ?>
                 </div>
             <?php endif; ?>
             <?php if ($buttonLabel !== '' && $buttonUrl !== ''): ?>
                 <div class="mt-6">
                     <a href="<?= $block->escapeUrl($buttonUrl) ?>"
-                       class="inline-flex items-center justify-center rounded-lg px-5 py-3 text-sm font-medium transition <?= $themeVariant === 'dark' ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:opacity-90' ?>">
+                       class="inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-medium transition <?= $block->escapeHtmlAttr($buttonClass) ?>">
                         <?= $block->escapeHtml($buttonLabel) ?>
                     </a>
                 </div>
@@ -47,7 +55,7 @@ $orderMedia = $mediaPosition === 'left' ? 'lg:order-1' : 'lg:order-2';
                 <img src="<?= $block->escapeUrl($imageUrl) ?>"
                      alt="<?= $block->escapeHtmlAttr($imageAlt) ?>"
                      loading="lazy"
-                     class="h-auto w-full rounded-2xl object-cover" />
+                     class="h-full min-h-[280px] w-full rounded-3xl object-cover shadow-sm" />
             </div>
         <?php endif; ?>
     </div>

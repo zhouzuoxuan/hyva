@@ -212,85 +212,107 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
      @mouseleave="headerHovered = false"
      :class="[headerClasses(), headerVisibilityClasses()]"
 >
-    <div class="container mx-auto mt-0 flex w-full flex-wrap items-center justify-between px-6 py-3 lg:flex-nowrap">
-        <!-- Logo -->
-        <div class="w-full pb-2 sm:order-1 sm:w-auto sm:pb-0 lg:order-0">
-            <?= $block->getChildHtml('logo'); ?>
-        </div>
-
-        <!-- Main Navigation -->
-        <div class="header-topmenu flex-1 justify-center" :class="navClasses()">
-            <?= $block->getChildHtml('topmenu') ?>
-        </div>
-
-        <!-- Header Actions -->
-        <div class="order-1 flex items-center gap-2 md:-mr-1 md:gap-1 lg:order-0" :class="actionClasses()">
-            <?php if ($showCompare): ?>
-                <div class="text-current">
-                    <?= $block->getChildHtml('compare'); ?>
-                </div>
-            <?php endif; ?>
-
-            <button
-                id="menu-search-icon"
-                class="btn border-transparent bg-transparent p-1 text-current"
-                @click.prevent="toggleSearch"
-                @keydown.window="searchShortcut"
-                aria-label="<?= $escaper->escapeHtmlAttr(__('Toggle search form')) ?>"
-                aria-haspopup="true"
-                :aria-expanded="searchOpen"
-                :aria-keyshortcuts="textShortcutModifier()"
-                x-ref="searchButton"
-            >
-                <?= $lucideIcons->searchHtml('text-current', 24, 24, ['aria-hidden' => 'true']) ?>
-            </button>
-
-            <div class="text-current">
-                <?= $block->getChildHtml('additional') ?>
+    <div class="container mx-auto mt-0 px-6">
+        <!-- Top Row -->
+        <div class="grid grid-cols-1 items-center gap-y-2 py-2 lg:grid-cols-[1fr_auto_1fr] lg:gap-x-6 lg:min-h-[44px]">
+            <!-- Left: contact / service links -->
+            <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[13px] leading-5 lg:justify-start"
+                 :class="isSolidHeader() ? 'text-slate-700' : 'text-white/90'">
+                <a href="tel:+441234567890" class="transition hover:opacity-80">
+                    +44 1234 567 890
+                </a>
+                <a href="/customer-service" class="transition hover:opacity-80">
+                    Customer Service
+                </a>
+                <a href="/contact-us" class="transition hover:opacity-80">
+                    Contact Us
+                </a>
             </div>
 
-            <div class="text-current">
-                <?= $block->getChildHtml('customer') ?>
+            <!-- Center: logo -->
+            <div class="flex items-center justify-center">
+                <?= $block->getChildHtml('logo'); ?>
             </div>
 
-            <?php if ($showWishlist): ?>
-                <div class="text-current">
-                    <?= $block->getChildHtml('wishlist') ?>
-                </div>
-            <?php endif ?>
+            <!-- Right: actions -->
+            <div class="flex items-center justify-center gap-1.5 md:gap-1 lg:justify-end"
+                 :class="actionClasses()">
+                <?php if ($showCompare): ?>
+                    <div class="text-current">
+                        <?= $block->getChildHtml('compare'); ?>
+                    </div>
+                <?php endif; ?>
 
-            <?php if ($showMiniCart): ?>
                 <button
-            <?php else: ?>
-            <a
+                    id="menu-search-icon"
+                    class="btn border-transparent bg-transparent p-1 text-current"
+                    @click.prevent="toggleSearch"
+                    @keydown.window="searchShortcut"
+                    aria-label="<?= $escaper->escapeHtmlAttr(__('Toggle search form')) ?>"
+                    aria-haspopup="true"
+                    :aria-expanded="searchOpen"
+                    :aria-keyshortcuts="textShortcutModifier()"
+                    x-ref="searchButton"
+                >
+                    <?= $lucideIcons->searchHtml('text-current', 22, 22, ['aria-hidden' => 'true']) ?>
+                </button>
+
+                <div class="text-current">
+                    <?= $block->getChildHtml('additional') ?>
+                </div>
+
+                <div class="text-current">
+                    <?= $block->getChildHtml('customer') ?>
+                </div>
+
+                <?php if ($showWishlist): ?>
+                    <div class="text-current">
+                        <?= $block->getChildHtml('wishlist') ?>
+                    </div>
                 <?php endif ?>
-                id="menu-cart-icon"
-                type="button"
-                class="relative btn border-transparent bg-transparent p-1 text-current"
-                x-ref="cartButton"
-                :aria-label="cartAriaLabel()"
+
                 <?php if ($showMiniCart): ?>
-                    @click="toggleCart"
-                    :aria-expanded="isCartOpen"
-                    aria-haspopup="dialog"
+                    <button
                 <?php else: ?>
-                    href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart/index')) ?>"
-                    aria-label="<?= $escaper->escapeHtmlAttr(__('View cart')) ?>"
-                <?php endif ?>
-            >
-                <?= $lucideIcons->shoppingCartHtml('text-current md:h-6 md:w-6', 28, 28, ['aria-hidden' => 'true']) ?>
-                <span
-                    x-text="summaryCount()"
-                    x-show="summaryCount()"
-                    x-cloak
-                    class="absolute -right-1.5 -top-1.5 rounded-full bg-primary px-2 py-1 text-center text-xs font-semibold leading-none text-on-primary uppercase tabular-nums"
-                    aria-hidden="true"
-                ></span>
-                <?php if ($showMiniCart): ?>
-                    </button>
-                <?php else: ?>
-            </a>
-        <?php endif ?>
+                <a
+                    <?php endif ?>
+                    id="menu-cart-icon"
+                    type="button"
+                    class="relative btn border-transparent bg-transparent p-1 text-current"
+                    x-ref="cartButton"
+                    :aria-label="cartAriaLabel()"
+                    <?php if ($showMiniCart): ?>
+                        @click="toggleCart"
+                        :aria-expanded="isCartOpen"
+                        aria-haspopup="dialog"
+                    <?php else: ?>
+                        href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart/index')) ?>"
+                        aria-label="<?= $escaper->escapeHtmlAttr(__('View cart')) ?>"
+                    <?php endif ?>
+                >
+                    <?= $lucideIcons->shoppingCartHtml('text-current md:h-5 md:w-5', 24, 24, ['aria-hidden' => 'true']) ?>
+                    <span
+                        x-text="summaryCount()"
+                        x-show="summaryCount()"
+                        x-cloak
+                        class="absolute -right-1.5 -top-1.5 rounded-full bg-primary px-1.5 py-0.5 text-center text-[10px] font-semibold leading-none text-on-primary uppercase tabular-nums"
+                        aria-hidden="true"
+                    ></span>
+                    <?php if ($showMiniCart): ?>
+                        </button>
+                    <?php else: ?>
+                </a>
+            <?php endif ?>
+            </div>
+        </div>
+
+        <!-- Bottom Row: centered navigation -->
+        <div class="flex items-center justify-center border-t transition-colors duration-300 lg:min-h-[40px]"
+             :class="isSolidHeader() ? 'border-gray-200' : 'border-white/15'">
+            <div class="header-topmenu flex items-center justify-center text-sm"
+                 :class="navClasses()">
+                <?= $block->getChildHtml('topmenu') ?>
+            </div>
         </div>
     </div>
 

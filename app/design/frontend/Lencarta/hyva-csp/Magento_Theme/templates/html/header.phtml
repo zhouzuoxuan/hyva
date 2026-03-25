@@ -212,11 +212,10 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
      @mouseleave="headerHovered = false"
      :class="[headerClasses(), headerVisibilityClasses()]"
 >
-    <div class="container mx-auto mt-0 px-6">
-        <!-- Top Row -->
-        <div class="grid grid-cols-1 items-center gap-y-2 py-2 lg:grid-cols-[1fr_auto_1fr] lg:gap-x-6 lg:min-h-[44px]">
-            <!-- Left: contact / service links -->
-            <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[13px] leading-5 lg:justify-start"
+    <div class="container mx-auto mt-0 px-4 pt-2 sm:px-6 sm:pt-0">
+        <div class="grid grid-cols-[auto_1fr_auto] grid-rows-[56px_44px] items-center lg:grid-cols-[1fr_auto_1fr] lg:grid-rows-[auto_auto]">
+            <!-- Desktop top-left links -->
+            <div class="hidden lg:flex lg:row-start-1 lg:col-start-1 lg:min-h-[56px] lg:items-center lg:justify-start lg:gap-x-4 lg:text-[13px] lg:leading-5"
                  :class="isSolidHeader() ? 'text-slate-700' : 'text-white/90'">
                 <a href="tel:+441234567890" class="transition hover:opacity-80">
                     +44 1234 567 890
@@ -229,16 +228,24 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
                 </a>
             </div>
 
-            <!-- Center: logo -->
-            <div class="flex items-center justify-center">
+            <!-- Logo -->
+            <div class="row-start-1 col-start-1 col-span-3 py-3 flex items-center justify-center lg:row-start-1 lg:col-start-2 lg:col-span-1 lg:min-h-[56px]">
                 <?= $block->getChildHtml('logo'); ?>
             </div>
 
-            <!-- Right: actions -->
-            <div class="flex items-center justify-center gap-1.5 md:gap-1 lg:justify-end"
+            <!-- Topmenu -->
+            <div class="row-start-2 col-start-1 flex items-center justify-start border-t lg:row-start-2 lg:col-start-1 lg:col-span-3 lg:min-h-[44px] lg:justify-center lg:py-0"
+                 :class="[navClasses(), isSolidHeader() ? 'border-gray-200' : 'border-white/15']">
+                <div class="header-topmenu flex items-center justify-start text-sm lg:justify-center">
+                    <?= $block->getChildHtml('topmenu') ?>
+                </div>
+            </div>
+
+            <!-- Right actions -->
+            <div class="row-start-2 col-start-3 flex items-center justify-end gap-1 lg:row-start-1 lg:col-start-3 lg:min-h-[56px] lg:border-0 lg:py-0 lg:gap-1.5"
                  :class="actionClasses()">
                 <?php if ($showCompare): ?>
-                    <div class="text-current">
+                    <div class="hidden text-current lg:block">
                         <?= $block->getChildHtml('compare'); ?>
                     </div>
                 <?php endif; ?>
@@ -257,7 +264,7 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
                     <?= $lucideIcons->searchHtml('text-current', 22, 22, ['aria-hidden' => 'true']) ?>
                 </button>
 
-                <div class="text-current">
+                <div class="hidden text-current lg:block">
                     <?= $block->getChildHtml('additional') ?>
                 </div>
 
@@ -266,7 +273,7 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
                 </div>
 
                 <?php if ($showWishlist): ?>
-                    <div class="text-current">
+                    <div class="hidden text-current lg:block">
                         <?= $block->getChildHtml('wishlist') ?>
                     </div>
                 <?php endif ?>
@@ -303,15 +310,6 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
                     <?php else: ?>
                 </a>
             <?php endif ?>
-            </div>
-        </div>
-
-        <!-- Bottom Row: centered navigation -->
-        <div class="flex items-center justify-center border-t transition-colors duration-300 lg:min-h-[40px]"
-             :class="isSolidHeader() ? 'border-gray-200' : 'border-white/15'">
-            <div class="header-topmenu flex items-center justify-center text-sm"
-                 :class="navClasses()">
-                <?= $block->getChildHtml('topmenu') ?>
             </div>
         </div>
     </div>

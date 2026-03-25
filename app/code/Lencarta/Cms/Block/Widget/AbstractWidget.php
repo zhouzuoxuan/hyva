@@ -75,24 +75,18 @@ abstract class AbstractWidget extends Template implements BlockInterface
     public function getHeroTextSchemeClasses(string $scheme): array
     {
         $map = [
-            'light' => [
-                'eyebrow' => 'text-white/75',
-                'title' => 'text-white',
-                'description' => 'text-white/85',
-            ],
-            'dark' => [
-                'eyebrow' => 'text-slate-600',
-                'title' => 'text-slate-950',
-                'description' => 'text-slate-700',
-            ],
-            'brand-light' => [
-                'eyebrow' => 'text-sky-200',
-                'title' => 'text-white',
-                'description' => 'text-white/85',
-            ],
+            'light' => 'text-white',
+            'dark' => 'text-slate-950',
+            'brand-light' => 'text-brand',
         ];
 
-        return $map[$scheme] ?? $map['light'];
+        $textClass = $map[$scheme] ?? $map['light'];
+
+        return [
+            'eyebrow' => $textClass,
+            'title' => $textClass,
+            'description' => $textClass,
+        ];
     }
 
     public function getCtaTextSchemeClasses(string $scheme, string $fallbackVariant = 'light'): array
@@ -102,24 +96,18 @@ abstract class AbstractWidget extends Template implements BlockInterface
         }
 
         $map = [
-            'light' => [
-                'eyebrow' => 'text-white/75',
-                'title' => 'text-white',
-                'description' => 'text-white/85',
-            ],
-            'dark' => [
-                'eyebrow' => 'text-slate-500',
-                'title' => 'text-slate-950',
-                'description' => 'text-slate-700',
-            ],
-            'brand' => [
-                'eyebrow' => 'text-sky-700',
-                'title' => 'text-slate-950',
-                'description' => 'text-slate-800',
-            ],
+            'light' => 'text-white',
+            'dark' => 'text-slate-950',
+            'brand' => 'text-brand',
         ];
 
-        return $map[$scheme] ?? $map['dark'];
+        $textClass = $map[$scheme] ?? $map['dark'];
+
+        return [
+            'eyebrow' => $textClass,
+            'title' => $textClass,
+            'description' => $textClass,
+        ];
     }
 
     public function getButtonStyleClasses(string $style, string $context = 'hero', string $textScheme = 'light'): string

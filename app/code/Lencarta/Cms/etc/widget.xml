@@ -181,6 +181,10 @@
             <parameter name="title" xsi:type="text" visible="true" required="true" sort_order="50">
                 <label translate="true">Title</label>
             </parameter>
+            <parameter name="title_tag" xsi:type="select" visible="true" required="false" sort_order="55" source_model="Lencarta\Cms\Model\Config\Source\TitleTag">
+                <label translate="true">Title Tag</label>
+                <description translate="true">Use H1 for the homepage main heading. Use H2/H3 or Div when reusing the hero in another context.</description>
+            </parameter>
             <parameter name="description_html" xsi:type="block" visible="true" required="false" sort_order="60">
                 <label translate="true">Description (HTML)</label>
                 <description translate="true">Supports HTML such as &lt;br&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;span&gt; and links.</description>

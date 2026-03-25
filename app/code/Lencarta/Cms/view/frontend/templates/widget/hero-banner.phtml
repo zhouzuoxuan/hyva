@@ -5,6 +5,7 @@ $mobileImage = $block->getPictureFallback('mobile_image', 'desktop_image');
 $imageAlt = $block->getField('image_alt', $block->getField('title'));
 $eyebrow = $block->getField('eyebrow');
 $title = $block->getField('title');
+$titleTag = $block->getField('title_tag', 'h1');
 $descriptionHtml = $block->getHtmlField('description_html');
 $buttonText = $block->getField('button_text');
 $buttonLink = $block->getField('button_link');
@@ -43,6 +44,12 @@ $overlayOpacityClass = [
 $textClasses = $block->getHeroTextSchemeClasses($textScheme);
 $buttonClass = $block->getButtonStyleClasses($buttonStyle, 'hero', $textScheme);
 $heightClass = $fullscreen ? 'min-h-[100svh]' : 'min-h-[70svh]';
+$allowedTitleTags = ['h1', 'h2', 'h3', 'div'];
+if (!in_array($titleTag, $allowedTitleTags, true)) {
+    $titleTag = 'h1';
+}
+$titleClass = $textClasses['title'] . ' max-w-[14ch] text-4xl font-semibold leading-[1.02] sm:text-5xl lg:text-6xl';
+$descriptionClass = $textClasses['description'] . ' mt-5 max-w-xl text-base leading-7 sm:text-lg [&_a]:underline [&_a]:underline-offset-4 [&_a:hover]:opacity-90';
 ?>
 <?php if ($desktopImage !== ''): ?>
 <section class="relative isolate overflow-hidden <?= $block->escapeHtmlAttr($heightClass) ?>">
@@ -63,7 +70,7 @@ $heightClass = $fullscreen ? 'min-h-[100svh]' : 'min-h-[70svh]';
     <?php endif; ?>
 
     <div class="relative z-10 mx-auto flex <?= $block->escapeHtmlAttr($heightClass . ' ' . $contentContainerClass) ?> px-6 py-10 md:px-10 md:py-14 lg:px-14 lg:py-16">
-        <div class="w-full max-w-2xl <?= $block->escapeHtmlAttr($textClasses['title']) ?>">
+        <div class="w-full max-w-2xl">
             <?php if ($eyebrow !== ''): ?>
                 <div class="mb-4 text-xs font-semibold uppercase tracking-[0.22em] <?= $block->escapeHtmlAttr($textClasses['eyebrow']) ?>">
                     <?= $block->escapeHtml($eyebrow) ?>
@@ -71,13 +78,13 @@ $heightClass = $fullscreen ? 'min-h-[100svh]' : 'min-h-[70svh]';
             <?php endif; ?>
 
             <?php if ($title !== ''): ?>
-                <h1 class="max-w-[14ch] text-4xl font-semibold leading-[1.02] sm:text-5xl lg:text-6xl">
+                <<?= $block->escapeHtml($titleTag) ?> class="<?= $block->escapeHtmlAttr($titleClass) ?>">
                     <?= $block->escapeHtml($title) ?>
-                </h1>
+                </<?= $block->escapeHtml($titleTag) ?>>
             <?php endif; ?>
 
             <?php if ($descriptionHtml !== ''): ?>
-                <div class="prose mt-5 max-w-xl text-base leading-7 sm:text-lg <?= $block->escapeHtmlAttr($textClasses['description']) ?>">
+                <div class="<?= $block->escapeHtmlAttr($descriptionClass) ?>">
                     <?= /* @noEscape */ $descriptionHtml ?>
                 </div>
             <?php endif; ?>
@@ -85,7 +92,7 @@ $heightClass = $fullscreen ? 'min-h-[100svh]' : 'min-h-[70svh]';
             <?php if ($buttonText !== '' && $buttonLink !== ''): ?>
                 <div class="mt-7">
                     <a href="<?= $block->escapeUrl($buttonLink) ?>"
-                       class="inline-flex items-center justify-center rounded-xl px-6 py-3.5 text-sm font-medium transition <?= $block->escapeHtmlAttr($buttonClass) ?>">
+                       class="inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-medium transition <?= $block->escapeHtmlAttr($buttonClass) ?>">
                         <?= $block->escapeHtml($buttonText) ?>
                     </a>
                 </div>

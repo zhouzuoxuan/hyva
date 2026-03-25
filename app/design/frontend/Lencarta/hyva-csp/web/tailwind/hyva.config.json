@@ -27,6 +27,16 @@
         "on": {
           "primary": "#fff",
           "secondary": "#fff"
+        },
+        "brand": {
+          "lighter": "#e9f3f8",
+          "DEFAULT": "#7fa9bf",
+          "darker": "#48697d"
+        },
+        "ink": {
+          "lighter": "#667085",
+          "DEFAULT": "#344054",
+          "darker": "#1d2939"
         }
       },
       "form": {

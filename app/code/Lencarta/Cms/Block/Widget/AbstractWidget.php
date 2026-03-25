@@ -70,6 +70,75 @@ abstract class AbstractWidget extends Template implements BlockInterface
         }
     }
 
+
+
+    public function getHeroTextSchemeClasses(string $scheme): array
+    {
+        $map = [
+            'light' => [
+                'eyebrow' => 'text-white/75',
+                'title' => 'text-white',
+                'description' => 'text-white/85',
+            ],
+            'dark' => [
+                'eyebrow' => 'text-slate-600',
+                'title' => 'text-slate-950',
+                'description' => 'text-slate-700',
+            ],
+            'brand-light' => [
+                'eyebrow' => 'text-sky-200',
+                'title' => 'text-white',
+                'description' => 'text-white/85',
+            ],
+        ];
+
+        return $map[$scheme] ?? $map['light'];
+    }
+
+    public function getCtaTextSchemeClasses(string $scheme, string $fallbackVariant = 'light'): array
+    {
+        if ($scheme === 'inherit') {
+            $scheme = $fallbackVariant === 'dark' ? 'light' : 'dark';
+        }
+
+        $map = [
+            'light' => [
+                'eyebrow' => 'text-white/75',
+                'title' => 'text-white',
+                'description' => 'text-white/85',
+            ],
+            'dark' => [
+                'eyebrow' => 'text-slate-500',
+                'title' => 'text-slate-950',
+                'description' => 'text-slate-700',
+            ],
+            'brand' => [
+                'eyebrow' => 'text-sky-700',
+                'title' => 'text-slate-950',
+                'description' => 'text-slate-800',
+            ],
+        ];
+
+        return $map[$scheme] ?? $map['dark'];
+    }
+
+    public function getButtonStyleClasses(string $style, string $context = 'hero', string $textScheme = 'light'): string
+    {
+        $contextualPrimary = in_array($textScheme, ['light', 'brand-light'], true)
+            ? 'bg-white text-slate-950 hover:bg-slate-100'
+            : 'bg-slate-950 text-white hover:bg-slate-800';
+
+        $map = [
+            'primary' => $contextualPrimary,
+            'secondary-light' => 'border border-white/40 bg-white/10 text-white hover:bg-white/15',
+            'secondary-dark' => 'border border-slate-950/15 bg-slate-950/5 text-slate-950 hover:bg-slate-950/10',
+            'outline-light' => 'border border-white/55 bg-transparent text-white hover:bg-white/10',
+            'outline-dark' => 'border border-slate-950/30 bg-transparent text-slate-950 hover:bg-slate-950/5',
+        ];
+
+        return $map[$style] ?? $contextualPrimary;
+    }
+
     public function getPictureFallback(string $primaryKey, string $fallbackKey = ''): string
     {
         $primary = $this->getField($primaryKey);

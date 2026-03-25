@@ -11,8 +11,9 @@ $imageAlt = $block->getField('image_alt', $title);
 $contentPosition = $block->getField('content_position', 'right-center');
 $overlayStyle = $block->getField('overlay_style', 'dark');
 $overlayOpacity = $block->getField('overlay_opacity', '35');
-$textScheme = $block->getField('text_scheme', 'light');
-$themeVariant = $block->getField('theme_variant', 'dark');
+$textScheme = $block->getField('text_scheme', 'inherit');
+$buttonStyle = $block->getField('button_style', 'primary');
+$themeVariant = $block->getField('theme_variant', 'soft');
 
 $positionClasses = [
     'left-top' => 'items-start justify-start text-left',
@@ -37,12 +38,6 @@ $overlayOpacityClass = [
     '50' => 'opacity-50',
     '65' => 'opacity-65',
 ];
-$textSchemeClass = $textScheme === 'dark' ? 'text-slate-950' : 'text-white';
-$subTextClass = $textScheme === 'dark' ? 'text-slate-700' : 'text-white/85';
-$eyebrowClass = $textScheme === 'dark' ? 'text-slate-600' : 'text-white/75';
-$buttonClass = $textScheme === 'dark'
-    ? 'bg-slate-950 text-white hover:bg-slate-800'
-    : 'bg-white text-slate-950 hover:bg-slate-100';
 
 $fallbackWrapperClass = [
     'light' => 'bg-white border border-slate-200',
@@ -51,6 +46,11 @@ $fallbackWrapperClass = [
 ][$themeVariant] ?? 'bg-slate-900 text-white';
 
 $hasImage = $desktopImage !== '';
+$effectiveTextScheme = $textScheme === 'inherit'
+    ? ($hasImage ? 'light' : ($themeVariant === 'dark' ? 'light' : 'dark'))
+    : $textScheme;
+$textClasses = $block->getCtaTextSchemeClasses($effectiveTextScheme, $themeVariant);
+$buttonClass = $block->getButtonStyleClasses($buttonStyle, 'cta', $effectiveTextScheme === 'brand' ? 'dark' : $effectiveTextScheme);
 ?>
 <section class="<?= $hasImage ? 'relative isolate overflow-hidden rounded-3xl' : 'rounded-3xl p-6 md:p-8 lg:p-10 ' . $block->escapeHtmlAttr($fallbackWrapperClass) ?>">
     <?php if ($hasImage): ?>
@@ -69,17 +69,17 @@ $hasImage = $desktopImage !== '';
             <div class="absolute inset-0 <?= $block->escapeHtmlAttr(($overlayBg[$overlayStyle] ?? 'bg-slate-950') . ' ' . ($overlayOpacityClass[$overlayOpacity] ?? 'opacity-35')) ?>"></div>
         <?php endif; ?>
         <div class="relative z-10 flex min-h-[320px] p-6 md:min-h-[420px] md:p-8 lg:p-10 <?= $block->escapeHtmlAttr($contentContainerClass) ?>">
-            <div class="w-full max-w-xl rounded-2xl bg-black/10 p-0 backdrop-blur-none <?= $block->escapeHtmlAttr($textSchemeClass) ?>">
+            <div class="w-full max-w-xl rounded-2xl">
                 <?php if ($eyebrow !== ''): ?>
-                    <div class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] <?= $block->escapeHtmlAttr($eyebrowClass) ?>">
+                    <div class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] <?= $block->escapeHtmlAttr($textClasses['eyebrow']) ?>">
                         <?= $block->escapeHtml($eyebrow) ?>
                     </div>
                 <?php endif; ?>
                 <?php if ($title !== ''): ?>
-                    <h2 class="text-3xl font-semibold leading-tight md:text-4xl"><?= $block->escapeHtml($title) ?></h2>
+                    <h2 class="<?= $block->escapeHtmlAttr($textClasses['title']) ?> text-3xl font-semibold leading-tight md:text-4xl"><?= $block->escapeHtml($title) ?></h2>
                 <?php endif; ?>
                 <?php if ($contentHtml !== ''): ?>
-                    <div class="prose mt-4 max-w-none text-base leading-7 <?= $block->escapeHtmlAttr($subTextClass) ?>">
+                    <div class="prose mt-4 max-w-none text-base leading-7 <?= $block->escapeHtmlAttr($textClasses['description']) ?>">
                         <?= /* @noEscape */ $contentHtml ?>
                     </div>
                 <?php endif; ?>
@@ -100,7 +100,7 @@ $hasImage = $desktopImage !== '';
             </div>
         <?php endif; ?>
         <?php if ($title !== ''): ?>
-            <h2 class="text-3xl font-semibold leading-tight md:text-4xl"><?= $block->escapeHtml($title) ?></h2>
+            <h2 class="text-3xl font-semibold leading-tight md:text-4xl <?= $themeVariant === 'dark' ? 'text-white' : 'text-slate-950' ?>"><?= $block->escapeHtml($title) ?></h2>
         <?php endif; ?>
         <?php if ($contentHtml !== ''): ?>
             <div class="prose prose-slate mt-4 max-w-none text-base leading-7 <?= $themeVariant === 'dark' ? 'text-slate-200' : 'text-slate-700' ?>">

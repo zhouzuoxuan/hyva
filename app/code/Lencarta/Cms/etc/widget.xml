@@ -132,8 +132,11 @@
             <parameter name="overlay_opacity" xsi:type="select" visible="true" required="false" sort_order="110" source_model="Lencarta\Cms\Model\Config\Source\OverlayOpacity">
                 <label translate="true">Overlay Opacity</label>
             </parameter>
-            <parameter name="text_scheme" xsi:type="select" visible="true" required="false" sort_order="120" source_model="Lencarta\Cms\Model\Config\Source\TextScheme">
+            <parameter name="text_scheme" xsi:type="select" visible="true" required="false" sort_order="120" source_model="Lencarta\Cms\Model\Config\Source\CtaTextScheme">
                 <label translate="true">Text Colour Scheme</label>
+            </parameter>
+            <parameter name="button_style" xsi:type="select" visible="true" required="false" sort_order="125" source_model="Lencarta\Cms\Model\Config\Source\ButtonStyle">
+                <label translate="true">Button Style</label>
             </parameter>
             <parameter name="theme_variant" xsi:type="select" visible="true" required="false" sort_order="130" source_model="Lencarta\Cms\Model\Config\Source\ThemeVariant">
                 <label translate="true">Fallback Style (No Image)</label>
@@ -202,8 +205,11 @@
             <parameter name="overlay_opacity" xsi:type="select" visible="true" required="false" sort_order="110" source_model="Lencarta\Cms\Model\Config\Source\OverlayOpacity">
                 <label translate="true">Overlay Opacity</label>
             </parameter>
-            <parameter name="text_scheme" xsi:type="select" visible="true" required="false" sort_order="120" source_model="Lencarta\Cms\Model\Config\Source\TextScheme">
+            <parameter name="text_scheme" xsi:type="select" visible="true" required="false" sort_order="120" source_model="Lencarta\Cms\Model\Config\Source\HeroTextScheme">
                 <label translate="true">Text Colour Scheme</label>
+            </parameter>
+            <parameter name="button_style" xsi:type="select" visible="true" required="false" sort_order="125" source_model="Lencarta\Cms\Model\Config\Source\ButtonStyle">
+                <label translate="true">Button Style</label>
             </parameter>
             <parameter name="fullscreen" xsi:type="select" visible="true" required="false" sort_order="130" source_model="Magento\Config\Model\Config\Source\Yesno">
                 <label translate="true">Full Screen Hero</label>

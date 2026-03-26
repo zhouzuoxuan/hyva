@@ -57,6 +57,15 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
 
             measureHeader() {
                 this.headerHeight = this.$root ? this.$root.offsetHeight : 0;
+                this.syncHeaderCssVars();
+            },
+
+            syncHeaderCssVars() {
+                document.documentElement.style.setProperty('--site-header-height', `${this.headerHeight}px`);
+                document.documentElement.style.setProperty(
+                    '--site-header-offset',
+                    this.headerHidden ? '0px' : `${this.headerHeight}px`
+                );
             },
 
             getData(data) {
@@ -72,12 +81,14 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
                 if (this.searchOpen || this.isCartOpen || this.headerHovered) {
                     this.headerHidden = false;
                     this.lastScrollY = currentScrollY;
+                    this.syncHeaderCssVars();
                     return;
                 }
 
                 if (currentScrollY <= 8) {
                     this.headerHidden = false;
                     this.lastScrollY = currentScrollY;
+                    this.syncHeaderCssVars();
                     return;
                 }
 
@@ -92,6 +103,7 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
                 }
 
                 this.lastScrollY = currentScrollY;
+                this.syncHeaderCssVars();
             },
 
             isOverlayMode() {
@@ -156,23 +168,27 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
             toggleCart() {
                 this.isCartOpen = this.$event.detail?.isOpen ?? true;
                 this.headerHidden = false;
+                this.syncHeaderCssVars();
                 this.$dispatch('toggle-cart', { isOpen: this.isCartOpen });
             },
 
             toggleSearch() {
                 this.searchOpen = !this.searchOpen;
                 this.headerHidden = false;
+                this.syncHeaderCssVars();
                 this.$dispatch('search-open');
             },
 
             toggleSearchOpen() {
                 this.searchOpen = true;
                 this.headerHidden = false;
+                this.syncHeaderCssVars();
                 this.$dispatch('search-open');
             },
 
             searchClose() {
                 this.searchOpen = false;
+                this.syncHeaderCssVars();
                 this.$refs.searchButton.focus();
             },
 
@@ -208,8 +224,8 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
      x-init="init()"
      @private-content-loaded.window="getData(event.detail.data)"
      @scroll.window.throttle.50ms="onScroll"
-     @mouseenter="headerHovered = true; headerHidden = false"
-     @mouseleave="headerHovered = false"
+     @mouseenter="headerHovered = true; headerHidden = false; syncHeaderCssVars()"
+     @mouseleave="headerHovered = false; syncHeaderCssVars()"
      :class="[headerClasses(), headerVisibilityClasses()]"
 >
     <div class="container mx-auto mt-0 px-4 pt-2 sm:px-6 sm:pt-0">
@@ -229,7 +245,7 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
             </div>
 
             <!-- Logo -->
-            <div class="row-start-1 col-start-1 col-span-3 py-3 flex items-center justify-center lg:row-start-1 lg:col-start-2 lg:col-span-1 lg:min-h-[56px]">
+            <div class="row-start-1 col-start-1 col-span-3 flex items-center justify-center py-3 lg:row-start-1 lg:col-start-2 lg:col-span-1 lg:min-h-[56px] lg:py-0">
                 <?= $block->getChildHtml('logo'); ?>
             </div>
 

@@ -11,6 +11,7 @@ declare(strict_types=1);
 use Hyva\Theme\Model\ViewModelRegistry;
 use Hyva\Theme\ViewModel\HeroiconsSolid;
 use Hyva\Theme\ViewModel\SvgIcons;
+use Lencarta\Header\ViewModel\HeaderConfig as HeaderConfig;
 use Magento\Framework\Escaper;
 use Magento\Framework\View\Element\Template;
 
@@ -21,10 +22,15 @@ use Magento\Framework\View\Element\Template;
 /** @var SvgIcons $hyvaIcons */
 $hyvaIcons = $viewModels->require(SvgIcons::class);
 
-/** @var HeroiconsSolid $heroIcons */
+/** @var HeroiconsSolid $heroIconsSolid */
 $heroIconsSolid = $viewModels->require(HeroiconsSolid::class);
 
+/** @var HeaderConfig $HeaderConfig */
+$HeaderConfig = $viewModels->require(HeaderConfig::class);
+
 $socialIconsSize = 40;
+$socialLinks = $HeaderConfig->getSocialLinks();
+$hasSocialLinks = !empty($socialLinks);
 ?>
 
 <div class="lg:bg-blue-900 lg:text-white">
@@ -39,68 +45,70 @@ $socialIconsSize = 40;
                     <p class="text-blue-100">
                         <?= $escaper->escapeHtml(
                             __(
-                                'View our <a class="underline hover:no-underline" href="%1">frequently asked questions</a>'
-                                . ', <a class="underline hover:no-underline" href="%2">track your order</a>'
-                                . ' or <a class="underline hover:no-underline" href="%3">get in touch</a> with any question you might have.',
+                                'View our <a class="underline hover:no-underline" href="%1">frequently asked questions</a>, <a class="underline hover:no-underline" href="%2">track your order</a> or <a class="underline hover:no-underline" href="%3">get in touch</a> with any question you might have.',
                                 $block->getUrl('#'),
                                 $block->getUrl('sales/order/history'),
                                 $block->getUrl('contact')
-                            ), ['a']
+                            ),
+                            ['a']
                         ) ?>
                     </p>
                 </div>
             </div>
         </div>
-        <div class="container lg:text-white lg:px-0 lg:max-w-none">
-            <div class="pt-8 mb-4 text-lg font-bold text-center lg:text-right lg:text-base">
-                <?= $escaper->escapeHtml(__('Follow us')) ?>
+
+        <?php if ($hasSocialLinks): ?>
+            <div class="container lg:text-white lg:px-0 lg:max-w-none">
+                <div class="pt-8 mb-4 text-lg font-bold text-center lg:text-right lg:text-base">
+                    <?= $escaper->escapeHtml(__('Follow us')) ?>
+                </div>
+
+                <div class="flex justify-center gap-2 pb-8 border-b border-zinc-200 lg:border-b-0 lg:justify-end">
+                    <?php foreach ($socialLinks as $item): ?>
+                        <?php
+                        $url = trim((string) ($item['url'] ?? ''));
+                        $label = (string) ($item['label'] ?? '');
+                        $icon = (string) ($item['icon'] ?? '');
+
+                        if ($url === '' || $label === '' || $icon === '') {
+                            continue;
+                        }
+                        ?>
+                        <a
+                            href="<?= $escaper->escapeUrl($url) ?>"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="<?= $escaper->escapeHtmlAttr(__('Follow us on %1', $label)) ?>"
+                            class="bg-slate-700 text-white rounded-full hover:bg-slate-500 transition-colors lg:bg-blue-500 lg:hover:bg-blue-400"
+                        >
+                            <?php
+                            switch ($icon) {
+                                case 'social-facebook':
+                                    echo $hyvaIcons->socialFacebookHtml('', $socialIconsSize, $socialIconsSize, [
+                                        'title' => __('Follow us on %1', $label)
+                                    ]);
+                                    break;
+                                case 'social-instagram':
+                                    echo $hyvaIcons->socialInstagramHtml('', $socialIconsSize, $socialIconsSize, [
+                                        'title' => __('Follow us on %1', $label)
+                                    ]);
+                                    break;
+                                case 'social-pinterest':
+                                    echo $hyvaIcons->socialPinterestHtml('', $socialIconsSize, $socialIconsSize, [
+                                        'title' => __('Follow us on %1', $label)
+                                    ]);
+                                    break;
+                                case 'social-twitter':
+                                    echo $hyvaIcons->socialTwitterHtml('', $socialIconsSize, $socialIconsSize, [
+                                        'title' => __('Follow us on %1', $label)
+                                    ]);
+                                    break;
+                            }
+                            ?>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
             </div>
-            <div class="flex justify-center gap-2 pb-8 border-b border-zinc-200 lg:border-b-0 lg:justify-end">
-                <a
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="bg-slate-700 text-white rounded-full hover:bg-slate-500 transition-colors
-                        lg:bg-blue-500 lg:hover:bg-blue-400"
-                >
-                    <?= $hyvaIcons->socialFacebookHtml('', $socialIconsSize, $socialIconsSize, [
-                        'title' => __('Follow us on %1', 'Facebook')
-                    ]) ?>
-                </a>
-                <a
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="bg-slate-700 text-white rounded-full hover:bg-slate-500 transition-colors
-                        lg:bg-blue-500 lg:hover:bg-blue-400"
-                >
-                    <?= $hyvaIcons->socialInstagramHtml('', $socialIconsSize, $socialIconsSize, [
-                        'title' => __('Follow us on %1', 'Instagram')
-                    ]) ?>
-                </a>
-                <a
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="bg-slate-700 text-white rounded-full hover:bg-slate-500 transition-colors
-                        lg:bg-blue-500 lg:hover:bg-blue-400"
-                >
-                    <?= $hyvaIcons->socialPinterestHtml('', $socialIconsSize, $socialIconsSize, [
-                        'title' => __('Follow us on %1', 'Pinterest')
-                    ]) ?>
-                </a>
-                <a
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="bg-slate-700 text-white rounded-full hover:bg-slate-500 transition-colors
-                        lg:bg-blue-500 lg:hover:bg-blue-400"
-                >
-                    <?= $hyvaIcons->socialTwitterHtml('', $socialIconsSize, $socialIconsSize, [
-                        'title' => __('Follow us on %1', 'Twitter')
-                    ]) ?>
-                </a>
-            </div>
-        </div>
+        <?php endif; ?>
     </div>
 </div>

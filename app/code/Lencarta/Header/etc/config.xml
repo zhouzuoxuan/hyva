@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <lencarta_header>
+            <desktop>
+                <show_phone>1</show_phone>
+                <show_compare>1</show_compare>
+                <show_wishlist>0</show_wishlist>
+                <top_link_1_label>Customer Service</top_link_1_label>
+                <top_link_1_url>/customer-service</top_link_1_url>
+                <top_link_2_label>Contact Us</top_link_2_label>
+                <top_link_2_url>/contact-us</top_link_2_url>
+                <top_link_3_label></top_link_3_label>
+                <top_link_3_url></top_link_3_url>
+            </desktop>
+            <mobile_menu>
+                <max_level>4</max_level>
+                <show_search>1</show_search>
+                <show_socials>1</show_socials>
+                <show_settings_nav>1</show_settings_nav>
+                <home_label>Home</home_label>
+                <home_url>/</home_url>
+                <extra_link_1_label></extra_link_1_label>
+                <extra_link_1_url></extra_link_1_url>
+                <extra_link_2_label></extra_link_2_label>
+                <extra_link_2_url></extra_link_2_url>
+            </mobile_menu>
+            <mobile_cta>
+                <enabled>0</enabled>
+                <label>Contact Us</label>
+                <url>/contact-us</url>
+            </mobile_cta>
+            <social>
+                <facebook_url></facebook_url>
+                <instagram_url></instagram_url>
+                <pinterest_url></pinterest_url>
+                <twitter_url></twitter_url>
+            </social>
+            <messages>
+                <display_mode>tag</display_mode>
+                <show_icon>1</show_icon>
+            </messages>
+        </lencarta_header>
+    </default>
+</config>

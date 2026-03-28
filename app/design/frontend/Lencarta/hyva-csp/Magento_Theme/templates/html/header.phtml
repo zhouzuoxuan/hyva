@@ -11,6 +11,7 @@ use Hyva\Theme\Model\ViewModelRegistry;
 use Hyva\Theme\ViewModel\HyvaCsp;
 use Hyva\Theme\ViewModel\LucideIcons;
 use Hyva\Theme\ViewModel\StoreConfig;
+use Lencarta\Header\ViewModel\HeaderConfig;
 use Magento\Checkout\Block\Cart\Sidebar as SidebarCart;
 use Magento\Framework\Escaper;
 use Magento\Framework\View\Element\Template;
@@ -27,8 +28,12 @@ $lucideIcons = $viewModels->require(LucideIcons::class);
 $storeConfig = $viewModels->require(StoreConfig::class);
 $showMiniCart = $storeConfig->getStoreConfig(SidebarCart::XML_PATH_CHECKOUT_SIDEBAR_DISPLAY);
 
-$showCompare = $block->getShowCompare() !== null ? (bool) $block->getShowCompare() : true;
-$showWishlist = $block->getShowWishlist() !== null ? (bool) $block->getShowWishlist() : false;
+/** @var HeaderConfig $headerConfig */
+$headerConfig = $viewModels->require(HeaderConfig::class);
+
+$showCompare = $headerConfig->isCompareEnabled();
+$showWishlist = $headerConfig->isWishlistEnabled();
+$desktopLinks = $headerConfig->getDesktopLinks();
 $isHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
 $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
 ?>
@@ -230,26 +235,25 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
 >
     <div class="container mx-auto mt-0 px-4 pt-2 sm:px-6 sm:pt-0">
         <div class="grid grid-cols-[auto_1fr_auto] grid-rows-[56px_44px] items-center lg:grid-cols-[1fr_auto_1fr] lg:grid-rows-[auto_auto]">
-            <!-- Desktop top-left links -->
             <div class="hidden lg:flex lg:row-start-1 lg:col-start-1 lg:min-h-[56px] lg:items-center lg:justify-start lg:gap-x-4 lg:text-[13px] lg:leading-5"
                  :class="isSolidHeader() ? 'text-slate-700' : 'text-white/90'">
-                <a href="tel:+441234567890" class="transition hover:opacity-80">
-                    +44 1234 567 890
-                </a>
-                <a href="/customer-service" class="transition hover:opacity-80">
-                    Customer Service
-                </a>
-                <a href="/contact-us" class="transition hover:opacity-80">
-                    Contact Us
-                </a>
+                <?php if ($headerConfig->isPhoneVisible()): ?>
+                    <a href="<?= $escaper->escapeUrl($headerConfig->getPhoneHref()) ?>" class="transition hover:opacity-80">
+                        <?= $escaper->escapeHtml($headerConfig->getPhone()) ?>
+                    </a>
+                <?php endif; ?>
+
+                <?php foreach ($desktopLinks as $link): ?>
+                    <a href="<?= $escaper->escapeUrl($link['url']) ?>" class="transition hover:opacity-80">
+                        <?= $escaper->escapeHtml($link['label']) ?>
+                    </a>
+                <?php endforeach; ?>
             </div>
 
-            <!-- Logo -->
             <div class="row-start-1 col-start-1 col-span-3 flex items-center justify-center py-3 lg:row-start-1 lg:col-start-2 lg:col-span-1 lg:min-h-[56px]">
                 <?= $block->getChildHtml('logo'); ?>
             </div>
 
-            <!-- Topmenu -->
             <div class="row-start-2 col-start-1 flex items-center justify-start border-t lg:row-start-2 lg:col-start-1 lg:col-span-3 lg:min-h-[44px] lg:justify-center lg:py-0"
                  :class="[navClasses(), isSolidHeader() ? 'border-gray-200' : 'border-white/15']">
                 <div class="header-topmenu flex items-center justify-start text-sm lg:justify-center">
@@ -257,7 +261,6 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
                 </div>
             </div>
 
-            <!-- Right actions -->
             <div class="row-start-2 col-start-3 flex items-center justify-end gap-1 lg:row-start-1 lg:col-start-3 lg:min-h-[56px] lg:border-0 lg:py-0 lg:gap-1.5"
                  :class="actionClasses()">
                 <?php if ($showCompare): ?>
@@ -292,13 +295,13 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
                     <div class="hidden text-current lg:block">
                         <?= $block->getChildHtml('wishlist') ?>
                     </div>
-                <?php endif ?>
+                <?php endif; ?>
 
                 <?php if ($showMiniCart): ?>
                     <button
                 <?php else: ?>
-                <a
-                    <?php endif ?>
+                    <a
+                <?php endif; ?>
                     id="menu-cart-icon"
                     type="button"
                     class="relative btn border-transparent bg-transparent p-1 text-current"
@@ -311,7 +314,7 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
                     <?php else: ?>
                         href="<?= $escaper->escapeUrl($block->getUrl('checkout/cart/index')) ?>"
                         aria-label="<?= $escaper->escapeHtmlAttr(__('View cart')) ?>"
-                    <?php endif ?>
+                    <?php endif; ?>
                 >
                     <?= $lucideIcons->shoppingCartHtml('text-current md:h-5 md:w-5', 24, 24, ['aria-hidden' => 'true']) ?>
                     <span
@@ -321,11 +324,11 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
                         class="absolute -right-1.5 -top-1.5 rounded-full bg-primary px-1.5 py-0.5 text-center text-[10px] font-semibold leading-none text-on-primary uppercase tabular-nums"
                         aria-hidden="true"
                     ></span>
-                    <?php if ($showMiniCart): ?>
-                        </button>
-                    <?php else: ?>
-                </a>
-            <?php endif ?>
+                <?php if ($showMiniCart): ?>
+                    </button>
+                <?php else: ?>
+                    </a>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -342,9 +345,6 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
         <?= $block->getChildHtml('header-search'); ?>
     </div>
 
-    <!-- Cart Drawer -->
     <?= $block->getChildHtml('cart-drawer'); ?>
-
-    <!-- Authentication Pop-Up -->
     <?= $block->getChildHtml('authentication-popup'); ?>
 </div>

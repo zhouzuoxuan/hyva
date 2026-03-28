@@ -1,40 +1,9 @@
 <?xml version="1.0"?>
-
-<page
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd"
->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
-        <referenceBlock name="messages">
-            <arguments>
-                <argument name="display_mode" xsi:type="string">tag</argument> <!-- Notification appearance (default/blank/tag) -->
-                <argument name="show_icon" xsi:type="boolean">true</argument> <!-- Show icon (true/false) -->
-            </arguments>
-        </referenceBlock>
-
         <referenceBlock name="topmenu_mobile">
             <block name="topmenu_mobile_item" template="Magento_Theme::html/header/menu/mobile-item.phtml"/>
-            <arguments>
-                <argument name="max_level" xsi:type="number">4</argument> <!-- Max Menu depth to show -->
-                <argument name="show_search" xsi:type="boolean">true</argument> <!-- Show Search (true/false) -->
-                <argument name="show_socials" xsi:type="boolean">true</argument> <!-- Show Social Icons (true/false) -->
-                <argument name="show_settings_nav" xsi:type="boolean">true</argument> <!-- Show Settings Nav (true/false) -->
-
-                <argument name="additional_menu_items_before" xsi:type="array">
-                    <item name="home" xsi:type="array">
-                        <item name="url" xsi:type="string">/</item>
-                        <item name="name" xsi:type="string" translate="true">Home</item>
-                    </item>
-                </argument>
-
-                <argument name="additional_menu_items" xsi:type="array">
-                    <!-- <item name="contact" xsi:type="array">
-                        <item name="url" xsi:type="string">contact</item>
-                        <item name="name" xsi:type="string" translate="true">Contact</item>
-                    </item> -->
-                </argument>
-            </arguments>
-
             <block
                 class="Magento\Theme\Block\Html\Header\Logo"
                 name="topmenu_mobile.logo"

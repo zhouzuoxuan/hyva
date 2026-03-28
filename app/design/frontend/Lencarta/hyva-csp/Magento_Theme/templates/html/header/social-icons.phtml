@@ -10,8 +10,9 @@ declare(strict_types=1);
 
 use Hyva\Theme\Model\ViewModelRegistry;
 use Hyva\Theme\ViewModel\SvgIcons;
-use Magento\Framework\View\Element\Template;
+use Lencarta\Header\ViewModel\HeaderConfig;
 use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
 
 /** @var Template $block */
 /** @var Escaper $escaper */
@@ -20,38 +21,23 @@ use Magento\Framework\Escaper;
 /** @var SvgIcons $hyvaIcons */
 $hyvaIcons = $viewModels->require(SvgIcons::class);
 
-$socials = [
-    [
-        'url' => '#link',
-        'label' => 'Facebook',
-        'icon' => 'social-facebook'
-    ],
-    [
-        'url' => '#link',
-        'label' => 'Instagram',
-        'icon' => 'social-instagram'
-    ],
-    [
-        'url' => '#link',
-        'label' => 'Pinterest',
-        'icon' => 'social-pinterest'
-    ],
-    [
-        'url' => '#link',
-        'label' => 'Twitter',
-        'icon' => 'social-twitter'
-    ],
-];
+/** @var HeaderConfig $headerConfig */
+$headerConfig = $viewModels->require(HeaderConfig::class);
 
+$socials = $headerConfig->getSocialLinks();
+
+if (!$socials) {
+    return '';
+}
 ?>
 
-<nav aria-label="Social" class="flex flex-wrap justify-center gap-2 pt-6 pb-4 px-6">
+<nav aria-label="<?= $escaper->escapeHtmlAttr(__('Social')) ?>" class="flex flex-wrap justify-center gap-2 px-6 pb-4 pt-6">
     <?php foreach ($socials as $item): ?>
         <a
             href="<?= $escaper->escapeUrl($item['url']) ?>"
             target="_blank"
             rel="noopener noreferrer"
-            class="bg-slate-700 text-white rounded-full hover:bg-slate-500 transition-colors"
+            class="rounded-full bg-slate-700 text-white transition-colors hover:bg-slate-500"
         >
             <?= $hyvaIcons->renderHtml($item['icon'], '', 40, 40, ['title' => __('Follow us on %1', $item['label'])]) ?>
         </a>

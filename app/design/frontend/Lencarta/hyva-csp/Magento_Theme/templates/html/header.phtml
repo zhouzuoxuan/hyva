@@ -254,7 +254,7 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
                 <?= $block->getChildHtml('logo'); ?>
             </div>
 
-            <div class="row-start-2 col-start-1 flex items-center justify-start border-t lg:row-start-2 lg:col-start-1 lg:col-span-3 lg:min-h-[44px] lg:justify-center lg:py-0"
+            <div class="row-start-2 col-start-1 flex items-center justify-start lg:row-start-2 lg:col-start-1 lg:col-span-3 lg:min-h-[44px] lg:justify-center lg:py-0"
                  :class="[navClasses(), isSolidHeader() ? 'border-gray-200' : 'border-white/15']">
                 <div class="header-topmenu flex items-center justify-start text-sm lg:justify-center">
                     <?= $block->getChildHtml('topmenu') ?>

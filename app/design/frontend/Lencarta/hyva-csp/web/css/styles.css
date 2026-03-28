@@ -5169,6 +5169,10 @@
 }
 .page-main {
   flex-grow: 1;
+  margin-block: calc(var(--spacing) * 8);
+}
+.cms-index-index .page-main {
+  margin-block: 0 !important;
 }
 .columns {
   display: grid;

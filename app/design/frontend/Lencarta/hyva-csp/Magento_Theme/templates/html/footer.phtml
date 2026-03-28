@@ -16,95 +16,116 @@ use Magento\Framework\View\Element\Template;
 /** @var Template $block */
 /** @var HyvaCsp $hyvaCsp */
 
-// Remove any child blocks that don't need to be part of the footer columns
+$fullWidthBlocks = ['footer-links-4cols'];
+
+$excludedBlocks = array_merge(
+    ['footer-copyright', 'form.subscribe', 'footer-content-before', 'footer-content-after'],
+    $fullWidthBlocks
+);
+
 $footerColumns = array_diff(
     $block->getChildNames(),
-    array('footer-copyright', 'form.subscribe', 'footer-content-before', 'footer-content-after')
+    $excludedBlocks
 );
 ?>
 
 <?= $block->getChildHtml('footer-content-before') ?>
 <?= $block->getChildHtml('subscribe') ?>
-<div class="bg-zinc-100 border-t border-zinc-200">
-    <div class="container py-8 mx-auto">
-        <div class="grid grid-cols-1 lg:grid-cols-4 lg:gap-6 text-slate-600">
-            <?php foreach ($footerColumns as $childName): ?>
-                <?= $block->getBlockHtml($childName) ?>
+
+    <div class="bg-zinc-100 border-t border-zinc-200">
+        <div class="container py-8 mx-auto">
+
+            <?php foreach ($fullWidthBlocks as $fullWidthBlockName): ?>
+                <?php if ($blockHtml = $block->getBlockHtml($fullWidthBlockName)): ?>
+                    <div class="w-full">
+                        <?= $blockHtml ?>
+                    </div>
+                <?php endif; ?>
             <?php endforeach; ?>
+
+            <?php if (!empty($footerColumns)): ?>
+                <div class="grid grid-cols-1 lg:grid-cols-4 lg:gap-6 text-slate-600<?= !empty($fullWidthBlocks) ? ' mt-8' : '' ?>">
+                    <?php foreach ($footerColumns as $childName): ?>
+                        <?= $block->getBlockHtml($childName) ?>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <?php if ($footerContentAfter = $block->getChildHtml('footer-content-after')): ?>
+            <div class="space-y-10 bg-zinc-50 py-4">
+                <?= /** @noEscape */ $footerContentAfter ?>
+            </div>
+        <?php endif; ?>
+
+        <div class="container pt-7 pb-5 border-t border-zinc-200 flex justify-between items-center flex-col sm:flex-row text-sm">
+            <?= $block->getChildHtml('copyright') ?>
+            <nav class="text-slate-600" aria-label="<?= $escaper->escapeHtml(__('Legal Menu')) ?>">
+                <a
+                    href="<?= $escaper->escapeUrl($block->getUrl('privacy-policy-cookie-restriction-mode')) ?>"
+                    class="inline-block py-1 px-2 sm:px-0 sm:mr-4 sm:last:mr-0 hover:underline"
+                ><?= $escaper->escapeHtml(__('Terms & Conditions')) ?></a>
+                <a
+                    href="<?= $escaper->escapeUrl($block->getUrl('privacy-policy-cookie-restriction-mode')) ?>"
+                    class="inline-block py-1 px-2 sm:px-0 sm:mr-4 sm:last:mr-0 hover:underline"
+                ><?= $escaper->escapeHtml(__('Privacy Policy')) ?></a>
+            </nav>
         </div>
     </div>
-    <?php if ($footerContentAfter = $block->getChildHtml('footer-content-after')): ?>
-        <div class="space-y-10 bg-zinc-50 py-4">
-            <?= /** @noEscape */ $footerContentAfter ?>
-        </div>
-    <?php endif; ?>
-    <div class="container pt-7 pb-5 border-t border-zinc-200 flex justify-between items-center flex-col sm:flex-row text-sm">
-        <?= $block->getChildHtml('copyright') ?>
-        <nav class="text-slate-600" aria-label="<?= $escaper->escapeHtml(__('Legal Menu')) ?>">
-            <a
-                href="<?= $escaper->escapeUrl($block->getUrl('privacy-policy-cookie-restriction-mode')) ?>"
-                class="inline-block py-1 px-2 sm:px-0 sm:mr-4 sm:last:mr-0 hover:underline"
-            ><?= $escaper->escapeHtml(__('Terms & Conditions')) ?></a>
-            <a
-                href="<?= $escaper->escapeUrl($block->getUrl('privacy-policy-cookie-restriction-mode')) ?>"
-                class="inline-block py-1 px-2 sm:px-0 sm:mr-4 sm:last:mr-0 hover:underline"
-            ><?= $escaper->escapeHtml(__('Privacy Policy')) ?></a>
-        </nav>
-    </div>
-</div>
-<script>
-    function mobileFooterCollpase() {
-        return {
-            open: false,
-            isMobile: false,
-            init() {
-                this.checkIsMobileResolution();
-                if (this.$root.dataset.open === "true") {
-                    this.open = true;
-                }
-            },
-            checkIsMobileResolution() {
-                this.isMobile = getComputedStyle(this.$refs.toggleIcon).display !== 'none'
-            },
-            isOpen() {
-                return this.isMobile ? this.open : true;
-            },
-            toggle() {
-                return this.isMobile ? this.open = !this.open : true;
-            },
-            eventListeners: {
-                ['@resize.window.debounce']() {
+
+    <script>
+        function mobileFooterCollpase() {
+            return {
+                open: false,
+                isMobile: false,
+                init() {
                     this.checkIsMobileResolution();
+                    if (this.$root.dataset.open === "true") {
+                        this.open = true;
+                    }
                 },
-                ['@visibilitychange.window.debounce']() {
-                    this.checkIsMobileResolution();
+                checkIsMobileResolution() {
+                    this.isMobile = getComputedStyle(this.$refs.toggleIcon).display !== 'none'
+                },
+                isOpen() {
+                    return this.isMobile ? this.open : true;
+                },
+                toggle() {
+                    return this.isMobile ? this.open = !this.open : true;
+                },
+                eventListeners: {
+                    ['@resize.window.debounce']() {
+                        this.checkIsMobileResolution();
+                    },
+                    ['@visibilitychange.window.debounce']() {
+                        this.checkIsMobileResolution();
+                    }
+                },
+                setToggleRoles: {
+                    [':role']() {
+                        return this.isMobile && 'button';
+                    },
+                    [':tabindex']() {
+                        return this.isMobile && '0';
+                    },
+                    [':aria-expanded']() {
+                        return this.isMobile ? this.open : null;
+                    },
+                    [':aria-controls']() {
+                        return this.isMobile ? this.$el.dataset.id : null;
+                    }
+                },
+                setCollapseRoles: {
+                    [':aria-hidden']() {
+                        return this.isMobile ? !this.open : null;
+                    },
+                    [':aria-labelledby']() {
+                        return this.isMobile ? this.$el.id : null;
+                    }
                 }
-            },
-            setToggleRoles: {
-                [':role']() {
-                    return this.isMobile && 'button';
-                },
-                [':tabindex']() {
-                    return this.isMobile && '0';
-                },
-                [':aria-expanded']() {
-                    return this.isMobile ? this.open : null;
-                },
-                [':aria-controls']() {
-                    return this.isMobile ? this.$el.dataset.id : null;
-                }
-            },
-            setCollapseRoles: {
-                [':aria-hidden']() {
-                    return this.isMobile ? !this.open : null;
-                },
-                [':aria-labelledby']() {
-                    return this.isMobile ? this.$el.id : null;
-                }
+
             }
         }
-    }
-    window.addEventListener('alpine:init', () => Alpine.data('mobileFooterCollpase', mobileFooterCollpase), { once: true })
-</script>
+        window.addEventListener('alpine:init', () => Alpine.data('mobileFooterCollpase', mobileFooterCollpase), { once: true })
+    </script>
 <?php $hyvaCsp->registerInlineScript() ?>
-

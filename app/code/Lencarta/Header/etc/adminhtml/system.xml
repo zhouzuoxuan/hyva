@@ -170,6 +170,10 @@
                        showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Twitter / X URL</label>
                 </field>
+                <field id="youtube_url" translate="label" type="text" sortOrder="40"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>YouTube URL</label>
+                </field>
             </group>
 
             <group id="messages"

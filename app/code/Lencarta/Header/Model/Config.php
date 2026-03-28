@@ -41,6 +41,7 @@ class Config
     private const XML_PATH_SOCIAL_INSTAGRAM = 'lencarta_header/social/instagram_url';
     private const XML_PATH_SOCIAL_PINTEREST = 'lencarta_header/social/pinterest_url';
     private const XML_PATH_SOCIAL_TWITTER = 'lencarta_header/social/twitter_url';
+    private const XML_PATH_SOCIAL_YOUTUBE = 'lencarta_header/social/youtube_url';
 
     private const XML_PATH_MESSAGES_DISPLAY_MODE = 'lencarta_header/messages/display_mode';
     private const XML_PATH_MESSAGES_SHOW_ICON = 'lencarta_header/messages/show_icon';
@@ -212,6 +213,11 @@ class Config
                 'url' => $this->getValue(self::XML_PATH_SOCIAL_TWITTER),
                 'label' => 'Twitter',
                 'icon' => 'social-twitter',
+            ],
+            [
+                'url' => $this->getValue(self::XML_PATH_SOCIAL_YOUTUBE),
+                'label' => 'Youtube',
+                'icon' => 'social-youtube',
             ],
         ];
 

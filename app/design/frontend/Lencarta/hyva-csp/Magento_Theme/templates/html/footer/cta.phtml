@@ -81,30 +81,9 @@ $hasSocialLinks = !empty($socialLinks);
                             aria-label="<?= $escaper->escapeHtmlAttr(__('Follow us on %1', $label)) ?>"
                             class="bg-slate-700 text-white rounded-full hover:bg-slate-500 transition-colors lg:bg-blue-500 lg:hover:bg-blue-400"
                         >
-                            <?php
-                            switch ($icon) {
-                                case 'social-facebook':
-                                    echo $hyvaIcons->socialFacebookHtml('', $socialIconsSize, $socialIconsSize, [
-                                        'title' => __('Follow us on %1', $label)
-                                    ]);
-                                    break;
-                                case 'social-instagram':
-                                    echo $hyvaIcons->socialInstagramHtml('', $socialIconsSize, $socialIconsSize, [
-                                        'title' => __('Follow us on %1', $label)
-                                    ]);
-                                    break;
-                                case 'social-pinterest':
-                                    echo $hyvaIcons->socialPinterestHtml('', $socialIconsSize, $socialIconsSize, [
-                                        'title' => __('Follow us on %1', $label)
-                                    ]);
-                                    break;
-                                case 'social-twitter':
-                                    echo $hyvaIcons->socialTwitterHtml('', $socialIconsSize, $socialIconsSize, [
-                                        'title' => __('Follow us on %1', $label)
-                                    ]);
-                                    break;
-                            }
-                            ?>
+                            <?= $hyvaIcons->renderHtml($icon, '', $socialIconsSize, $socialIconsSize, [
+                                'title' => __('Follow us on %1', $label)
+                            ]) ?>
                         </a>
                     <?php endforeach; ?>
                 </div>

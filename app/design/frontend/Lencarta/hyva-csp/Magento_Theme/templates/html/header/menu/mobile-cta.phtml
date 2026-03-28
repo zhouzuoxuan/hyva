@@ -29,7 +29,7 @@ $iconId = $headerConfig->getMobileCtaIconId();
         href="<?= $escaper->escapeUrl($headerConfig->getMobileCtaUrl()) ?>"
         class="btn btn-primary inline-flex w-full justify-center"
     >
-        <?= $iconId ? $heroicons->shoppingCartHtml('shrink-0', 20, 20, ['aria-hidden' => 'true']) : ''; ?>
+        <?= $iconId ? $heroicons->shoppingCartHtml($iconId, 20, 20, ['aria-hidden' => 'true']) : ''; ?>
         <?= $escaper->escapeHtml($headerConfig->getMobileCtaLabel()) ?>
     </a>
 </div>

@@ -34,6 +34,7 @@ class Config
 
     private const XML_PATH_MOBILE_CTA_ENABLED = 'lencarta_header/mobile_cta/enabled';
     private const XML_PATH_MOBILE_CTA_LABEL = 'lencarta_header/mobile_cta/label';
+    private const XML_PATH_MOBILE_CTA_ICON_ID = 'lencarta_header/mobile_cta/icon_id';
     private const XML_PATH_MOBILE_CTA_URL = 'lencarta_header/mobile_cta/url';
 
     private const XML_PATH_SOCIAL_FACEBOOK = 'lencarta_header/social/facebook_url';
@@ -175,6 +176,11 @@ class Config
     }
 
     public function getMobileCtaLabel(): string
+    {
+        return trim((string) $this->getValue(self::XML_PATH_MOBILE_CTA_LABEL));
+    }
+
+    public function getMobileCtaIconId(): string
     {
         return trim((string) $this->getValue(self::XML_PATH_MOBILE_CTA_LABEL));
     }

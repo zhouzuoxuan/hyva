@@ -137,6 +137,10 @@
                        showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>CTA Label</label>
                 </field>
+                <field id="icon_id" translate="label" type="text" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Icon ID</label>
+                </field>
                 <field id="url" translate="label" type="text" sortOrder="30"
                        showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>CTA URL</label>

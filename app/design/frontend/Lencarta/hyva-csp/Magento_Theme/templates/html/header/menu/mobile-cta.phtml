@@ -6,6 +6,7 @@
 declare(strict_types=1);
 
 use Hyva\Theme\Model\ViewModelRegistry;
+use Hyva\Theme\ViewModel\HeroiconsOutline;
 use Lencarta\Header\ViewModel\HeaderConfig;
 use Magento\Framework\Escaper;
 use Magento\Framework\View\Element\Template;
@@ -20,12 +21,15 @@ $headerConfig = $viewModels->require(HeaderConfig::class);
 if (!$headerConfig->isMobileCtaEnabled()) {
     return '';
 }
+$heroicons = $viewModels->require(HeroiconsOutline::class);
+$iconId = $headerConfig->getMobileCtaIconId();
 ?>
 <div class="px-6 py-6">
     <a
         href="<?= $escaper->escapeUrl($headerConfig->getMobileCtaUrl()) ?>"
         class="btn btn-primary inline-flex w-full justify-center"
     >
+        <?= $iconId ? $heroicons->shoppingCartHtml('shrink-0', 20, 20, ['aria-hidden' => 'true']) : ''; ?>
         <?= $escaper->escapeHtml($headerConfig->getMobileCtaLabel()) ?>
     </a>
 </div>

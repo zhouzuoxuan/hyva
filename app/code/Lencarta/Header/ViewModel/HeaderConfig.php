@@ -58,6 +58,11 @@ class HeaderConfig implements ArgumentInterface
         return $this->config->getMobileCtaLabel();
     }
 
+    public function getMobileCtaIconId(): string
+    {
+        return $this->config->getMobileCtaIconId();
+    }
+
     public function getMobileCtaUrl(): string
     {
         return $this->config->getMobileCtaUrl();

@@ -27,9 +27,10 @@
                 <extra_link_2_url></extra_link_2_url>
             </mobile_menu>
             <mobile_cta>
-                <enabled>0</enabled>
-                <label>Contact Us</label>
-                <url>/contact-us</url>
+                <enabled>1</enabled>
+                <label>Shopping Cart</label>
+                <icon_id>shrink-0</icon_id>
+                <url>/checkout/cart/index</url>
             </mobile_cta>
             <social>
                 <facebook_url></facebook_url>

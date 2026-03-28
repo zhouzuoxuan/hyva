@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5de2a08a1c4f4db3cb2b573d9a5e0680",
+    "content-hash": "ab930274e97728e7e76c1b53c4be75d3",
     "packages": [
         {
             "name": "2tvenom/cborencode",
@@ -3100,6 +3100,56 @@
                 "issues": "https://gitlab.hyva.io/hyva-themes/magento2-page-builder/-/issues"
             },
             "time": "2025-04-24T13:51:05+00:00"
+        },
+        {
+            "name": "hyva-themes/magento2-payment-icons",
+            "version": "2.0.0",
+            "dist": {
+                "type": "zip",
+                "url": "https://hyva-themes.repo.packagist.com/hengxinxuan-sh-4oodl/dists/hyva-themes/magento2-payment-icons/2.0.0.0/cb3f5f5ea978890c4ba63d4440f0155e4a3c14b3.zip",
+                "reference": "cb3f5f5ea978890c4ba63d4440f0155e4a3c14b3",
+                "mirrors": [
+                    {
+                        "url": "https://hyva-themes.repo.packagist.com/hengxinxuan-sh-4oodl/dists/%package%/%version%/r%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
+            },
+            "require": {
+                "hyva-themes/magento2-theme-module": ">=1.1.12"
+            },
+            "type": "magento2-module",
+            "autoload": {
+                "files": [
+                    "src/registration.php"
+                ],
+                "psr-4": {
+                    "Hyva\\PaymentIcons\\": "src/"
+                }
+            },
+            "notification-url": "https://hyva-themes.repo.packagist.com/hengxinxuan-sh-4oodl/downloads/",
+            "license": [
+                "See LICENSE.md or https://hyva.io/license"
+            ],
+            "authors": [
+                {
+                    "name": "Hyvä Themes BV",
+                    "email": "info@hyva.io",
+                    "homepage": "https://www.hyva.io/"
+                }
+            ],
+            "description": "Enables the usage of light-, dark- & mono- payment SVG icons",
+            "keywords": [
+                "magento2",
+                "magento2-hyva",
+                "magento2-module",
+                "paymenticons"
+            ],
+            "support": {
+                "source": "https://gitlab.hyva.io/hyva-themes/magento2-payment-icons/-/tree/2.0.0",
+                "issues": "https://gitlab.hyva.io/hyva-themes/magento2-payment-icons/-/issues"
+            },
+            "time": "2025-01-10T10:09:57+00:00"
         },
         {
             "name": "hyva-themes/magento2-theme-module",

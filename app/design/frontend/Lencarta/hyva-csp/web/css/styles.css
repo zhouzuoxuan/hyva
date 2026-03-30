@@ -1163,6 +1163,9 @@
   .max-w-xl {
     max-width: var(--container-xl);
   }
+  .min-w-0 {
+    min-width: calc(var(--spacing) * 0);
+  }
   .min-w-9\.5 {
     min-width: calc(var(--spacing) * 9.5);
   }
@@ -1549,6 +1552,10 @@
   }
   .rounded-xl {
     border-radius: var(--radius-xl);
+  }
+  .rounded-s-2xl {
+    border-start-start-radius: var(--radius-2xl);
+    border-end-start-radius: var(--radius-2xl);
   }
   .rounded-s-none {
     border-start-start-radius: 0;
@@ -2072,8 +2079,14 @@
   .pr-1 {
     padding-right: calc(var(--spacing) * 1);
   }
+  .pr-3 {
+    padding-right: calc(var(--spacing) * 3);
+  }
   .pr-4 {
     padding-right: calc(var(--spacing) * 4);
+  }
+  .pr-5 {
+    padding-right: calc(var(--spacing) * 5);
   }
   .pr-8 {
     padding-right: calc(var(--spacing) * 8);
@@ -2631,17 +2644,32 @@
   .\[--message-darker\:theme\(colors\.yellow\.900\)\] {
     --message-darker: oklch(42.1% 0.095 57.708);
   }
+  .\[--message-lighter\:theme\(colors\.blue\.50\)\] {
+    --message-lighter: oklch(97% 0.014 254.604);
+  }
   .\[--message-lighter\:theme\(colors\.blue\.100\)\] {
     --message-lighter: oklch(93.2% 0.032 255.585);
+  }
+  .\[--message-lighter\:theme\(colors\.green\.50\)\] {
+    --message-lighter: oklch(98.2% 0.018 155.826);
   }
   .\[--message-lighter\:theme\(colors\.green\.100\)\] {
     --message-lighter: oklch(96.2% 0.044 156.743);
   }
+  .\[--message-lighter\:theme\(colors\.red\.50\)\] {
+    --message-lighter: oklch(97.1% 0.013 17.38);
+  }
   .\[--message-lighter\:theme\(colors\.red\.100\)\] {
     --message-lighter: oklch(93.6% 0.032 17.717);
   }
+  .\[--message-lighter\:theme\(colors\.slate\.50\)\] {
+    --message-lighter: oklch(98.4% 0.003 247.858);
+  }
   .\[--message-lighter\:theme\(colors\.slate\.100\)\] {
     --message-lighter: oklch(96.8% 0.007 247.896);
+  }
+  .\[--message-lighter\:theme\(colors\.yellow\.50\)\] {
+    --message-lighter: oklch(98.7% 0.026 102.212);
   }
   .\[--message-lighter\:theme\(colors\.yellow\.100\)\] {
     --message-lighter: oklch(97.3% 0.071 103.193);
@@ -3503,6 +3531,12 @@
     @media (width >= 40rem) {
       font-size: var(--text-5xl);
       line-height: var(--tw-leading, var(--text-5xl--line-height));
+    }
+  }
+  .sm\:text-base {
+    @media (width >= 40rem) {
+      font-size: var(--text-base);
+      line-height: var(--tw-leading, var(--text-base--line-height));
     }
   }
   .sm\:text-lg {

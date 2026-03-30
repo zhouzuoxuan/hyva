@@ -1137,6 +1137,9 @@
   .w-\[480px\] {
     width: 480px;
   }
+  .w-\[640px\] {
+    width: 640px;
+  }
   .w-auto {
     width: auto;
   }
@@ -1170,6 +1173,9 @@
   .max-w-\[50\%\] {
     max-width: 50%;
   }
+  .max-w-\[theme\(spacing\.20\)\] {
+    max-width: 5rem;
+  }
   .max-w-full {
     max-width: 100%;
   }
@@ -1202,6 +1208,9 @@
   }
   .min-w-48 {
     min-width: calc(var(--spacing) * 48);
+  }
+  .min-w-\[theme\(spacing\.12\)\] {
+    min-width: 3rem;
   }
   .min-w-\[theme\(spacing\.16\)\] {
     min-width: 4rem;
@@ -1861,6 +1870,9 @@
   .bg-slate-50 {
     background-color: var(--color-slate-50);
   }
+  .bg-slate-100 {
+    background-color: var(--color-slate-100);
+  }
   .bg-slate-200 {
     background-color: var(--color-slate-200);
   }
@@ -2161,6 +2173,9 @@
   }
   .pb-1 {
     padding-bottom: calc(var(--spacing) * 1);
+  }
+  .pb-1\.5 {
+    padding-bottom: calc(var(--spacing) * 1.5);
   }
   .pb-2 {
     padding-bottom: calc(var(--spacing) * 2);
@@ -2839,6 +2854,14 @@
       }
     }
   }
+  .backdrop\:bg-black\/75 {
+    &::backdrop {
+      background-color: color-mix(in srgb, #000 75%, transparent);
+      @supports (color: color-mix(in lab, red, red)) {
+        background-color: color-mix(in oklab, var(--color-black) 75%, transparent);
+      }
+    }
+  }
   .backdrop\:backdrop-blur-sm {
     &::backdrop {
       --tw-backdrop-blur: blur(var(--blur-sm));
@@ -3217,6 +3240,13 @@
       }
     }
   }
+  .hover\:text-slate-500 {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-slate-500);
+      }
+    }
+  }
   .hover\:text-slate-700 {
     &:hover {
       @media (hover: hover) {
@@ -3396,6 +3426,11 @@
   .focus\:text-gray-600 {
     &:focus {
       color: var(--color-gray-600);
+    }
+  }
+  .focus\:text-slate-500 {
+    &:focus {
+      color: var(--color-slate-500);
     }
   }
   .focus\:ring-0 {
@@ -3698,6 +3733,16 @@
   .sm\:w-auto {
     @media (width >= 40rem) {
       width: auto;
+    }
+  }
+  .sm\:max-w-\[theme\(spacing\.32\)\] {
+    @media (width >= 40rem) {
+      max-width: 8rem;
+    }
+  }
+  .sm\:min-w-\[theme\(spacing\.24\)\] {
+    @media (width >= 40rem) {
+      min-width: 6rem;
     }
   }
   .sm\:table-fixed {
@@ -4512,6 +4557,11 @@
       width: calc(var(--spacing) * 80);
     }
   }
+  .lg\:w-auto {
+    @media (width >= 64rem) {
+      width: auto;
+    }
+  }
   .lg\:max-w-3xl {
     @media (width >= 64rem) {
       max-width: var(--container-3xl);
@@ -4995,6 +5045,11 @@
   .\[\&\:\:-webkit-list-button\]\:w-0 {
     &::-webkit-list-button {
       width: calc(var(--spacing) * 0);
+    }
+  }
+  .\[\&\>\:not\(\.loader\)\]\:invisible {
+    &>:not(.loader) {
+      visibility: hidden;
     }
   }
   .\[\&\>svg\]\:hidden {

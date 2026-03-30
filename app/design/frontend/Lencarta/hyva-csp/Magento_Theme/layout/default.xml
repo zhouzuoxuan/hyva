@@ -55,6 +55,16 @@
             <block name="cart-drawer.qtybox" template="Magento_Theme::html/cart/qtybox.phtml"/>
         </referenceBlock>
 
+        <referenceBlock name="script-alpine-js">
+            <block name="alpine-plugin-ajax-cart" template="Magento_Theme::page/js/plugins/ajax-cart.phtml">
+                <arguments>
+                    <argument name="delay" xsi:type="number">500</argument> <!-- Extra delay in milliseconds added to the loader (true/false) -->
+                    <argument name="show_sku" xsi:type="boolean">true</argument> <!-- Show Sku (true/false) -->
+                    <argument name="display_on_success" xsi:type="string">modal</argument> <!-- What to show on success (false/minicart/modal) -->
+                </arguments>
+            </block>
+        </referenceBlock>
+
         <!-- footer ui-->
         <referenceContainer name="footer-content-before">
             <block name="footer-cta" template="Magento_Theme::html/footer/cta.phtml"/>

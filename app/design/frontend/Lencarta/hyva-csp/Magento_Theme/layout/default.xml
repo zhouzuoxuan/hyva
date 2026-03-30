@@ -38,6 +38,14 @@
             <block name="alpine-plugin-htmldialog" template="Hyva_Theme::page/js/plugins/htmldialog.phtml"/>
         </referenceBlock>
 
+        <!-- breadcrumbs ui-->
+        <referenceBlock name="breadcrumbs">
+            <arguments>
+                <argument name="show_back_btn" xsi:type="boolean">true</argument> <!-- Show back button on mobile (true/false) -->
+                <argument name="overflow_style" xsi:type="string">normal</argument> <!-- Overflow style (normal/sticky) -->
+            </arguments>
+        </referenceBlock>
+
         <!-- cart ui-->
         <referenceBlock name="cart-drawer">
             <arguments>

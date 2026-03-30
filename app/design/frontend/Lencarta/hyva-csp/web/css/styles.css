@@ -128,6 +128,7 @@
   --color-container-lighter: var(--color-white);
   --color-container: var(--color-gray-50);
   --color-container-darker: var(--color-gray-100);
+  --animate-dancers: animate-dancers 2s infinite linear;
   --color-primary-lighter: oklch(52% 0.2 265);
   --color-primary: oklch(46% 0.2 265);
   --color-primary-darker: oklch(28% 0.2 265);
@@ -5859,6 +5860,22 @@ body:where(:not([class*="-full-width"])) {
     margin-block-end: auto;
   }
 }
+@layer utilities {
+  .loader-dancers rect {
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+    animation: var(--animate-dancers);
+  }
+  .loader-dancers rect:first-child {
+    transform-origin: 100% 0%;
+    fill: var(--color-primary);
+  }
+  .loader-dancers rect:last-child {
+    transform-origin: 0% 0%;
+    animation-delay: 0.25s;
+    fill: var(--color-secondary);
+  }
+}
 .mollie-buttons {
   margin-top: 10%;
   text-align: center;
@@ -6368,6 +6385,23 @@ body:where(:not([class*="-full-width"])) {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+@keyframes animate-dancers {
+  0%, 5% {
+    rotate: 0deg;
+  }
+  20%, 30% {
+    rotate: 90deg;
+  }
+  45%, 55% {
+    rotate: 180deg;
+  }
+  70%, 80% {
+    rotate: 270deg;
+  }
+  95%, 100% {
+    rotate: 360deg;
   }
 }
 @layer properties {

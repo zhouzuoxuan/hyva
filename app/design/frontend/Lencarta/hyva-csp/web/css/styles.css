@@ -1257,6 +1257,9 @@
   .table-auto {
     table-layout: auto;
   }
+  .table-fixed {
+    table-layout: fixed;
+  }
   .origin-top-left {
     transform-origin: 0 0;
   }
@@ -3047,6 +3050,11 @@
       padding-bottom: calc(var(--spacing) * 0);
     }
   }
+  .odd\:bg-slate-100 {
+    &:nth-child(odd) {
+      background-color: var(--color-slate-100);
+    }
+  }
   .even\:bg-gray-50 {
     &:nth-child(even) {
       background-color: var(--color-gray-50);
@@ -4145,6 +4153,16 @@
       display: inline-flex;
     }
   }
+  .md\:table-cell {
+    @media (width >= 48rem) {
+      display: table-cell;
+    }
+  }
+  .md\:table-row {
+    @media (width >= 48rem) {
+      display: table-row;
+    }
+  }
   .md\:h-5 {
     @media (width >= 48rem) {
       height: calc(var(--spacing) * 5);
@@ -4360,6 +4378,11 @@
   .md\:py-0 {
     @media (width >= 48rem) {
       padding-block: calc(var(--spacing) * 0);
+    }
+  }
+  .md\:py-2 {
+    @media (width >= 48rem) {
+      padding-block: calc(var(--spacing) * 2);
     }
   }
   .md\:py-6 {
@@ -5146,6 +5169,24 @@
   .print\:text-left {
     @media print {
       text-align: left;
+    }
+  }
+  .prose-h2\:text-xl {
+    & :where(h2) {
+      font-size: var(--text-xl);
+      line-height: var(--tw-leading, var(--text-xl--line-height));
+    }
+  }
+  .prose-h3\:text-lg {
+    & :where(h3) {
+      font-size: var(--text-lg);
+      line-height: var(--tw-leading, var(--text-lg--line-height));
+    }
+  }
+  .prose-h4\:text-base {
+    & :where(h4) {
+      font-size: var(--text-base);
+      line-height: var(--tw-leading, var(--text-base--line-height));
     }
   }
   .\[\&_\.price\]\:font-normal {

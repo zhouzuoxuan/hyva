@@ -29,6 +29,15 @@
             <block name="alpine-plugin-htmldialog" template="Hyva_Theme::page/js/plugins/htmldialog.phtml"/>
         </referenceBlock>
 
+        <!-- cart ui-->
+        <referenceBlock name="cart-drawer">
+            <arguments>
+                <argument name="show_sku" xsi:type="boolean">true</argument> <!-- Show sku in product options (true/false) -->
+                <argument name="qty_style" xsi:type="string">incrementor</argument> <!-- Qty style (text/input/select/incrementor) -->
+            </arguments>
+            <block name="cart-drawer.qtybox" template="Magento_Theme::html/cart/qtybox.phtml"/>
+        </referenceBlock>
+
         <!-- footer ui-->
         <referenceContainer name="footer-content-before">
             <block name="footer-cta" template="Magento_Theme::html/footer/cta.phtml"/>

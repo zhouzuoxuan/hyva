@@ -1,6 +1,7 @@
 @import "./icons.css";
 @import "./fallback.css";
 @import "./animations.css";
+@import "./mask-overflow.css";
 
 /* Disable the -webkit-details-marker when the summary has the `list-none` class */
 @utility list-none {

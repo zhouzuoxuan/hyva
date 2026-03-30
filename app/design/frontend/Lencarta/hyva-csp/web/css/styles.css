@@ -19,6 +19,7 @@
   --color-red-200: oklch(88.5% 0.062 18.334);
   --color-red-500: oklch(63.7% 0.237 25.331);
   --color-red-600: oklch(57.7% 0.245 27.325);
+  --color-red-700: oklch(50.5% 0.213 27.518);
   --color-red-900: oklch(39.6% 0.141 25.723);
   --color-orange-400: oklch(75% 0.183 55.934);
   --color-yellow-50: oklch(98.7% 0.026 102.212);
@@ -1051,6 +1052,9 @@
   .min-h-50 {
     min-height: calc(var(--spacing) * 50);
   }
+  .min-h-64 {
+    min-height: calc(var(--spacing) * 64);
+  }
   .min-h-80 {
     min-height: calc(var(--spacing) * 80);
   }
@@ -1155,6 +1159,9 @@
   }
   .max-w-\[25\%\] {
     max-width: 25%;
+  }
+  .max-w-\[50\%\] {
+    max-width: 50%;
   }
   .max-w-full {
     max-width: 100%;
@@ -1313,6 +1320,12 @@
   .list-none {
     list-style-type: none;
   }
+  .columns-xs {
+    columns: var(--container-xs);
+  }
+  .break-inside-avoid {
+    break-inside: avoid;
+  }
   .grid-flow-row {
     grid-auto-flow: row;
   }
@@ -1468,6 +1481,9 @@
   .gap-x-7 {
     column-gap: calc(var(--spacing) * 7);
   }
+  .gap-x-8 {
+    column-gap: calc(var(--spacing) * 8);
+  }
   .space-x-4 {
     :where(& > :not(:last-child)) {
       --tw-space-x-reverse: 0;
@@ -1584,6 +1600,10 @@
     border-top-right-radius: var(--radius-md);
     border-bottom-right-radius: var(--radius-md);
   }
+  .rounded-b-md {
+    border-bottom-right-radius: var(--radius-md);
+    border-bottom-left-radius: var(--radius-md);
+  }
   .border {
     border-style: var(--tw-border-style);
     border-width: 1px;
@@ -1619,6 +1639,10 @@
   .border-b-2 {
     border-bottom-style: var(--tw-border-style);
     border-bottom-width: 2px;
+  }
+  .border-b-\[3px\] {
+    border-bottom-style: var(--tw-border-style);
+    border-bottom-width: 3px;
   }
   .border-l {
     border-left-style: var(--tw-border-style);
@@ -2143,6 +2167,9 @@
   .pb-20 {
     padding-bottom: calc(var(--spacing) * 20);
   }
+  .pb-\[calc\(theme\(padding\.4\)_-_3px\)\] {
+    padding-bottom: calc(1rem - 3px);
+  }
   .pl-1 {
     padding-left: calc(var(--spacing) * 1);
   }
@@ -2391,6 +2418,9 @@
   }
   .text-primary-darker {
     color: var(--color-primary-darker);
+  }
+  .text-red-700 {
+    color: var(--color-red-700);
   }
   .text-red-900 {
     color: var(--color-red-900);
@@ -2755,6 +2785,11 @@
       rotate: 180deg;
     }
   }
+  .group-aria-expanded\:text-inherit {
+    &:is(:where(.group)[aria-expanded="true"] *) {
+      color: inherit;
+    }
+  }
   .backdrop\:bg-black\/25 {
     &::backdrop {
       background-color: color-mix(in srgb, #000 25%, transparent);
@@ -2918,6 +2953,13 @@
   .focus-within\:ring-offset-gray-100 {
     &:focus-within {
       --tw-ring-offset-color: var(--color-gray-100);
+    }
+  }
+  .hover\:border-blue-500 {
+    &:hover {
+      @media (hover: hover) {
+        border-color: var(--color-blue-500);
+      }
     }
   }
   .hover\:border-primary {
@@ -3312,14 +3354,29 @@
       outline-width: 2px;
     }
   }
+  .aria-expanded\:border-blue-500 {
+    &[aria-expanded="true"] {
+      border-color: var(--color-blue-500);
+    }
+  }
   .aria-expanded\:border-current {
     &[aria-expanded="true"] {
       border-color: currentcolor;
     }
   }
+  .aria-expanded\:text-blue-500 {
+    &[aria-expanded="true"] {
+      color: var(--color-blue-500);
+    }
+  }
   .aria-expanded\:text-blue-700 {
     &[aria-expanded="true"] {
       color: var(--color-blue-700);
+    }
+  }
+  .aria-\[current\=page\]\:border-slate-400 {
+    &[aria-current="page"] {
+      border-color: var(--color-slate-400);
     }
   }
   .aria-\[current\=page\]\:font-bold {
@@ -3339,6 +3396,20 @@
       color: var(--color-blue-700);
     }
   }
+  .aria-\[current\=page\]\:underline {
+    &[aria-current="page"] {
+      text-decoration-line: underline;
+    }
+  }
+  .aria-\[current\=page\]\:hover\:border-blue-500 {
+    &[aria-current="page"] {
+      &:hover {
+        @media (hover: hover) {
+          border-color: var(--color-blue-500);
+        }
+      }
+    }
+  }
   .aria-\[hidden\=true\]\:hidden {
     &[aria-hidden="true"] {
       display: none;
@@ -3352,6 +3423,27 @@
   .data-\[active\]\:opacity-100 {
     &[data-active] {
       opacity: 100%;
+    }
+  }
+  .data-\[has-current\]\:border-slate-400 {
+    &[data-has-current] {
+      border-color: var(--color-slate-400);
+    }
+  }
+  .data-\[has-current\]\:hover\:border-blue-500 {
+    &[data-has-current] {
+      &:hover {
+        @media (hover: hover) {
+          border-color: var(--color-blue-500);
+        }
+      }
+    }
+  }
+  .data-\[has-current\]\:aria-expanded\:border-blue-500 {
+    &[data-has-current] {
+      &[aria-expanded="true"] {
+        border-color: var(--color-blue-500);
+      }
     }
   }
   .supports-\[backdrop-filter\]\:bg-black\/20 {

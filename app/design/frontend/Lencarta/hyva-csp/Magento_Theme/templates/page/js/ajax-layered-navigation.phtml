@@ -1,0 +1,295 @@
+<?php
+declare(strict_types=1);
+
+use Hyva\Theme\Model\ViewModelRegistry;
+
+/** @var ViewModelRegistry $viewModels */
+/** @var \Hyva\Theme\ViewModel\HyvaCsp $hyvaCsp */
+$hyvaCsp = $viewModels->require(\Hyva\Theme\ViewModel\HyvaCsp::class);
+?>
+
+<script>
+    (() => {
+        'use strict';
+
+        /**
+         * 你只需要根据实际 DOM 稳定性，调整这三个 selector 列表即可。
+         * 第一个匹配到的元素会被用于替换。
+         */
+        const SELECTORS = {
+            // 左侧筛选栏（建议选择最外层容器）
+            filters: [
+                'div[aria-label="Product filters"]',
+                '#layered-filter-block',
+                '#filters-content'
+            ],
+            // 商品列表 + toolbar/pager 的外层容器（尽量覆盖整个“列表区域”）
+            products: [
+                '.column.main .category-products',
+                '.category-products',
+                '#product-list',
+                '#products-list'
+            ],
+            // toolbar 区域（用于点击拦截范围）
+            toolbar: [
+                '.toolbar-products',
+                '.toolbar.toolbar-products'
+            ]
+        };
+
+        const CLICK_SCOPE = [
+            ...SELECTORS.filters,
+            ...SELECTORS.toolbar
+        ];
+
+        let currentController = null;
+
+        const firstMatch = (root, selectors) => {
+            for (const sel of selectors) {
+                const el = root.querySelector(sel);
+                if (el) return el;
+            }
+            return null;
+        };
+
+        const sameOrigin = (url) => {
+            try {
+                const u = new URL(url, window.location.href);
+                return u.origin === window.location.origin;
+            } catch (_) {
+                return false;
+            }
+        };
+
+        const shouldInterceptLink = (a, event) => {
+            if (!a || !a.href) return false;
+            if (!sameOrigin(a.href)) return false;
+
+            if (a.target && a.target.toLowerCase() === '_blank') return false;
+            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false;
+            if (a.hasAttribute('download')) return false;
+            if (a.getAttribute('rel') === 'external') return false;
+
+            for (const sel of CLICK_SCOPE) {
+                if (a.closest(sel)) return true;
+            }
+            return false;
+        };
+
+        const setLoading = (isLoading) => {
+            document.documentElement.classList.toggle('plp-ajax-loading', !!isLoading);
+        };
+
+        const initTree = (el) => {
+            try {
+                if (window.hyva && typeof window.hyva.initTree === 'function') {
+                    window.hyva.initTree(el);
+                    return;
+                }
+                if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+                    window.Alpine.initTree(el);
+                }
+            } catch (_) {}
+        };
+
+        const destroyTree = (el) => {
+            try {
+                if (window.hyva && typeof window.hyva.destroyTree === 'function') {
+                    window.hyva.destroyTree(el);
+                    return;
+                }
+                if (window.Alpine && typeof window.Alpine.destroyTree === 'function') {
+                    window.Alpine.destroyTree(el);
+                }
+            } catch (_) {}
+        };
+
+        // -------- CSP nonce & inline scripts execution --------
+
+        const getCurrentNonce = () => {
+            const s = document.querySelector('script[nonce]');
+            return s ? (s.getAttribute('nonce') || s.nonce || '') : '';
+        };
+
+        const isRunnableInlineScript = (scriptEl) => {
+            if (!scriptEl) return false;
+            if (scriptEl.src) return false; // 不加载外链脚本，避免重复加载 main.js/alpine 等
+            const type = (scriptEl.getAttribute('type') || '').trim().toLowerCase();
+            // 只执行真正 JS；跳过 ld+json / application/json 等
+            return (!type || type === 'text/javascript' || type === 'application/javascript' || type === 'module');
+        };
+
+        /**
+         * 核心：把“新片段 DOM 内部的 inline scripts”用当前页面 nonce 执行一遍。
+         * 这样 initToolbar_xxx / initConfigurableSwatchOptions_xxx / displayedItems 等就会被定义。
+         */
+        const execInlineScriptsFrom = (rootEl) => {
+            if (!rootEl) return;
+
+            // 清理上一次 Ajax 注入的脚本，避免堆积
+            document.querySelectorAll('script[data-ajax-nav-script="1"]').forEach(s => s.remove());
+
+            const nonce = getCurrentNonce();
+            const scripts = Array.from(rootEl.querySelectorAll('script')).filter(isRunnableInlineScript);
+
+            for (const oldScript of scripts) {
+                const code = (oldScript.textContent || '').trim();
+                if (!code) continue;
+
+                const s = document.createElement('script');
+                const t = (oldScript.getAttribute('type') || '').trim();
+                if (t) s.setAttribute('type', t);
+
+                // 关键：必须使用当前页面 nonce
+                if (nonce) s.setAttribute('nonce', nonce);
+
+                s.setAttribute('data-ajax-nav-script', '1');
+                s.textContent = code;
+
+                document.body.appendChild(s);
+            }
+        };
+
+        // 可选：从插入后的片段中移除 script 标签，避免以后误判/重复解析
+        const stripScriptsIn = (rootEl) => {
+            if (!rootEl) return;
+            try { rootEl.querySelectorAll('script').forEach(s => s.remove()); } catch (_) {}
+        };
+
+        const stopAlpineMutations = () => {
+            try {
+                if (window.Alpine && typeof window.Alpine.stopObservingMutations === 'function') {
+                    window.Alpine.stopObservingMutations();
+                }
+            } catch (_) {}
+        };
+
+        const startAlpineMutations = () => {
+            try {
+                if (window.Alpine && typeof window.Alpine.startObservingMutations === 'function') {
+                    window.Alpine.startObservingMutations();
+                }
+            } catch (_) {}
+        };
+
+        // -------- swap logic --------
+
+        const swapFromHtml = (html, urlForHistory, pushState) => {
+            const parser = new DOMParser();
+            const nextDoc = parser.parseFromString(html, 'text/html');
+
+            const nextFilters = firstMatch(nextDoc, SELECTORS.filters);
+            const nextProducts = firstMatch(nextDoc, SELECTORS.products);
+
+            const curFilters = firstMatch(document, SELECTORS.filters);
+            const curProducts = firstMatch(document, SELECTORS.products);
+
+            // 找不到关键节点就直接降级整页跳转（保证不会把页面弄坏）
+            if (!nextFilters || !nextProducts || !curFilters || !curProducts) {
+                window.location.href = urlForHistory;
+                return;
+            }
+
+            // 1) 停止 Alpine mutation 扫描：避免它在 init 脚本执行前就开始求值 x-for
+            stopAlpineMutations();
+
+            // 2) 销毁旧 tree，避免旧 effect 残留（offsetLeft / tooltip 等）
+            destroyTree(curFilters);
+            destroyTree(curProducts);
+
+            // 3) 替换 DOM（先 replace，再执行新片段 scripts，更贴近真实页面加载）
+            const importedFilters = document.importNode(nextFilters, true);
+            const importedProducts = document.importNode(nextProducts, true);
+
+            curFilters.replaceWith(importedFilters);
+            curProducts.replaceWith(importedProducts);
+
+            // 4) 更新 title（可选）
+            const nextTitle = nextDoc.querySelector('title');
+            if (nextTitle && nextTitle.textContent) document.title = nextTitle.textContent;
+
+            // 5) 更新 URL
+            if (pushState) history.pushState({ url: urlForHistory }, '', urlForHistory);
+
+            // 6) 执行新片段 inline scripts（必须用当前页 nonce）
+            execInlineScriptsFrom(importedFilters);
+            execInlineScriptsFrom(importedProducts);
+
+            // 可选：移除片段中的 script 标签
+            stripScriptsIn(importedFilters);
+            stripScriptsIn(importedProducts);
+
+            // 7) 下一帧再 initTree（布局稳定 + 避免测量类组件竞态）
+            requestAnimationFrame(() => {
+                initTree(importedFilters);
+                initTree(importedProducts);
+
+                // 对依赖布局计算的组件（tooltip/slider等）有帮助
+                window.dispatchEvent(new Event('resize'));
+
+                // 恢复 Alpine mutation 扫描
+                startAlpineMutations();
+
+                window.dispatchEvent(new CustomEvent('lencarta:plp-updated', {
+                    detail: { url: urlForHistory }
+                }));
+            });
+        };
+
+        const navigate = async (url, { pushState = true } = {}) => {
+            if (!sameOrigin(url)) {
+                window.location.href = url;
+                return;
+            }
+
+            // 取消上一次请求，避免乱序覆盖
+            if (currentController) {
+                try { currentController.abort(); } catch (_) {}
+            }
+            currentController = new AbortController();
+
+            setLoading(true);
+
+            try {
+                const res = await fetch(url, {
+                    method: 'GET',
+                    signal: currentController.signal,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    credentials: 'same-origin'
+                });
+
+                const finalUrl = res.url || url;
+
+                if (!res.ok) {
+                    window.location.href = finalUrl;
+                    return;
+                }
+
+                const html = await res.text();
+                swapFromHtml(html, finalUrl, pushState);
+            } catch (e) {
+                if (e && e.name === 'AbortError') return;
+                window.location.href = url;
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        // 只拦截 filters/toolbar 区域内的链接点击
+        document.addEventListener('click', (event) => {
+            const a = event.target.closest('a');
+            if (!shouldInterceptLink(a, event)) return;
+            event.preventDefault();
+            navigate(a.href, { pushState: true });
+        }, { capture: true });
+
+        // 浏览器后退/前进
+        window.addEventListener('popstate', (event) => {
+            const url = (event.state && event.state.url) ? event.state.url : window.location.href;
+            navigate(url, { pushState: false });
+        });
+
+    })();
+</script>
+
+<?php $hyvaCsp->registerInlineScript(); ?>

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="catalog.leftnav">
+            <arguments>
+                <argument name="active_open" xsi:type="boolean">true</argument>
+                <argument name="active_style" xsi:type="string">chips</argument>
+            </arguments>
+        </referenceBlock>
+
+        <referenceContainer name="before.body.end">
+            <block name="lencarta.ajax.layerednav"
+                   template="Magento_Theme::page/js/ajax-layered-navigation.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

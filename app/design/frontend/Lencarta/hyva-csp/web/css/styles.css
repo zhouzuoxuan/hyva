@@ -17,6 +17,7 @@
       "Courier New", monospace;
   --color-red-50: oklch(97.1% 0.013 17.38);
   --color-red-200: oklch(88.5% 0.062 18.334);
+  --color-red-300: oklch(80.8% 0.114 19.571);
   --color-red-500: oklch(63.7% 0.237 25.331);
   --color-red-600: oklch(57.7% 0.245 27.325);
   --color-red-700: oklch(50.5% 0.213 27.518);
@@ -5768,22 +5769,113 @@
     }
   }
 }
-@layer components {
-  .swatch-attribute-options {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+.swatch-attribute {
+  border: 0;
+}
+.product-info {
+  .swatch-attribute {
+    margin-block-end: calc(var(--spacing) * 2);
   }
-  .swatch-option {
-    margin: calc(var(--spacing) * 1);
-    display: flex;
-    justify-content: center;
-    border-style: var(--tw-border-style);
-    border-width: 1px;
-    padding-inline: calc(var(--spacing) * 2);
-    padding-block: calc(var(--spacing) * 1);
-    --tw-ring-offset-width: 2px;
-    min-width: 40px;
+}
+.swatch-attribute-options {
+  margin-inline: calc(var(--spacing) * 0);
+  display: flex;
+  min-height: calc(var(--spacing) * 10);
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: calc(var(--spacing) * 2);
+  &.space-x-4 {
+    gap: calc(var(--spacing) * 4);
+    & > * {
+      margin: 0;
+    }
+  }
+  & > [role="radiogroup"].flex {
+    gap: calc(var(--spacing) * 2);
+    padding-block: 2px;
+    padding-inline: 2px;
+  }
+}
+.swatch-option {
+  --swatch-active-color: #0000;
+  --swatch-stroke: var(--color-slate-200);
+  --swatch-bg: var(--color-white);
+  --swatch-color: var(--color-slate-800);
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 40px;
+  margin: 0;
+  padding-block: calc(var(--spacing) * 2);
+  padding-inline: calc(var(--spacing) * 2.5);
+  outline: 2px solid var(--swatch-active-color);
+  box-shadow: none;
+  border: 2px solid var(--swatch-stroke);
+  border-radius: var(--radius-md);
+  background-color: var(--swatch-bg);
+  color: var(--swatch-color);
+  font-size: var(--text-sm);
+  line-height: 1.1;
+  font-weight: 500;
+  transition-property: color, background-color, border-color, outline-color;
+  transition-timing-function: var(--default-transition-timing-function);
+  transition-duration: var(--default-transition-duration);
+  &:hover {
+    --swatch-stroke: var(--color-blue-300);
+  }
+  &:focus-within {
+    --swatch-active-color: var(--color-blue-500);
+    --swatch-stroke: var(--color-blue-300);
+  }
+  &:is(:has(:checked), [data-checked], :active) {
+    --swatch-stroke: var(--color-blue-500);
+    --swatch-bg: var(--color-blue-50);
+    --swatch-color: var(--color-blue-800);
+    &:hover {
+      --swatch-stroke: var(--color-blue-300);
+    }
+    &:focus-within {
+      --swatch-stroke: var(--color-white);
+    }
+  }
+  &:is([style*="background-color"], [style*="background-image"]) {
+    width: calc(var(--spacing) * 8);
+    height: calc(var(--spacing) * 8);
+    min-width: 0;
+    &:is(:has(:checked), [data-checked], :active) {
+      --swatch-stroke: var(--color-white);
+      --swatch-active-color: var(--color-blue-500);
+    }
+    &:hover {
+      --swatch-stroke: var(--color-white);
+      --swatch-active-color: var(--color-blue-300);
+    }
+  }
+  &[style*="background-color"] {
+    border-radius: 50%;
+  }
+  &:is(:disabled, .is-disabled, :has(input:disabled)) {
+    --swatch-stroke: var(--color-slate-300);
+    --swatch-bg: var(--color-slate-50);
+    --swatch-color: var(--color-slate-500);
+    outline: none;
+    &:not([style*="background-color"], [style*="background-image"]) {
+      background: linear-gradient( 130deg, #0000 calc(50% - 1px), var(--swatch-stroke) calc(50% - 1px), var(--swatch-stroke) calc(50% + 1px), #0000 calc(50% + 1px) );
+    }
+    &:is([style*="background-color"], [style*="background-image"]) {
+      &::after {
+        content: "";
+        position: absolute;
+        inset: 4px;
+        background-color: var(--color-white);
+        background-image: linear-gradient( to top left, #0000 calc(50% - 1px), var(--color-red-300) calc(50% - 1px), var(--color-red-300) calc(50% + 1px), #0000 calc(50% + 1px) ), linear-gradient( to top right, #0000 calc(50% - 1px), var(--color-red-300) calc(50% - 1px), var(--color-red-300) calc(50% + 1px), #0000 calc(50% + 1px) );
+        background-size: calc(100% - 10px) calc(100% - 10px);
+        background-repeat: no-repeat;
+        background-position: center;
+        border-radius: inherit;
+      }
+    }
   }
 }
 @layer components {

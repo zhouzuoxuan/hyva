@@ -1,6 +1,16 @@
 <?xml version="1.0"?>
 <view xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:Config/etc/view.xsd">
+    <vars module="Magento_Catalog">
+        <var name="gallery">
+            <var name="nav">thumbs</var>
+            <var name="navdir">vertical</var>
+            <var name="allowfullscreen">true</var>
+            <var name="arrows">true</var>
+            <var name="navarrows">true</var>
+            <var name="navoverflow">arrow</var>
+        </var>
+    </vars>
     <media>
         <images module="Magento_Catalog">
             <image id="product_page_image_large" type="image">

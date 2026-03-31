@@ -1,0 +1,311 @@
+<?php
+
+use Hyva\Theme\ViewModel\HyvaCsp;
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
+
+/** @var Template $block */
+/** @var Escaper $escaper */
+/** @var HyvaCsp $hyvaCsp */
+
+?>
+    <script>
+        function initSwatchOptions(swatchConfig) {
+            return {
+                swatchConfig,
+
+                getAttributeSwatchData(attributeId) {
+                    const config = Object.assign({}, this.swatchConfig[attributeId] || {});
+                    config.details = JSON.parse(config.additional_data || '{}');
+
+                    return config;
+                },
+
+                mapSwatchTypeNumberToTypeCode(typeNumber) {
+                    switch (String(typeNumber)) {
+                        case '1':
+                            return 'color';
+                        case '2':
+                            return 'image';
+                        case '3':
+                            return 'empty';
+                        case '0':
+                        default:
+                            return 'text';
+                    }
+                },
+
+                getTypeOfFirstOption(attributeId) {
+                    const config = this.swatchConfig[attributeId] || {};
+
+                    for (const optionId in config) {
+                        if (Object.prototype.hasOwnProperty.call(config, optionId)) {
+                            const option = config[optionId];
+                            if (typeof option.type !== 'undefined') {
+                                return this.mapSwatchTypeNumberToTypeCode(option.type);
+                            }
+                        }
+                    }
+
+                    return 'empty';
+                },
+
+                getVisualSwatchType(attributeId, targetOptionId) {
+                    const config = this.swatchConfig[attributeId] || {};
+
+                    if (config[targetOptionId] && typeof config[targetOptionId].type !== 'undefined') {
+                        return this.mapSwatchTypeNumberToTypeCode(config[targetOptionId].type);
+                    }
+
+                    return this.getTypeOfFirstOption(attributeId);
+                },
+
+                getSwatchType(attributeId, optionId) {
+                    if (this.swatchConfig[attributeId] && !this.swatchConfig[attributeId].details) {
+                        this.swatchConfig[attributeId] = this.getAttributeSwatchData(attributeId);
+                    }
+
+                    const type = this.swatchConfig[attributeId]
+                        && this.swatchConfig[attributeId].details
+                        && this.swatchConfig[attributeId].details.swatch_input_type
+                        || 'empty';
+
+                    return type === 'visual'
+                        ? this.getVisualSwatchType(attributeId, optionId)
+                        : type;
+                },
+
+                getCurrentAttributeId() {
+                    const element = this.$el || this.$root;
+
+                    if (element && element.dataset && element.dataset.attributeId) {
+                        return element.dataset.attributeId;
+                    }
+
+                    const attributeContainer = element && element.closest
+                        ? element.closest('[data-attribute-id]')
+                        : null;
+
+                    if (attributeContainer && attributeContainer.dataset && attributeContainer.dataset.attributeId) {
+                        return attributeContainer.dataset.attributeId;
+                    }
+
+                    return null;
+                },
+
+                getCurrentProductId() {
+                    if (this.productId) {
+                        return this.productId;
+                    }
+
+                    const rootElement = this.$root || this.$el;
+                    const productContainer = rootElement && rootElement.closest
+                        ? rootElement.closest('[data-product-id]')
+                        : null;
+
+                    if (productContainer && productContainer.dataset && productContainer.dataset.productId) {
+                        return productContainer.dataset.productId;
+                    }
+
+                    return 'swatch';
+                },
+
+                isTextSwatch() {
+                    const attributeId = this.getCurrentAttributeId();
+                    return this.getSwatchType(attributeId, this.item.id) === 'text';
+                },
+
+                isVisualSwatch() {
+                    const attributeId = this.activeTooltipItem.attribute;
+                    const type = this.getSwatchType(attributeId, this.activeTooltipItem.item);
+
+                    return ['image', 'color'].includes(type);
+                },
+
+                getSwatchBackgroundStyle() {
+                    const attributeId = this.getCurrentAttributeId();
+                    const config = this.getSwatchConfig(attributeId, this.item.id);
+                    const type = this.getSwatchType(attributeId, this.item.id);
+
+                    if (!config) {
+                        return '';
+                    }
+
+                    if (type === 'color') {
+                        return 'background-color:' + config.value;
+                    }
+
+                    if (type === 'image') {
+                        return "background: #fff url('" + config.value + "') no-repeat center";
+                    }
+
+                    return '';
+                },
+
+                getSwatchText() {
+                    const attributeId = this.getCurrentAttributeId();
+                    const optionId = (this.$el && this.$el.dataset && this.$el.dataset.optionId)
+                        ? this.$el.dataset.optionId
+                        : this.selectedValues[attributeId];
+
+                    const config = this.getSwatchConfig(attributeId, optionId);
+
+                    return (config && (config.label || config.value))
+                        || this.getOptionLabelFromOptionConfig(attributeId, optionId);
+                },
+
+                getOptionLabelFromOptionConfig(attributeId, optionId) {
+                    const options = this.getAllAttributeOptions(attributeId) || [];
+                    const option = options.filter(item => item.id === optionId);
+
+                    return option && option[0] && option[0].label || '';
+                },
+
+                getSwatchConfig(attributeId, optionId) {
+                    return this.swatchConfig[attributeId] && this.swatchConfig[attributeId][optionId]
+                        ? this.swatchConfig[attributeId][optionId]
+                        : false;
+                },
+
+                activeTooltipItem: false,
+                tooltipPositionElement: false,
+
+                isTooltipVisible() {
+                    return this.activeTooltipItem
+                        && this.getSwatchConfig(
+                            this.activeTooltipItem.attribute,
+                            this.activeTooltipItem.item
+                        );
+                },
+
+                isFirstItemCol() {
+                    return this.activeTooltipItem && this.activeTooltipItem.index === 0;
+                },
+
+                getTooltipImageStyle() {
+                    const attributeId = this.activeTooltipItem.attribute;
+                    const optionId = this.activeTooltipItem.item;
+                    const config = this.getSwatchConfig(attributeId, optionId);
+                    const type = this.getSwatchType(attributeId, optionId);
+
+                    if (!config) {
+                        return 'display:none';
+                    }
+
+                    if (type === 'color') {
+                        return 'background-color:' + config.value + '; width: 110px; height: 90px;';
+                    }
+
+                    if (type === 'image') {
+                        return "background: #ffffff url('" + config.thumb
+                            + "') center center no-repeat; width: 110px; height: 90px;";
+                    }
+
+                    return 'display:none';
+                },
+
+                getTooltipWrapperClasses() {
+                    return {
+                        '-translate-x-5': this.isFirstItemCol()
+                    };
+                },
+
+                getTooltipPosition() {
+                    return this.tooltipPositionElement
+                        ? `top: ${this.tooltipPositionElement.offsetTop}px;`
+                        + `left: ${
+                            this.tooltipPositionElement.offsetLeft - (
+                                this.tooltipPositionElement.closest('.snap')
+                                && this.tooltipPositionElement.closest('.snap').scrollLeft
+                                || 0
+                            )
+                        }px;`
+                        : '';
+                },
+
+                getTooltipLabel() {
+                    const config = this.getSwatchConfig(
+                        this.activeTooltipItem.attribute,
+                        this.activeTooltipItem.item
+                    );
+
+                    return config ? config.label : '';
+                },
+
+                focusedLabel: false,
+
+                focusLabel(optionId) {
+                    this.focusedLabel = optionId;
+                },
+
+                blurLabel() {
+                    this.focusedLabel = false;
+                },
+
+                getSwatchOptionHtmlId() {
+                    const productId = this.getCurrentProductId();
+                    const attributeId = this.getCurrentAttributeId() || 'attr';
+
+                    return `attribute-option-${productId}-${attributeId}-${this.item.id}`;
+                },
+
+                getSwatchOptionHtmlIdGroup() {
+                    return ['swatch-option'];
+                },
+
+                swatchOptionClasses() {
+                    const attributeId = this.getCurrentAttributeId();
+
+                    return {
+                        'border-gray-100 ring ring-primary/50': this.selectedValues[attributeId] === this.item.id,
+                        'border-gray-300': this.selectedValues[attributeId] !== this.item.id,
+                        'w-6 h-6': !this.isTextSwatch(),
+                        'border-gray-100 ring ring-primary/75': this.focusedLabel === this.item.id,
+                    };
+                },
+
+                outOfStockSwatchWrapperClasses() {
+                    return {
+                        'w-6 h-6': !this.isTextSwatch(),
+                    };
+                },
+
+                outOfStockSwatchContentClasses() {
+                    return {
+                        'sr-only': !this.isTextSwatch()
+                    };
+                },
+
+                setActiveTooltipItem() {
+                    this.activeTooltipItem = {
+                        attribute: this.getCurrentAttributeId(),
+                        item: this.item.id,
+                        index: this.index
+                    };
+                    this.tooltipPositionElement = this.$event.target;
+                },
+
+                unsetActiveTooltipItem() {
+                    this.activeTooltipItem = false;
+                },
+
+                onFocusSwatchItem() {
+                    this.focusLabel(this.item.id);
+                },
+
+                isSwatchRequired() {
+                    const attributeId = this.getCurrentAttributeId();
+
+                    return this.getAllowedAttributeOptions(attributeId)
+                        .filter(attributeOption => this.selectedValues[attributeOption])
+                        .length === 0;
+                },
+
+                modelBinding() {
+                    const attributeId = this.getCurrentAttributeId();
+                    return this.selectedValues[attributeId];
+                }
+            }
+        }
+    </script>
+<?php $hyvaCsp->registerInlineScript() ?>

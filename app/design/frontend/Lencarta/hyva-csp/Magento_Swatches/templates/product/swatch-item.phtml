@@ -1,0 +1,87 @@
+<?php
+
+declare(strict_types=1);
+
+use Hyva\Theme\Model\ViewModelRegistry;
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
+use Magento\Swatches\ViewModel\Product\Renderer\Configurable as ConfigurableViewModel;
+
+// phpcs:disable Generic.Files.LineLength.TooLong
+
+/** @var Template $block */
+/** @var Escaper $escaper */
+/** @var ViewModelRegistry $viewModels */
+
+/** @var ConfigurableViewModel $configurableViewModel */
+$configurableViewModel = $viewModels->require(ConfigurableViewModel::class);
+
+$productId = (int) $block->getProductId();
+$attributeId = (int) $block->getAttributeId();
+
+if (!$productId || !$attributeId) {
+    return '';
+}
+?>
+
+<div
+    data-product-id="<?= $productId ?>"
+    data-attribute-id="<?= $attributeId ?>"
+>
+    <template x-if="isOptionEnabledAndInStock">
+        <label
+            :for="getSwatchOptionHtmlId"
+            class="swatch-option relative shadow-sm cursor-pointer select-none bg-container-lighter product-option-value-label"
+            :class="swatchOptionClasses"
+            :style="getSwatchBackgroundStyle"
+            <?php if ($configurableViewModel->getShowSwatchTooltip()): ?>
+                @mouseenter.self="setActiveTooltipItem"
+                @mouseleave.self="unsetActiveTooltipItem"
+            <?php endif; ?>
+        >
+            <input
+                :id="getSwatchOptionHtmlId"
+                :value="item.id"
+                :checked="isSelected"
+                name="super_attribute[<?= $attributeId ?>]"
+                type="radio"
+                class="inline-block absolute p-0 border-0 focus:border-0 focus:ring-0 product-option-value-input"
+                style="z-index:-1"
+                @focus="onFocusSwatchItem"
+                @blur="blurLabel"
+                @change="onChangeOption"
+                @click="clearOptionIfActive"
+                :required="isSwatchRequired"
+                :data-option-id="item.id"
+                :aria-label="getSwatchText"
+                aria-describedby="attribute-label-<?= $escaper->escapeHtmlAttr($productId . '-' . $attributeId) ?>"
+            >
+            <template x-if="isTextSwatch">
+                <div
+                    :data-option-id="item.id"
+                    x-html="getSwatchText"
+                    class="pointer-events-none select-none whitespace-nowrap"
+                    aria-hidden="true"
+                ></div>
+            </template>
+        </label>
+    </template>
+
+    <template x-if="isOptionEnabledAndOutOfStock">
+        <div
+            class="relative border-2 shadow-sm opacity-50 cursor-pointer select-none border-gray-300 swatch-option bg-white"
+            :class="outOfStockSwatchWrapperClasses"
+            :style="getSwatchBackgroundStyle"
+        >
+            <div
+                x-html="getSwatchText"
+                :data-option-id="item.id"
+                class="whitespace-nowrap"
+                :class="outOfStockSwatchContentClasses"
+            ></div>
+            <svg class="absolute inset-0 w-full h-full text-gray-500 bg-white/25">
+                <line x1="0" y1="100%" x2="100%" y2="0" class="stroke-current stroke-1"></line>
+            </svg>
+        </div>
+    </template>
+</div>

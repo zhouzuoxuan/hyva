@@ -8,6 +8,9 @@
         },
         {
             "src": "vendor/hyva-themes/magento2-hyva-widgets/src"
+        },
+        {
+            "src": "vendor/hyva-themes/magento2-smile-elasticsuite/src"
         }
     ]
 }

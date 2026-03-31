@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4db43af5d0968ddc1c904fc13218e01f",
+    "content-hash": "3c9d07a80b3d8e566bb45f0e92547594",
     "packages": [
         {
             "name": "2tvenom/cborencode",
@@ -182,16 +182,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.373.5",
+            "version": "3.375.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "978964f417f3617a6ced691110af6fc5d496fb4e"
+                "reference": "6cfa1798c3fa0182d902eda9419dca48c86d74a1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/978964f417f3617a6ced691110af6fc5d496fb4e",
-                "reference": "978964f417f3617a6ced691110af6fc5d496fb4e",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/6cfa1798c3fa0182d902eda9419dca48c86d74a1",
+                "reference": "6cfa1798c3fa0182d902eda9419dca48c86d74a1",
                 "shasum": ""
             },
             "require": {
@@ -273,9 +273,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.373.5"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.375.0"
             },
-            "time": "2026-03-18T18:22:37+00:00"
+            "time": "2026-03-30T19:30:55+00:00"
         },
         {
             "name": "bacon/bacon-qr-code",
@@ -729,16 +729,16 @@
         },
         {
             "name": "composer/ca-bundle",
-            "version": "1.5.10",
+            "version": "1.5.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/ca-bundle.git",
-                "reference": "961a5e4056dd2e4a2eedcac7576075947c28bf63"
+                "reference": "68ff39175e8e94a4bb1d259407ce51a6a60f09e6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/ca-bundle/zipball/961a5e4056dd2e4a2eedcac7576075947c28bf63",
-                "reference": "961a5e4056dd2e4a2eedcac7576075947c28bf63",
+                "url": "https://api.github.com/repos/composer/ca-bundle/zipball/68ff39175e8e94a4bb1d259407ce51a6a60f09e6",
+                "reference": "68ff39175e8e94a4bb1d259407ce51a6a60f09e6",
                 "shasum": ""
             },
             "require": {
@@ -785,7 +785,7 @@
             "support": {
                 "irc": "irc://irc.freenode.org/composer",
                 "issues": "https://github.com/composer/ca-bundle/issues",
-                "source": "https://github.com/composer/ca-bundle/tree/1.5.10"
+                "source": "https://github.com/composer/ca-bundle/tree/1.5.11"
             },
             "funding": [
                 {
@@ -797,20 +797,20 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-12-08T15:06:51+00:00"
+            "time": "2026-03-30T09:16:10+00:00"
         },
         {
             "name": "composer/class-map-generator",
-            "version": "1.7.1",
+            "version": "1.7.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/class-map-generator.git",
-                "reference": "8f5fa3cc214230e71f54924bd0197a3bcc705eb1"
+                "reference": "6a9c2f0970022ab00dc58c07d0685dd712f2231b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/class-map-generator/zipball/8f5fa3cc214230e71f54924bd0197a3bcc705eb1",
-                "reference": "8f5fa3cc214230e71f54924bd0197a3bcc705eb1",
+                "url": "https://api.github.com/repos/composer/class-map-generator/zipball/6a9c2f0970022ab00dc58c07d0685dd712f2231b",
+                "reference": "6a9c2f0970022ab00dc58c07d0685dd712f2231b",
                 "shasum": ""
             },
             "require": {
@@ -854,7 +854,7 @@
             ],
             "support": {
                 "issues": "https://github.com/composer/class-map-generator/issues",
-                "source": "https://github.com/composer/class-map-generator/tree/1.7.1"
+                "source": "https://github.com/composer/class-map-generator/tree/1.7.2"
             },
             "funding": [
                 {
@@ -866,7 +866,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-12-29T13:15:25+00:00"
+            "time": "2026-03-30T15:36:56+00:00"
         },
         {
             "name": "composer/composer",
@@ -3152,6 +3152,54 @@
             "time": "2025-01-10T10:09:57+00:00"
         },
         {
+            "name": "hyva-themes/magento2-smile-elasticsuite",
+            "version": "1.2.7.1",
+            "dist": {
+                "type": "zip",
+                "url": "https://hyva-themes.repo.packagist.com/hengxinxuan-sh-4oodl/dists/hyva-themes/magento2-smile-elasticsuite/1.2.7.1/e0a047d434ccb67e768a500b24979aed4bfc6d91.zip",
+                "reference": "e0a047d434ccb67e768a500b24979aed4bfc6d91",
+                "mirrors": [
+                    {
+                        "url": "https://hyva-themes.repo.packagist.com/hengxinxuan-sh-4oodl/dists/%package%/%version%/r%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
+            },
+            "require": {
+                "magento/framework": ">=103.0.0",
+                "smile/elasticsuite": "~2.10.9|~2.11.0"
+            },
+            "type": "magento2-module",
+            "autoload": {
+                "files": [
+                    "src/registration.php"
+                ],
+                "psr-4": {
+                    "Hyva\\SmileElasticsuite\\": "src/"
+                }
+            },
+            "notification-url": "https://hyva-themes.repo.packagist.com/hengxinxuan-sh-4oodl/downloads/",
+            "license": [
+                "see LICENSE.md"
+            ],
+            "authors": [
+                {
+                    "name": "Hyvä Themes, Elgentos",
+                    "email": "info@elgentos.nl"
+                },
+                {
+                    "name": "Elasticsuite core team",
+                    "email": "elasticsuite@smile.fr"
+                }
+            ],
+            "description": "Hyva_SmileElasticsuite makes Smile_Elasticsuite compatible with Hyvä Themes",
+            "support": {
+                "source": "https://gitlab.hyva.io/hyva-themes/hyva-compat/magento2-smile-elasticsuite/-/tree/1.2.7.1",
+                "issues": "https://gitlab.hyva.io/hyva-themes/hyva-compat/magento2-smile-elasticsuite/-/issues"
+            },
+            "time": "2025-11-12T11:19:52+00:00"
+        },
+        {
             "name": "hyva-themes/magento2-theme-module",
             "version": "1.4.5",
             "dist": {
@@ -5302,16 +5350,16 @@
         },
         {
             "name": "league/flysystem",
-            "version": "3.32.0",
+            "version": "3.33.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/flysystem.git",
-                "reference": "254b1595b16b22dbddaaef9ed6ca9fdac4956725"
+                "reference": "570b8871e0ce693764434b29154c54b434905350"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/flysystem/zipball/254b1595b16b22dbddaaef9ed6ca9fdac4956725",
-                "reference": "254b1595b16b22dbddaaef9ed6ca9fdac4956725",
+                "url": "https://api.github.com/repos/thephpleague/flysystem/zipball/570b8871e0ce693764434b29154c54b434905350",
+                "reference": "570b8871e0ce693764434b29154c54b434905350",
                 "shasum": ""
             },
             "require": {
@@ -5379,9 +5427,9 @@
             ],
             "support": {
                 "issues": "https://github.com/thephpleague/flysystem/issues",
-                "source": "https://github.com/thephpleague/flysystem/tree/3.32.0"
+                "source": "https://github.com/thephpleague/flysystem/tree/3.33.0"
             },
-            "time": "2026-02-25T17:01:41+00:00"
+            "time": "2026-03-25T07:59:30+00:00"
         },
         {
             "name": "league/flysystem-aws-s3-v3",
@@ -20242,23 +20290,23 @@
         },
         {
             "name": "opensearch-project/opensearch-php",
-            "version": "2.5.1",
+            "version": "2.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opensearch-project/opensearch-php.git",
-                "reference": "6e193551266c1f284bdf005d587a85ebff00f29e"
+                "reference": "6bcff126ffd8f54ca33a0dd659128cbc5d3b2bcd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opensearch-project/opensearch-php/zipball/6e193551266c1f284bdf005d587a85ebff00f29e",
-                "reference": "6e193551266c1f284bdf005d587a85ebff00f29e",
+                "url": "https://api.github.com/repos/opensearch-project/opensearch-php/zipball/6bcff126ffd8f54ca33a0dd659128cbc5d3b2bcd",
+                "reference": "6bcff126ffd8f54ca33a0dd659128cbc5d3b2bcd",
                 "shasum": ""
             },
             "require": {
                 "ext-curl": "*",
                 "ext-json": ">=1.3.7",
                 "ezimuel/ringphp": "^1.4.0",
-                "php": "^8.1",
+                "php": "^8.2",
                 "php-http/discovery": "^1.20",
                 "psr/http-client": "^1.0.3",
                 "psr/http-client-implementation": "*",
@@ -20283,10 +20331,11 @@
                 "phpstan/phpstan-phpunit": "^1.4.2",
                 "phpunit/phpunit": "^10.5.58",
                 "react/promise": "^v3.3",
-                "symfony/console": "^v6.4.27|^7.3.6|^v8.0.0",
-                "symfony/finder": "^v6.4.27|^7.3.6|^v8.0.0",
-                "symfony/http-client": "^6.4.27|^7.3.6|^v8.0.0",
-                "symfony/http-client-contracts": "^v3.6.0|^v8.0.0"
+                "symfony/console": "v6.4.31|^7.4.3|^8.0.3",
+                "symfony/finder": "^v6.4.31|^7.4.3|^v8.0.3",
+                "symfony/http-client": "^6.4.31|^7.4.3|^v8.0.3",
+                "symfony/http-client-contracts": "^v3.6.0|^v8.0.3",
+                "twig/twig": "^3.0"
             },
             "suggest": {
                 "aws/aws-sdk-php": "Required (^3.0.0) in order to use the AWS Signing Client Decorator",
@@ -20322,9 +20371,9 @@
             ],
             "support": {
                 "issues": "https://github.com/opensearch-project/opensearch-php/issues",
-                "source": "https://github.com/opensearch-project/opensearch-php/tree/2.5.1"
+                "source": "https://github.com/opensearch-project/opensearch-php/tree/2.6.0"
             },
-            "time": "2026-01-16T21:44:15+00:00"
+            "time": "2026-03-24T03:15:15+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",
@@ -22535,6 +22584,125 @@
             "time": "2023-09-03T09:24:00+00:00"
         },
         {
+            "name": "smile/elasticsuite",
+            "version": "2.11.18.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Smile-SA/elasticsuite.git",
+                "reference": "5fc2b662329963f961e564de9bf4e447597895e9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Smile-SA/elasticsuite/zipball/5fc2b662329963f961e564de9bf4e447597895e9",
+                "reference": "5fc2b662329963f961e564de9bf4e447597895e9",
+                "shasum": ""
+            },
+            "require": {
+                "magento/framework": ">=103.0.6",
+                "magento/magento-composer-installer": "*",
+                "magento/module-backend": ">=102.0.6",
+                "magento/module-catalog": ">=104.0.6",
+                "magento/module-catalog-graph-ql": ">=100.4.6",
+                "magento/module-catalog-search": ">=102.0.6",
+                "magento/module-store": ">=101.1.6",
+                "opensearch-project/opensearch-php": "^1.0 || ^2.0 <2.4.0 || >=2.4.3 <3.0.0"
+            },
+            "replace": {
+                "smile/module-elasticsuite-admin-notification": "self.version",
+                "smile/module-elasticsuite-analytics": "self.version",
+                "smile/module-elasticsuite-catalog": "self.version",
+                "smile/module-elasticsuite-catalog-graph-ql": "self.version",
+                "smile/module-elasticsuite-catalog-optimizer": "self.version",
+                "smile/module-elasticsuite-catalog-rule": "self.version",
+                "smile/module-elasticsuite-core": "self.version",
+                "smile/module-elasticsuite-indices": "self.version",
+                "smile/module-elasticsuite-swatches": "self.version",
+                "smile/module-elasticsuite-thesaurus": "self.version",
+                "smile/module-elasticsuite-tracker": "self.version",
+                "smile/module-elasticsuite-virtual-category": "self.version"
+            },
+            "require-dev": {
+                "smile/magento2-smilelab-quality-suite": "~2.2.0"
+            },
+            "type": "magento2-component",
+            "extra": {
+                "map": [
+                    [
+                        "src/lib/web/fonts/elasticsuite",
+                        "lib/web/fonts/elasticsuite"
+                    ]
+                ],
+                "branch-alias": {
+                    "dev-master": "2.12.x-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/module-elasticsuite-core/registration.php",
+                    "src/module-elasticsuite-admin-notification/registration.php",
+                    "src/module-elasticsuite-analytics/registration.php",
+                    "src/module-elasticsuite-catalog/registration.php",
+                    "src/module-elasticsuite-catalog-graph-ql/registration.php",
+                    "src/module-elasticsuite-catalog-optimizer/registration.php",
+                    "src/module-elasticsuite-catalog-rule/registration.php",
+                    "src/module-elasticsuite-indices/registration.php",
+                    "src/module-elasticsuite-swatches/registration.php",
+                    "src/module-elasticsuite-thesaurus/registration.php",
+                    "src/module-elasticsuite-tracker/registration.php",
+                    "src/module-elasticsuite-virtual-category/registration.php"
+                ],
+                "psr-4": {
+                    "Smile\\ElasticsuiteCore\\": "src/module-elasticsuite-core",
+                    "Smile\\ElasticsuiteCatalog\\": "src/module-elasticsuite-catalog",
+                    "Smile\\ElasticsuiteIndices\\": "src/module-elasticsuite-indices",
+                    "Smile\\ElasticsuiteTracker\\": "src/module-elasticsuite-tracker",
+                    "Smile\\ElasticsuiteSwatches\\": "src/module-elasticsuite-swatches",
+                    "Smile\\ElasticsuiteAnalytics\\": "src/module-elasticsuite-analytics",
+                    "Smile\\ElasticsuiteThesaurus\\": "src/module-elasticsuite-thesaurus",
+                    "Smile\\ElasticsuiteCatalogRule\\": "src/module-elasticsuite-catalog-rule",
+                    "Smile\\ElasticsuiteCatalogGraphQl\\": "src/module-elasticsuite-catalog-graph-ql",
+                    "Smile\\ElasticsuiteVirtualCategory\\": "src/module-elasticsuite-virtual-category",
+                    "Smile\\ElasticsuiteCatalogOptimizer\\": "src/module-elasticsuite-catalog-optimizer",
+                    "Smile\\ElasticsuiteAdminNotification\\": "src/module-elasticsuite-admin-notification"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "OSL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "Romain Ruaud",
+                    "email": "romain.ruaud@smile.fr"
+                },
+                {
+                    "name": "Richard Bayet",
+                    "email": "richard.bayet@smile.fr"
+                },
+                {
+                    "name": "Aurélien FOUCRET",
+                    "email": "aurelien.foucret@smile.fr"
+                }
+            ],
+            "description": "Magento 2 merchandising and search engine built on ElasticSearch ",
+            "homepage": "https://github.com/Smile-SA/elasticsuite",
+            "keywords": [
+                "core",
+                "elasticsearch",
+                "graphql",
+                "magento",
+                "magento2",
+                "merchandising",
+                "search",
+                "setup"
+            ],
+            "support": {
+                "issues": "https://github.com/Smile-SA/elasticsuite/issues",
+                "source": "https://github.com/Smile-SA/elasticsuite/tree/2.11.18.1"
+            },
+            "time": "2026-03-25T14:05:47+00:00"
+        },
+        {
             "name": "spomky-labs/aes-key-wrap",
             "version": "v7.0.0",
             "source": {
@@ -22682,40 +22850,41 @@
         },
         {
             "name": "spomky-labs/pki-framework",
-            "version": "1.4.1",
+            "version": "1.4.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Spomky-Labs/pki-framework.git",
-                "reference": "f0e9a548df4e3942886adc9b7830581a46334631"
+                "reference": "aa576cbd07128075bef97ac2f8af9854e67513d8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Spomky-Labs/pki-framework/zipball/f0e9a548df4e3942886adc9b7830581a46334631",
-                "reference": "f0e9a548df4e3942886adc9b7830581a46334631",
+                "url": "https://api.github.com/repos/Spomky-Labs/pki-framework/zipball/aa576cbd07128075bef97ac2f8af9854e67513d8",
+                "reference": "aa576cbd07128075bef97ac2f8af9854e67513d8",
                 "shasum": ""
             },
             "require": {
-                "brick/math": "^0.10|^0.11|^0.12|^0.13|^0.14",
+                "brick/math": "^0.10|^0.11|^0.12|^0.13|^0.14|^0.15|^0.16|^0.17",
                 "ext-mbstring": "*",
-                "php": ">=8.1"
+                "php": ">=8.1",
+                "psr/clock": "^1.0"
             },
             "require-dev": {
                 "ekino/phpstan-banned-code": "^1.0|^2.0|^3.0",
                 "ext-gmp": "*",
                 "ext-openssl": "*",
-                "infection/infection": "^0.28|^0.29|^0.31",
+                "infection/infection": "^0.28|^0.29|^0.31|^0.32",
                 "php-parallel-lint/php-parallel-lint": "^1.3",
                 "phpstan/extension-installer": "^1.3|^2.0",
                 "phpstan/phpstan": "^1.8|^2.0",
                 "phpstan/phpstan-deprecation-rules": "^1.0|^2.0",
                 "phpstan/phpstan-phpunit": "^1.1|^2.0",
                 "phpstan/phpstan-strict-rules": "^1.3|^2.0",
-                "phpunit/phpunit": "^10.1|^11.0|^12.0",
+                "phpunit/phpunit": "^10.1|^11.0|^12.0|^13.0",
                 "rector/rector": "^1.0|^2.0",
                 "roave/security-advisories": "dev-latest",
                 "symfony/string": "^6.4|^7.0|^8.0",
                 "symfony/var-dumper": "^6.4|^7.0|^8.0",
-                "symplify/easy-coding-standard": "^12.0"
+                "symplify/easy-coding-standard": "^12.0|^13.0"
             },
             "suggest": {
                 "ext-bcmath": "For better performance (or GMP)",
@@ -22775,7 +22944,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Spomky-Labs/pki-framework/issues",
-                "source": "https://github.com/Spomky-Labs/pki-framework/tree/1.4.1"
+                "source": "https://github.com/Spomky-Labs/pki-framework/tree/1.4.2"
             },
             "funding": [
                 {
@@ -22787,7 +22956,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2025-12-20T12:57:40+00:00"
+            "time": "2026-03-23T22:56:56+00:00"
         },
         {
             "name": "stomp-php/stomp-php",

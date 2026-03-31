@@ -84,5 +84,10 @@
                 <block name="footer-payment" template="Magento_Theme::html/footer/payment.phtml"/>
             </container>
         </referenceBlock>
+
+        <!-- js plugin-->
+<!--        <referenceBlock name="before.body.end">-->
+<!--            <block name="splide-js" template="Magento_Theme::page/js/splide-js.phtml"/>-->
+<!--        </referenceBlock>-->
     </body>
 </page>

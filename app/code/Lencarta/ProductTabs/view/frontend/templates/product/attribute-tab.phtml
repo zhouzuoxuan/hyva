@@ -1,0 +1,18 @@
+<?php
+declare(strict_types=1);
+
+/** @var AttributeTab $block */
+
+use Lencarta\ProductTabs\Block\Product\AttributeTab;
+
+if (!$block->canShow()) {
+    return;
+}
+?>
+<div class="prose max-w-none
+            [&_img]:block [&_img]:mx-auto
+            [&_figure]:mx-auto
+            [&_table]:mx-auto
+            [&_iframe]:mx-auto">
+    <?= /* @noEscape */ $block->getValueHtml() ?>
+</div>

@@ -1,17 +1,37 @@
 <?xml version="1.0"?>
-<!--
-/**
- * Hyvä Themes - https://hyva.io
- * Copyright © Hyvä Themes 2020-present. All rights reserved.
- * This product is licensed per Magento install
- * See https://hyva.io/license
- */
--->
-<page
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd"
->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+<!--    <head>-->
+<!--        <css src="Magento_Catalog::css/bootstrap-tiny.css" />-->
+<!--    </head>-->
     <body>
-        <referenceBlock name="product.attributes"/>
+        <!--product data ui -->
+        <referenceBlock name="product.info.details">
+            <arguments>
+                <argument name="divider" xsi:type="boolean">false</argument> <!-- Show divider between items (true/false) -->
+            </arguments>
+        </referenceBlock>
+        <referenceBlock name="description">
+            <arguments>
+                <argument name="title" xsi:type="string" translate="true">Description</argument>
+            </arguments>
+        </referenceBlock>
+
+        <!--related products -->
+        <referenceBlock name="related" remove="true" />
+        <referenceContainer name="product.info.main">
+            <referenceBlock name="product.info">
+                <block name="product.info.related_products" class="Magento\Catalog\Block\Product\View"
+                       template="Magento_Catalog::product/slider/product-slider.phtml">
+                    <arguments>
+                        <argument name="type" xsi:type="string">related</argument>
+                        <argument name="page_size" xsi:type="string">18</argument>
+                        <argument name="column_count" xsi:type="string">3</argument>
+                        <argument name="title" xsi:type="string" translate="true">Related Products</argument>
+                        <argument name="heading_tag" xsi:type="string">h2</argument>
+                    </arguments>
+                </block>
+            </referenceBlock>
+        </referenceContainer>
     </body>
 </page>

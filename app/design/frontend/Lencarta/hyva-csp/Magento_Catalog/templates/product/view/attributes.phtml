@@ -28,12 +28,12 @@ $product = $block->getProduct();
 
 $getLayoutStyle = (string) $block->getLayoutStyle() ?: "";
 
-$layoutStyleTableRow = $getLayoutStyle === "" ? "block md:table-row" : ($getLayoutStyle === "list" ? "block" : "");
+$layoutStyleTableRow = $getLayoutStyle === "" ? "block lg:table-row" : ($getLayoutStyle === "list" ? "block" : "");
 $layoutStyleTableCellHeading = $getLayoutStyle === ""
-    ? "block md:table-cell pt-3 md:py-2 px-3"
+    ? "block lg:table-cell pt-3 lg:py-2 px-3"
     : ($getLayoutStyle === "list" ? "block pt-3 px-3" : "py-2 px-3");
 $layoutStyleTableCellItem = $getLayoutStyle === ""
-    ? "block md:table-cell pb-3 md:py-2 px-3"
+    ? "block lg:table-cell pb-3 lg:py-2 px-3"
     : ($getLayoutStyle === "list" ? "block pb-3 px-3" : "py-2 px-3");
 ?>
 

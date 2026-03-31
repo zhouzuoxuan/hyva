@@ -1,0 +1,68 @@
+.product-content-bootstrap-lite .row {
+    margin-left: -15px;
+    margin-right: -15px;
+}
+
+.product-content-bootstrap-lite .row:before,
+.product-content-bootstrap-lite .row:after {
+    content: " ";
+    display: table;
+}
+
+.product-content-bootstrap-lite .row:after {
+    clear: both;
+}
+
+.product-content-bootstrap-lite .col-md-4 {
+    position: relative;
+    min-height: 1px;
+    padding-left: 15px;
+    padding-right: 15px;
+    box-sizing: border-box;
+}
+
+@media (min-width: 992px) {
+    .product-content-bootstrap-lite .col-md-4 {
+        float: left;
+        width: 33.33333333%;
+    }
+}
+
+.product-content-bootstrap-lite img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+.product-content-bootstrap-lite hr {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border: 0;
+    border-top: 1px solid #eeeeee;
+}
+
+.product-content-bootstrap-lite .table {
+    width: 100%;
+    max-width: 100%;
+    border-collapse: collapse;
+}
+
+.product-content-bootstrap-lite .table > tbody > tr > td,
+.product-content-bootstrap-lite .table > tbody > tr > th,
+.product-content-bootstrap-lite .table > thead > tr > td,
+.product-content-bootstrap-lite .table > thead > tr > th {
+    padding: 8px;
+    line-height: 1.42857143;
+    vertical-align: top;
+}
+
+.product-content-bootstrap-lite .table-bordered {
+    border: 1px solid #dddddd;
+}
+
+.product-content-bootstrap-lite .table-bordered > tbody > tr > td,
+.product-content-bootstrap-lite .table-bordered > tbody > tr > th,
+.product-content-bootstrap-lite .table-bordered > thead > tr > td,
+.product-content-bootstrap-lite .table-bordered > thead > tr > th {
+    border: 1px solid #dddddd;
+}

@@ -1,0 +1,14 @@
+<?php
+declare(strict_types=1);
+
+/** @var CmsTab $block */
+
+use Lencarta\ProductTabs\Block\Product\CmsTab;
+
+if (!$block->canShow()) {
+    return;
+}
+?>
+<div class="prose max-w-none">
+    <?= /* @noEscape */ $block->getContentHtml() ?>
+</div>

@@ -40,10 +40,10 @@ $classlist = $block->getData('class') ?: 'rounded-full w-9 h-9 bg-gray-200 p-0 b
     class="<?= $classlist ?>"
     aria-label="<?= $escaper->escapeHtmlAttr(__('Add to Wish List') . ' ' . $productName) ?>"
     data-addto="wishlist"
-    data-product-id="<?= (int) $productId ?>"
+    data-product-id="<?= $productId ?>"
     x-data="initWishlist"
     x-defer="intersect"
-    @click.prevent="addToWishlist"
+    @click.prevent="addToWishlist(<?= $productId ?>)"
 >
     <?= $heroicons->heartHtml('', 20, 20, ['aria-hidden' => 'true']) ?>
 </button>

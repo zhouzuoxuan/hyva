@@ -53,6 +53,7 @@ $messageSpacingClasses = $isHomePage ? 'mb-0' : 'mb-6';
 
     function initMessages() {
         "use strict";
+
         return {
             messages: window.mageMessages || [],
 
@@ -74,23 +75,59 @@ $messageSpacingClasses = $isHomePage ? 'mb-0' : 'mb-6';
                 this.messages[this.index] = undefined;
             },
 
-            addMessages(messages, hideAfter) {
-                messages.map((message) => {
-                    this.messages = this.messages.concat(message);
+            normalizeMessageText(text) {
+                if (!text) {
+                    return '';
+                }
 
-                    if (hideAfter === undefined && message.type === 'success' && window.defaultSuccessMessageTimeout) {
-                        hideAfter = window.defaultSuccessMessageTimeout;
+                const temp = document.createElement('div');
+                temp.innerHTML = text;
+
+                return (temp.textContent || temp.innerText || '')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            },
+
+            shouldSkipMessage(message) {
+                if (!message || message.type !== 'success') {
+                    return false;
+                }
+
+                const text = this.normalizeMessageText(message.text);
+
+                return [
+                    /^you added .+ to your shopping cart\.?$/i,
+                    /^you added .+ to your cart\.?$/i
+                ].some((pattern) => pattern.test(text));
+            },
+
+            addMessages(messages, hideAfter) {
+                messages.forEach((message) => {
+                    if (this.shouldSkipMessage(message)) {
+                        return;
                     }
 
-                    if (hideAfter) {
-                        this.setHideTimeOut(this.messages.length - 1, hideAfter);
+                    this.messages = this.messages.concat(message);
+
+                    let currentHideAfter = hideAfter;
+
+                    if (
+                        currentHideAfter === undefined
+                        && message.type === 'success'
+                        && window.defaultSuccessMessageTimeout
+                    ) {
+                        currentHideAfter = window.defaultSuccessMessageTimeout;
+                    }
+
+                    if (currentHideAfter) {
+                        this.setHideTimeOut(this.messages.length - 1, currentHideAfter);
                     }
                 });
             },
 
             setHideTimeOut(messageIndex, hideAfter) {
-                setTimeout((messageIndex) => {
-                    this.messages[messageIndex] = undefined;
+                setTimeout((index) => {
+                    this.messages[index] = undefined;
                 }, hideAfter, messageIndex);
             },
 

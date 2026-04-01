@@ -1,0 +1,24 @@
+<?php
+declare(strict_types=1);
+
+use Lencarta\PaymentPaypal\ViewModel\PaypalConfig;
+use Magento\Framework\View\Element\Template;
+
+/** @var Template $block */
+/** @var PaypalConfig $viewModel */
+$viewModel = $block->getData('view_model');
+?>
+<script>
+    window.lencartaPaypalConfig = {
+        enabled: <?= $viewModel->isEnabled() ? 'true' : 'false' ?>,
+        clientId: '<?= $block->escapeJs($viewModel->getClientId()) ?>',
+        sdkUrl: '<?= $block->escapeJs($viewModel->getSdkBaseUrl()) ?>',
+        currency: '<?= $block->escapeJs($viewModel->getCurrency()) ?>',
+        createOrderUrl: '<?= $block->escapeJs($viewModel->getCreateOrderUrl()) ?>',
+        button: {
+            color: '<?= $block->escapeJs($viewModel->getButtonColor()) ?>',
+            shape: '<?= $block->escapeJs($viewModel->getButtonShape()) ?>',
+            label: '<?= $block->escapeJs($viewModel->getButtonLabel()) ?>'
+        }
+    };
+</script>

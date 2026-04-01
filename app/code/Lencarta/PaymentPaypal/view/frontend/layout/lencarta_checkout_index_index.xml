@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <script src="Lencarta_PaymentPaypal::js/paypal.js"/>
+    </head>
+    <body>
+        <referenceContainer name="before.body.end">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="lencarta.paypal.config"
+                   template="Lencarta_PaymentPaypal::config.phtml">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">Lencarta\PaymentPaypal\ViewModel\PaypalConfig</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

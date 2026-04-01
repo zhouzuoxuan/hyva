@@ -1,0 +1,89 @@
+/* ===== Kill Magento/Hyvä outer wrappers ===== */
+
+body.lencarta-checkout-page,
+body.lencarta-checkout-page .page-wrapper,
+body.lencarta-checkout-page .page-main,
+body.lencarta-checkout-page #maincontent {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+}
+
+body.lencarta-checkout-page .page-main {
+    min-height: 100vh !important;
+    background: #ffffff !important;
+}
+
+body.lencarta-checkout-page .columns {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+}
+
+body.lencarta-checkout-page .column.main {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+}
+
+body.lencarta-checkout-page .page.messages,
+body.lencarta-checkout-page .messages,
+body.lencarta-checkout-page .breadcrumbs,
+body.lencarta-checkout-page .page-title-wrapper {
+    display: none !important;
+}
+
+/* ===== Our checkout canvas ===== */
+
+body.lencarta-checkout-page .lencarta-checkout-root {
+    min-height: 100vh;
+    background: #ffffff;
+}
+
+body.lencarta-checkout-page .lencarta-checkout-shell {
+    display: grid;
+    min-height: 100vh;
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 1024px) {
+    body.lencarta-checkout-page .lencarta-checkout-shell {
+        grid-template-columns: minmax(0, 1.618fr) minmax(420px, 1fr);
+    }
+}
+
+body.lencarta-checkout-page .lencarta-checkout-left {
+    background: #ffffff;
+}
+
+body.lencarta-checkout-page .lencarta-checkout-right {
+    background: #f7f7f7;
+    border-left: 1px solid #e2e8f0;
+}
+
+@media (min-width: 1024px) {
+    body.lencarta-checkout-page .lencarta-checkout-right-inner {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow: hidden;
+    }
+}
+
+body.lencarta-checkout-page .lencarta-products-scroll {
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+body.lencarta-checkout-page .lencarta-products-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+body.lencarta-checkout-page .lencarta-products-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+}

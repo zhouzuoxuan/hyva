@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <lencarta_paypal>
+                <active>0</active>
+                <sandbox_mode>1</sandbox_mode>
+                <title>PayPal</title>
+                <debug>1</debug>
+                <brand_name>Lencarta</brand_name>
+                <button_color>gold</button_color>
+                <button_shape>rect</button_shape>
+                <button_label>paypal</button_label>
+            </lencarta_paypal>
+        </payment>
+    </default>
+</config>

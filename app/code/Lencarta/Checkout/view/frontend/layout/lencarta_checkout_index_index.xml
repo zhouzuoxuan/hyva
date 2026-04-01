@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      layout="1column"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <script src="Lencarta_Checkout::js/checkout.js"/>
+        <css src="Lencarta_Checkout::css/checkout-page.css"/>
+    </head>
+    <body>
+        <attribute name="class" value="lencarta-checkout-page"/>
+
+        <referenceBlock name="page.main.title" remove="true"/>
+
+        <referenceBlock name="header.container" remove="true"/>
+        <referenceBlock name="header" remove="true"/>
+        <referenceBlock name="top.search" remove="true"/>
+        <referenceBlock name="catalog.compare.sidebar" remove="true"/>
+
+        <referenceBlock name="footer-container" remove="true"/>
+        <referenceBlock name="footer" remove="true"/>
+        <referenceBlock name="copyright" remove="true"/>
+
+        <referenceContainer name="content">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="lencarta.checkout.page"
+                   template="Lencarta_Checkout::checkout.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

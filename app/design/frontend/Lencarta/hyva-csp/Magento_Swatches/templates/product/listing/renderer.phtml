@@ -48,6 +48,8 @@ $swatchItemBlock->setData('product_id', $productId);
                 {
                     productId: '<?= $productId ?>',
                     mediaCallback: "<?= $escaper->escapeJs($escaper->escapeUrl($block->getMediaCallback())) ?>",
+                    lastListingGalleryProductId: null,
+                    lastSelectionSignature: null,
 
                     getListingAttributeOptions(attributeId) {
                         const options = this.getAllAttributeOptions(attributeId);
@@ -58,41 +60,139 @@ $swatchItemBlock->setData('product_id', $productId);
                         return this.getListingAttributeOptions(attributeId).length > 0;
                     },
 
-                    changeOption(optionId, value, skipUpdateGallery) {
-                        this.selectedValues[optionId] = value;
-                        this.findSimpleIndex();
-                        this.findAllowedAttributeOptions();
-                        this.updatePrices();
-                        !skipUpdateGallery && this.updateGallery();
+                    getListingSelectionSignature() {
+                        const selectedValues = this.selectedValues || {};
+                        const normalized = {};
+
+                        Object.keys(selectedValues)
+                            .sort()
+                            .forEach(attributeId => {
+                                const value = selectedValues[attributeId];
+
+                                if (value !== null && value !== undefined && value !== '') {
+                                    normalized[String(attributeId)] = String(value);
+                                }
+                            });
+
+                        return JSON.stringify(normalized);
                     },
 
-                    updateGallery() {
-                        if (!this.productIndex) {
+                    getMatchingProductIdsFromSelectedOptions() {
+                        const attributes = this.optionConfig && this.optionConfig.attributes
+                            ? this.optionConfig.attributes
+                            : {};
+
+                        let matchedProductIds = null;
+
+                        Object.values(attributes).forEach(attribute => {
+                            const selectedValues = this.selectedValues || {};
+                            const selectedValue =
+                                selectedValues[attribute.id] !== undefined
+                                    ? selectedValues[attribute.id]
+                                    : selectedValues[String(attribute.id)];
+
+                            if (selectedValue === null || selectedValue === undefined || selectedValue === '') {
+                                return;
+                            }
+
+                            const option = Array.isArray(attribute.options)
+                                ? attribute.options.find(option => String(option.id) === String(selectedValue))
+                                : null;
+
+                            const optionProductIds = option && Array.isArray(option.products)
+                                ? option.products.map(productId => String(productId))
+                                : [];
+
+                            if (matchedProductIds === null) {
+                                matchedProductIds = optionProductIds;
+                                return;
+                            }
+
+                            matchedProductIds = matchedProductIds.filter(productId => {
+                                return optionProductIds.includes(productId);
+                            });
+                        });
+
+                        return Array.isArray(matchedProductIds) ? matchedProductIds : [];
+                    },
+
+                    getListingGalleryProductId() {
+                        if (this.productIndex) {
+                            return String(this.productIndex);
+                        }
+
+                        const matchedProductIds = this.getMatchingProductIdsFromSelectedOptions();
+
+                        if (matchedProductIds.length) {
+                            return matchedProductIds[0];
+                        }
+
+                        return null;
+                    },
+
+                    syncListingGallery() {
+                        const selectionSignature = this.getListingSelectionSignature();
+
+                        if (selectionSignature === this.lastSelectionSignature) {
                             return;
                         }
 
-                        fetch(`${this.mediaCallback}?product_id=${this.productIndex}&isAjax=true`, {
+                        this.lastSelectionSignature = selectionSignature;
+
+                        this.$nextTick(() => {
+                            const galleryProductId = this.getListingGalleryProductId();
+
+                            if (!galleryProductId) {
+                                this.lastListingGalleryProductId = null;
+                                return;
+                            }
+
+                            this.fetchListingGallery(galleryProductId);
+                        });
+                    },
+
+                    fetchListingGallery(galleryProductId) {
+                        if (!galleryProductId) {
+                            return;
+                        }
+
+                        if (String(this.lastListingGalleryProductId) === String(galleryProductId)) {
+                            return;
+                        }
+
+                        this.lastListingGalleryProductId = String(galleryProductId);
+
+                        fetch(`${this.mediaCallback}?product_id=${encodeURIComponent(galleryProductId)}&isAjax=true`, {
                             method: 'GET',
                             headers: {
                                 'Content-Type': 'application/json',
                                 'X-Requested-With': 'XMLHttpRequest'
                             }
                         })
-                            .then(response => response.json())
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error(`HTTP ${response.status}`);
+                                }
+
+                                return response.json();
+                            })
                             .then(data => {
                                 if (data.errors) {
                                     console.warn(data.errors);
-                                } else {
-                                    const image = data && data.medium;
+                                    return;
+                                }
 
-                                    if (image) {
-                                        window.dispatchEvent(
-                                            new CustomEvent(
-                                                "update-gallery-<?= $productId ?>",
-                                                { detail: image }
-                                            )
-                                        );
-                                    }
+                                const image = data && (data.medium || data.large || data.small)
+                                    ? (data.medium || data.large || data.small)
+                                    : null;
+
+                                if (image) {
+                                    window.dispatchEvent(
+                                        new CustomEvent(
+                                            "update-gallery-<?= $productId ?>",
+                                            { detail: image }
+                                        )
+                                    );
                                 }
                             })
                             .catch(error => {
@@ -107,8 +207,6 @@ $swatchItemBlock->setData('product_id', $productId);
                             : {};
 
                         Object.values(attributes).forEach(attribute => {
-                            const skipUpdateGallery = false;
-
                             if (urlQueryParams.get(attribute.code) !== null) {
                                 let optionId = urlQueryParams.get(attribute.code);
 
@@ -120,7 +218,7 @@ $swatchItemBlock->setData('product_id', $productId);
                                     });
                                 }
 
-                                this.changeOption(attribute.id, optionId, skipUpdateGallery);
+                                this.changeOption(attribute.id, optionId);
                             }
                         });
                     },
@@ -191,6 +289,7 @@ $swatchItemBlock->setData('product_id', $productId);
     <div
         x-data="initConfigurableSwatchOptions_<?= $productId ?>()"
         x-init="findAllowedAttributeOptions();"
+        x-effect="syncListingGallery()"
         @private-content-loaded.window="onGetCartData($event.detail.data)"
         @resize.window="resizeEvent()"
         class="mb-2 relative"

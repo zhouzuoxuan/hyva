@@ -50,7 +50,6 @@ if (!$productId || !$attributeId) {
                 @focus="onFocusSwatchItem"
                 @blur="blurLabel"
                 @change="onChangeOption"
-                @click="clearOptionIfActive"
                 :required="isSwatchRequired"
                 :data-option-id="item.id"
                 :aria-label="getSwatchText"

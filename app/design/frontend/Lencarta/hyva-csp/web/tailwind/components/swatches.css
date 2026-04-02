@@ -7,12 +7,6 @@
     border: 0;
 }
 
-.product-info {
-    .swatch-attribute {
-        margin-block-end: --spacing(2);
-    }
-}
-
 .swatch-attribute-options {
     @apply flex flex-row flex-wrap gap-2 min-h-10 mx-0;
 

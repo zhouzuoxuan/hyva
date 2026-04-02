@@ -151,12 +151,12 @@ $viewModels->require(BlockJsDependencies::class)
             <?php endif; ?>
 
             <?php if ($product->isAvailable() && !$hideDetails): ?>
-                <div class="mb-4 mt-2">
+                <div class="mt-2">
                     <?= $block->getProductDetailsHtml($product) ?>
                 </div>
             <?php endif; ?>
 
-            <div class="mt-auto pt-2">
+            <div class="mt-auto">
                 <?php if ($isProductGroupedOrBundle): ?>
                     <span class="sr-only">
                         <?= $escaper->escapeHtml(__('The price depends on the options chosen on the product page')) ?>

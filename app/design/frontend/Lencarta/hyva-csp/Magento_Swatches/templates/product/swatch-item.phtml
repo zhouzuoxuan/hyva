@@ -49,7 +49,7 @@ if (!$productId || !$attributeId) {
                 style="z-index:-1"
                 @focus="onFocusSwatchItem"
                 @blur="blurLabel"
-                @change="onChangeOption"
+                @change="setLastChangedAttribute($event); onChangeOption($event)"
                 :required="isSwatchRequired"
                 :data-option-id="item.id"
                 :aria-label="getSwatchText"

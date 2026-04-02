@@ -13,6 +13,7 @@ use Magento\Framework\View\Element\Template;
         function initSwatchOptions(swatchConfig) {
             return {
                 swatchConfig,
+                lastChangedAttributeId: null,
 
                 getAttributeSwatchData(attributeId) {
                     const config = Object.assign({}, this.swatchConfig[attributeId] || {});
@@ -287,6 +288,22 @@ use Magento\Framework\View\Element\Template;
 
                 unsetActiveTooltipItem() {
                     this.activeTooltipItem = false;
+                },
+
+                setLastChangedAttribute(event) {
+                    const attributeContainer = event && event.target && event.target.closest
+                        ? event.target.closest('[data-attribute-id]')
+                        : null;
+
+                    if (attributeContainer && attributeContainer.dataset && attributeContainer.dataset.attributeId) {
+                        this.lastChangedAttributeId = String(attributeContainer.dataset.attributeId);
+                        return;
+                    }
+
+                    const name = event && event.target ? event.target.name : '';
+                    const match = name ? name.match(/\[(\d+)\]/) : null;
+
+                    this.lastChangedAttributeId = match ? String(match[1]) : null;
                 },
 
                 onFocusSwatchItem() {

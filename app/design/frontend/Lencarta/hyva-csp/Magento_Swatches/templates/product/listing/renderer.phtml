@@ -42,9 +42,18 @@ $swatchItemBlock->setData('product_id', $productId);
                 <?= /* @noEscape */ $block->getJsonSwatchConfig() ?>
             );
 
-            return Object.assign(
+            const baseComponent = Object.assign(
+                {},
                 configurableOptionsComponent,
-                swatchOptionsComponent,
+                swatchOptionsComponent
+            );
+
+            const originalOnChangeOption = typeof baseComponent.onChangeOption === 'function'
+                ? baseComponent.onChangeOption
+                : null;
+
+            return Object.assign(
+                baseComponent,
                 {
                     productId: '<?= $productId ?>',
                     mediaCallback: "<?= $escaper->escapeJs($escaper->escapeUrl($block->getMediaCallback())) ?>",
@@ -121,6 +130,30 @@ $swatchItemBlock->setData('product_id', $productId);
                             return String(this.productIndex);
                         }
 
+                        const lastChangedAttributeId = this.lastChangedAttributeId
+                            ? String(this.lastChangedAttributeId)
+                            : null;
+
+                        if (!lastChangedAttributeId) {
+                            return null;
+                        }
+
+                        const selectedValue =
+                            this.selectedValues[lastChangedAttributeId] !== undefined
+                                ? this.selectedValues[lastChangedAttributeId]
+                                : this.selectedValues[Number(lastChangedAttributeId)];
+
+                        if (selectedValue === null || selectedValue === undefined || selectedValue === '') {
+                            return null;
+                        }
+
+                        const swatchType = this.getSwatchType(lastChangedAttributeId, selectedValue);
+
+                        // 未完整选型时，只有颜色/图片类 swatch 改变才允许切图
+                        if (!['color', 'image'].includes(swatchType)) {
+                            return null;
+                        }
+
                         const matchedProductIds = this.getMatchingProductIdsFromSelectedOptions();
 
                         if (matchedProductIds.length) {
@@ -128,6 +161,16 @@ $swatchItemBlock->setData('product_id', $productId);
                         }
 
                         return null;
+                    },
+
+                    onChangeOption(event) {
+                        if (originalOnChangeOption) {
+                            originalOnChangeOption.call(this, event);
+                        }
+
+                        this.$nextTick(() => {
+                            this.syncListingGallery();
+                        });
                     },
 
                     syncListingGallery() {
@@ -182,15 +225,15 @@ $swatchItemBlock->setData('product_id', $productId);
                                     return;
                                 }
 
-                                const image = data && (data.medium || data.large || data.small)
-                                    ? (data.medium || data.large || data.small)
+                                const imageData = data && (data.medium || data.large || data.small)
+                                    ? data
                                     : null;
 
-                                if (image) {
+                                if (imageData) {
                                     window.dispatchEvent(
                                         new CustomEvent(
                                             "update-gallery-<?= $productId ?>",
-                                            { detail: image }
+                                            { detail: imageData }
                                         )
                                     );
                                 }
@@ -289,7 +332,6 @@ $swatchItemBlock->setData('product_id', $productId);
     <div
         x-data="initConfigurableSwatchOptions_<?= $productId ?>()"
         x-init="findAllowedAttributeOptions();"
-        x-effect="syncListingGallery()"
         @private-content-loaded.window="onGetCartData($event.detail.data)"
         @resize.window="resizeEvent()"
         class="mb-2 relative"

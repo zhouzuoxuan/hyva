@@ -36,11 +36,13 @@ if ($logoAlt === '') {
      x-init="init()"
      class="min-h-screen bg-white text-slate-900">
 
-    <div class="grid min-h-screen grid-cols-1 lg:grid-cols-[minmax(0,1.618fr)_minmax(360px,0.95fr)]">
+    <div class="grid min-h-screen grid-cols-1 lg:grid-cols-[minmax(0,1.618fr)_minmax(360px,0.95fr)]"
+         style="--checkout-edge-gutter: clamp(56px, 10vw, 220px); --checkout-center-gutter: clamp(32px, 3.2vw, 64px);">
 
         <!-- LEFT -->
         <section class="min-w-0 bg-white">
-            <div class="mx-auto max-w-5xl px-6 py-8 lg:px-8 lg:py-10 xl:px-10">
+            <div class="mr-auto max-w-[900px] py-8 lg:py-10"
+                 style="padding-left: var(--checkout-edge-gutter); padding-right: var(--checkout-center-gutter);">
                 <?= $block->getChildHtml('left_logo') ?>
                 <?= $block->getChildHtml('left_contact') ?>
                 <?= $block->getChildHtml('left_shipping_address') ?>
@@ -52,7 +54,8 @@ if ($logoAlt === '') {
         <!-- RIGHT -->
         <aside class="min-w-0 bg-[#f8f9fb] lg:border-l lg:border-slate-200">
             <div class="lg:sticky lg:top-0 lg:min-h-screen">
-                <div class="px-5 py-8 lg:px-6 lg:py-8 xl:px-8">
+                <div class="py-8 lg:py-8"
+                     style="padding-left: var(--checkout-center-gutter); padding-right: var(--checkout-edge-gutter);">
                     <?= $block->getChildHtml('right_summary') ?>
                     <?= $block->getChildHtml('right_products') ?>
                     <?= $block->getChildHtml('right_coupon') ?>

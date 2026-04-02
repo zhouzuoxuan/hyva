@@ -1,0 +1,57 @@
+<?php
+declare(strict_types=1);
+
+/** @var \Magento\Framework\View\Element\Template $block */
+?>
+<section class="pt-10">
+    <div class="border-b border-slate-200 pb-4">
+        <h2 class="text-2xl font-semibold text-slate-900">Delivery Options</h2>
+    </div>
+
+    <div class="pt-6">
+        <template x-if="!canLoadShippingMethods()">
+            <div class="border border-slate-300 bg-white px-4 py-4 text-sm text-slate-600">
+                Enter your address to see available delivery options.
+            </div>
+        </template>
+
+        <template x-if="canLoadShippingMethods() && shippingMethodsState === 'loading'">
+            <div class="border border-slate-300 bg-white px-4 py-4 text-sm text-slate-600">
+                Loading delivery options…
+            </div>
+        </template>
+
+        <template x-if="canLoadShippingMethods() && shippingMethodsState === 'unavailable'">
+            <div class="border border-amber-300 bg-amber-50 px-4 py-4 text-sm text-amber-800">
+                No delivery options are available for this address.
+            </div>
+        </template>
+
+        <template x-if="shippingMethodsState === 'ready'">
+            <div class="space-y-3">
+                <template x-for="method in shippingMethods" :key="method.code">
+                    <label class="block cursor-pointer border p-4 transition"
+                           :class="selectedShippingMethod === method.code ? 'border-slate-900 bg-slate-50' : 'border-slate-300 bg-white hover:border-slate-500'">
+                        <div class="flex items-start gap-4">
+                            <input type="radio"
+                                   name="shipping_method"
+                                   class="mt-1"
+                                   :checked="selectedShippingMethod === method.code"
+                                   @change="selectShippingMethod(method)">
+
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div>
+                                        <div class="text-sm font-semibold text-slate-900" x-text="method.carrier_title"></div>
+                                        <div class="mt-1 text-sm text-slate-500" x-text="method.method_title"></div>
+                                    </div>
+                                    <div class="whitespace-nowrap text-sm font-semibold text-slate-900" x-text="method.price"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </label>
+                </template>
+            </div>
+        </template>
+    </div>
+</section>

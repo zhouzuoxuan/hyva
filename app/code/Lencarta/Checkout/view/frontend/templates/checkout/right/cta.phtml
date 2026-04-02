@@ -1,0 +1,48 @@
+<?php
+declare(strict_types=1);
+
+/** @var \Magento\Framework\View\Element\Template $block */
+?>
+<div class="mt-5 shrink-0">
+    <label class="mb-4 flex items-start gap-3">
+        <input type="checkbox" x-model="termsAccepted" class="mt-1 rounded border-slate-300 text-slate-900 focus:ring-0">
+        <span class="text-sm leading-6 text-slate-600">
+            I agree to the
+            <a href="#" class="font-medium text-slate-900 underline underline-offset-2">Terms &amp; Conditions</a>.
+        </span>
+    </label>
+
+    <div class="bg-slate-900 p-4 lg:p-5 text-white">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <div class="text-base lg:text-lg font-semibold">Ready to pay?</div>
+                <div class="mt-1 text-xs lg:text-sm text-slate-300">
+                    Continue securely with PayPal to complete your order.
+                </div>
+            </div>
+            <div class="bg-white/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-200">
+                PayPal
+            </div>
+        </div>
+
+        <div class="mt-5">
+            <template x-if="!termsAccepted">
+                <div class="mb-4 border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
+                    Please accept the terms before continuing to payment.
+                </div>
+            </template>
+
+            <div :class="termsAccepted ? '' : 'pointer-events-none opacity-50'">
+                <div id="lencarta-paypal-button"></div>
+            </div>
+        </div>
+
+        <div class="mt-3 text-[11px] text-slate-400">
+            Protected checkout. Your payment details are handled securely by PayPal.
+        </div>
+    </div>
+
+    <template x-if="message">
+        <div class="mt-4 text-sm text-slate-600" x-text="message"></div>
+    </template>
+</div>

@@ -10,12 +10,10 @@
         <attribute name="class" value="lencarta-checkout-page"/>
 
         <referenceBlock name="page.main.title" remove="true"/>
-
         <referenceBlock name="header.container" remove="true"/>
         <referenceBlock name="header" remove="true"/>
         <referenceBlock name="top.search" remove="true"/>
         <referenceBlock name="catalog.compare.sidebar" remove="true"/>
-
         <referenceBlock name="footer-container" remove="true"/>
         <referenceBlock name="footer" remove="true"/>
         <referenceBlock name="copyright" remove="true"/>
@@ -23,7 +21,59 @@
         <referenceContainer name="content">
             <block class="Magento\Framework\View\Element\Template"
                    name="lencarta.checkout.page"
-                   template="Lencarta_Checkout::checkout.phtml"/>
+                   template="Lencarta_Checkout::checkout.phtml">
+
+                <block class="Magento\Framework\View\Element\Template"
+                       name="lencarta.checkout.left.logo"
+                       as="left_logo"
+                       template="Lencarta_Checkout::checkout/left/logo.phtml"/>
+
+                <block class="Magento\Framework\View\Element\Template"
+                       name="lencarta.checkout.left.contact"
+                       as="left_contact"
+                       template="Lencarta_Checkout::checkout/left/contact.phtml"/>
+
+                <block class="Magento\Framework\View\Element\Template"
+                       name="lencarta.checkout.left.shipping_address"
+                       as="left_shipping_address"
+                       template="Lencarta_Checkout::checkout/left/shipping-address.phtml"/>
+
+                <block class="Magento\Framework\View\Element\Template"
+                       name="lencarta.checkout.left.delivery_options"
+                       as="left_delivery_options"
+                       template="Lencarta_Checkout::checkout/left/delivery-options.phtml"/>
+
+                <block class="Magento\Framework\View\Element\Template"
+                       name="lencarta.checkout.left.payment_method"
+                       as="left_payment_method"
+                       template="Lencarta_Checkout::checkout/left/payment-method.phtml"/>
+
+                <block class="Magento\Framework\View\Element\Template"
+                       name="lencarta.checkout.right.summary"
+                       as="right_summary"
+                       template="Lencarta_Checkout::checkout/right/summary.phtml"/>
+
+                <block class="Magento\Framework\View\Element\Template"
+                       name="lencarta.checkout.right.products"
+                       as="right_products"
+                       template="Lencarta_Checkout::checkout/right/products.phtml"/>
+
+                <block class="Magento\Framework\View\Element\Template"
+                       name="lencarta.checkout.right.coupon"
+                       as="right_coupon"
+                       template="Lencarta_Checkout::checkout/right/coupon.phtml"/>
+
+                <block class="Magento\Framework\View\Element\Template"
+                       name="lencarta.checkout.right.totals"
+                       as="right_totals"
+                       template="Lencarta_Checkout::checkout/right/totals.phtml"/>
+
+                <block class="Magento\Framework\View\Element\Template"
+                       name="lencarta.checkout.right.cta"
+                       as="right_cta"
+                       template="Lencarta_Checkout::checkout/right/cta.phtml"/>
+
+            </block>
         </referenceContainer>
     </body>
 </page>

@@ -1,0 +1,17 @@
+<?php
+declare(strict_types=1);
+
+/** @var \Magento\Framework\View\Element\Template $block */
+?>
+<div class="pb-8">
+    <a :href="config.homeUrl"
+       aria-label="Home"
+       title="Go to Home page"
+       class="inline-flex items-center">
+        <img :src="config.logoSrc"
+             :alt="config.logoAlt"
+             class="h-10 w-auto"
+             loading="eager"
+             decoding="async">
+    </a>
+</div>

@@ -5,7 +5,7 @@ function initLencartaCheckout(config) {
         message: '',
         termsAccepted: false,
         couponCode: '',
-
+        couponOpen: false,
         email: '',
         emailSaveState: 'idle',
 

@@ -1,0 +1,38 @@
+<?php
+declare(strict_types=1);
+
+/** @var \Magento\Framework\View\Element\Template $block */
+?>
+<div class="mt-6 shrink-0 border-t border-slate-200 pt-5">
+    <button type="button"
+            @click="couponOpen = !couponOpen"
+            class="flex w-full items-center justify-between text-left">
+        <span class="text-sm font-semibold text-slate-900">Discount code</span>
+
+        <span class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 bg-white shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 viewBox="0 0 20 20"
+                 fill="currentColor"
+                 class="h-3.5 w-3.5 transition-transform duration-200"
+                 :class="couponOpen ? 'rotate-180' : ''">
+                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.512a.75.75 0 0 1-1.08 0L5.21 8.27a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd"/>
+            </svg>
+        </span>
+    </button>
+
+    <div x-show="couponOpen" class="pt-4">
+        <div class="flex gap-3">
+            <input
+                type="text"
+                x-model="couponCode"
+                placeholder="Enter coupon code"
+                class="min-w-0 flex-1 border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-slate-900"
+            >
+            <button type="button"
+                    @click="applyCoupon()"
+                    class="border border-slate-900 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-900 hover:text-white">
+                Apply
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,30 @@
+<?php
+declare(strict_types=1);
+
+/** @var \Magento\Framework\View\Element\Template $block */
+?>
+<div class="mt-5 shrink-0 border-t border-slate-200 pt-4 text-sm">
+    <div class="space-y-2">
+        <div class="flex justify-between gap-4">
+            <span class="text-slate-700">Subtotal</span>
+            <span class="font-medium text-slate-900" x-text="totals.formatted?.subtotal || '-'"></span>
+        </div>
+        <div class="flex justify-between gap-4">
+            <span class="text-slate-700">Shipping</span>
+            <span class="font-medium text-slate-900" x-text="totals.formatted?.shipping || '-'"></span>
+        </div>
+        <div class="flex justify-between gap-4">
+            <span class="text-slate-700">VAT</span>
+            <span class="font-medium text-slate-900" x-text="totals.formatted?.tax || '-'"></span>
+        </div>
+        <div class="flex justify-between gap-4">
+            <span class="text-slate-700">Discount</span>
+            <span class="font-medium text-slate-900" x-text="totals.formatted?.discount || '-'"></span>
+        </div>
+    </div>
+
+    <div class="mt-4 flex justify-between gap-4 text-xl lg:text-2xl font-semibold">
+        <span class="text-slate-900">Grand Total</span>
+        <span class="text-slate-900" x-text="totals.formatted?.grand_total || '-'"></span>
+    </div>
+</div>

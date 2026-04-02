@@ -1,0 +1,94 @@
+<?php
+declare(strict_types=1);
+
+/** @var \Magento\Framework\View\Element\Template $block */
+?>
+<section class="pt-10">
+    <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+        <h2 class="text-[clamp(1.7rem,2.4vw,2.5rem)] font-semibold tracking-tight text-slate-900">
+            Shipping Address
+        </h2>
+
+        <template x-if="shippingSaveState === 'saving'">
+            <span class="text-xs font-semibold text-amber-700">Saving…</span>
+        </template>
+        <template x-if="shippingSaveState === 'saved'">
+            <span class="text-xs font-semibold text-emerald-700">Saved</span>
+        </template>
+        <template x-if="shippingSaveState === 'error'">
+            <span class="text-xs font-semibold text-rose-700">Please review</span>
+        </template>
+    </div>
+
+    <div class="grid gap-5 pt-6 sm:grid-cols-2">
+        <label class="block">
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">First name</span>
+            <input x-model="shipping.firstname" @input.debounce.900ms="queueShippingAutosave()" @blur="queueShippingAutosave()"
+                   class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
+                   placeholder="Enter first name">
+        </label>
+
+        <label class="block">
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">Last name</span>
+            <input x-model="shipping.lastname" @input.debounce.900ms="queueShippingAutosave()" @blur="queueShippingAutosave()"
+                   class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
+                   placeholder="Enter last name">
+        </label>
+
+        <label class="block sm:col-span-2">
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">Company</span>
+            <input x-model="shipping.company" @input.debounce.900ms="queueShippingAutosave()"
+                   class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
+                   placeholder="Company">
+        </label>
+
+        <label class="block sm:col-span-2">
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">Street address</span>
+            <input x-model="shipping.street_1" @input.debounce.900ms="queueShippingAutosave()" @blur="queueShippingAutosave()"
+                   class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
+                   placeholder="Enter street address 1">
+        </label>
+
+        <label class="block sm:col-span-2">
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">Address line 2</span>
+            <input x-model="shipping.street_2" @input.debounce.900ms="queueShippingAutosave()"
+                   class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
+                   placeholder="Enter street address 2">
+        </label>
+
+        <label class="block">
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">City</span>
+            <input x-model="shipping.city" @input.debounce.900ms="queueShippingAutosave()" @blur="queueShippingAutosave()"
+                   class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
+                   placeholder="City">
+        </label>
+
+        <label class="block">
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">Postcode</span>
+            <input x-model="shipping.postcode" @input.debounce.900ms="queueShippingAutosave()" @blur="queueShippingAutosave()"
+                   class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
+                   placeholder="Postcode">
+        </label>
+
+        <label class="block">
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">County / Region</span>
+            <input x-model="shipping.region" @input.debounce.900ms="queueShippingAutosave()"
+                   class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
+                   placeholder="County / Region">
+        </label>
+
+        <label class="block">
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">Country code</span>
+            <input x-model="shipping.country_id" @input.debounce.900ms="queueShippingAutosave()" @blur="queueShippingAutosave()"
+                   class="w-full border border-slate-300 bg-white px-3 py-3 text-base uppercase outline-none transition placeholder:text-slate-400 focus:border-slate-900"
+                   placeholder="GB">
+        </label>
+
+        <label class="block sm:col-span-2">
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">Phone number</span>
+            <input x-model="shipping.telephone" @input.debounce.900ms="queueShippingAutosave()" @blur="queueShippingAutosave()"
+                   class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
+                   placeholder="Phone number">
+        </label>
+    </div>
+</section>

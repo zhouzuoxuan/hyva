@@ -36,6 +36,12 @@ $showWishlist = $headerConfig->isWishlistEnabled();
 $desktopLinks = $headerConfig->getDesktopLinks();
 $isHomePage = $block->getRequest()->getFullActionName() === 'cms_index_index';
 $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
+
+$initialHeaderClasses = $isHomePage
+    ? 'bg-transparent text-white border-transparent shadow-none'
+    : 'bg-white/95 text-slate-900 border-gray-100 shadow backdrop-blur supports-[backdrop-filter]:bg-white/80';
+
+$headerInlineStyle = $isHomePage ? 'border-bottom-color: transparent;' : '';
 ?>
 <script>
     function initHeader(isHomePage) {
@@ -50,11 +56,13 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
             lastScrollY: 0,
             headerHidden: false,
             headerHeight: 0,
+            isReady: false,
 
             init() {
                 this.$nextTick(() => {
                     this.measureHeader();
                     this.onScroll();
+                    this.isReady = true;
                 });
 
                 window.addEventListener('resize', () => this.measureHeader(), { passive: true });
@@ -137,6 +145,10 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
                 return this.headerHidden
                     ? '-translate-y-full opacity-0 pointer-events-none'
                     : 'translate-y-0 opacity-100';
+            },
+
+            headerTransitionClasses() {
+                return this.isReady ? 'transition-all duration-300 ease-out' : '';
             },
 
             searchPanelClasses() {
@@ -224,14 +236,15 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
 <?php $hyvaCsp->registerInlineScript(); ?>
 
 <div id="header"
-     class="<?= $escaper->escapeHtmlAttr($headerPositionClass) ?> z-30 w-full border-b transition-all duration-300 ease-out will-change-transform"
+     class="<?= $escaper->escapeHtmlAttr($headerPositionClass) ?> <?= $escaper->escapeHtmlAttr($initialHeaderClasses) ?> z-30 w-full border-b will-change-transform translate-y-0 opacity-100"
+     style="<?= $escaper->escapeHtmlAttr($headerInlineStyle) ?>"
      x-data="initHeader()"
      x-init="init()"
      @private-content-loaded.window="getData(event.detail.data)"
      @scroll.window.throttle.50ms="onScroll"
      @mouseenter="headerHovered = true; headerHidden = false; syncHeaderCssVars()"
      @mouseleave="headerHovered = false; syncHeaderCssVars()"
-     :class="[headerClasses(), headerVisibilityClasses()]"
+     :class="[headerClasses(), headerVisibilityClasses(), headerTransitionClasses()]"
 >
     <div class="container mx-auto mt-0 px-4 pt-2 sm:px-6 sm:pt-0">
         <div class="grid grid-cols-[auto_1fr_auto] grid-rows-[56px_44px] items-center lg:grid-cols-[1fr_auto_1fr] lg:grid-rows-[auto_auto]">
@@ -300,8 +313,8 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
                 <?php if ($showMiniCart): ?>
                     <button
                 <?php else: ?>
-                    <a
-                <?php endif; ?>
+                <a
+                    <?php endif; ?>
                     id="menu-cart-icon"
                     type="button"
                     class="relative btn border-transparent bg-transparent p-1 text-current"
@@ -324,11 +337,11 @@ $headerPositionClass = $isHomePage ? 'fixed inset-x-0 top-0' : 'relative';
                         class="absolute -right-1.5 -top-1.5 rounded-full bg-primary px-1.5 py-0.5 text-center text-[10px] font-semibold leading-none text-on-primary uppercase tabular-nums"
                         aria-hidden="true"
                     ></span>
-                <?php if ($showMiniCart): ?>
-                    </button>
-                <?php else: ?>
-                    </a>
-                <?php endif; ?>
+                    <?php if ($showMiniCart): ?>
+                        </button>
+                    <?php else: ?>
+                </a>
+            <?php endif; ?>
             </div>
         </div>
     </div>

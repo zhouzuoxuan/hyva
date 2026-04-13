@@ -1,39 +1,59 @@
 function initLencartaCheckout(config) {
+    const initialState = config.initialState || {};
+    const hasInitialState =
+        initialState &&
+        typeof initialState === 'object' &&
+        Array.isArray(initialState.items) &&
+        typeof initialState.totals === 'object';
+
+    const initialShipping = initialState.shipping || {};
+
     return {
         config,
         loading: false,
+        isReady: hasInitialState,
         message: '',
         termsAccepted: false,
-        couponCode: '',
+        couponCode: initialState.coupon_code || '',
         couponOpen: false,
-        email: '',
+
+        email: initialState.email || '',
         emailSaveState: 'idle',
 
         shipping: {
-            firstname: '',
-            lastname: '',
-            company: '',
-            telephone: '',
-            street_1: '',
-            street_2: '',
-            city: '',
-            postcode: '',
-            region: '',
-            country_id: 'GB'
+            firstname: initialShipping.firstname || '',
+            lastname: initialShipping.lastname || '',
+            company: initialShipping.company || '',
+            telephone: initialShipping.telephone || '',
+            street_1: initialShipping.street_1 || '',
+            street_2: initialShipping.street_2 || '',
+            city: initialShipping.city || '',
+            postcode: initialShipping.postcode || '',
+            region: initialShipping.region || '',
+            country_id: initialShipping.country_id || 'GB'
         },
 
         shippingSaveState: 'idle',
-        shippingMethodsState: 'idle',
+        shippingMethodsState:
+            Array.isArray(initialState.shipping_methods) && initialState.shipping_methods.length > 0
+                ? 'ready'
+                : 'idle',
 
-        items: [],
+        items: Array.isArray(initialState.items) ? initialState.items : [],
         itemsExpanded: false,
         maxVisibleItems: 2,
 
-        totals: {},
-        shippingMethods: [],
-        selectedShippingMethod: '',
+        totals: initialState.totals || {},
+        shippingMethods: Array.isArray(initialState.shipping_methods) ? initialState.shipping_methods : [],
+        selectedShippingMethod: initialState.selected_shipping_method || '',
 
         init() {
+            if (hasInitialState) {
+                window.lencartaCheckoutState = this;
+                window.dispatchEvent(new CustomEvent('lencarta-checkout-ready'));
+                return;
+            }
+
             this.loadState()
                 .then(() => {
                     window.lencartaCheckoutState = this;
@@ -41,6 +61,9 @@ function initLencartaCheckout(config) {
                 })
                 .catch(() => {
                     this.message = 'Unable to initialize checkout.';
+                })
+                .finally(() => {
+                    this.isReady = true;
                 });
         },
 
@@ -48,13 +71,16 @@ function initLencartaCheckout(config) {
             if (window.hyva && typeof window.hyva.getFormKey === 'function') {
                 return window.hyva.getFormKey();
             }
-            return '';
+
+            const input = document.querySelector('input[name="form_key"]');
+            return input ? input.value : '';
         },
 
         visibleItems() {
             if (this.itemsExpanded) {
                 return this.items;
             }
+
             return this.items.slice(0, this.maxVisibleItems);
         },
 
@@ -70,6 +96,7 @@ function initLencartaCheckout(config) {
             if (this.itemsExpanded) {
                 return 'Show fewer items';
             }
+
             const count = this.hiddenItemsCount();
             return `View ${count} more item${count > 1 ? 's' : ''}`;
         },
@@ -80,24 +107,47 @@ function initLencartaCheckout(config) {
 
         async loadState() {
             const res = await fetch(this.config.urls.state, {
-                credentials: 'same-origin'
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             });
+
             const data = await res.json();
 
             if (!data.success) {
-                this.message = 'Unable to load checkout state.';
+                this.message = data.message || 'Unable to load checkout state.';
                 return;
             }
 
-            this.email = data.data.email || '';
-            this.items = data.data.items || [];
-            this.totals = data.data.totals || {};
-            this.shippingMethods = data.data.shipping_methods || [];
-            this.selectedShippingMethod = data.data.selected_shipping_method || '';
+            this.hydrateFromState(data.data || {});
+            this.isReady = true;
+        },
 
-            if (this.shippingMethods.length > 0) {
-                this.shippingMethodsState = 'ready';
-            }
+        hydrateFromState(state) {
+            const shipping = state.shipping || {};
+
+            this.email = state.email || '';
+            this.items = Array.isArray(state.items) ? state.items : [];
+            this.totals = state.totals || {};
+            this.shippingMethods = Array.isArray(state.shipping_methods) ? state.shipping_methods : [];
+            this.selectedShippingMethod = state.selected_shipping_method || '';
+            this.couponCode = state.coupon_code || this.couponCode || '';
+
+            this.shipping = {
+                firstname: shipping.firstname || '',
+                lastname: shipping.lastname || '',
+                company: shipping.company || '',
+                telephone: shipping.telephone || '',
+                street_1: shipping.street_1 || '',
+                street_2: shipping.street_2 || '',
+                city: shipping.city || '',
+                postcode: shipping.postcode || '',
+                region: shipping.region || '',
+                country_id: shipping.country_id || 'GB'
+            };
+
+            this.shippingMethodsState = this.shippingMethods.length > 0 ? 'ready' : 'idle';
         },
 
         canLoadShippingMethods() {
@@ -113,6 +163,7 @@ function initLencartaCheckout(config) {
 
         async autoSaveEmail() {
             if (!this.email) {
+                this.emailSaveState = 'idle';
                 return;
             }
 
@@ -128,7 +179,8 @@ function initLencartaCheckout(config) {
                     method: 'POST',
                     credentials: 'same-origin',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
                     body
                 });
@@ -154,6 +206,7 @@ function initLencartaCheckout(config) {
                 this.shippingSaveState = 'idle';
                 this.shippingMethodsState = 'idle';
                 this.shippingMethods = [];
+                this.selectedShippingMethod = '';
                 return;
             }
 
@@ -183,7 +236,8 @@ function initLencartaCheckout(config) {
                     method: 'POST',
                     credentials: 'same-origin',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
                     body
                 });
@@ -199,9 +253,13 @@ function initLencartaCheckout(config) {
 
                 this.shippingSaveState = 'saved';
                 this.totals = data.totals || {};
-                this.shippingMethods = data.shipping_methods || [];
+                this.shippingMethods = Array.isArray(data.shipping_methods) ? data.shipping_methods : [];
                 this.shippingMethodsState = this.shippingMethods.length > 0 ? 'ready' : 'unavailable';
                 this.message = '';
+
+                if (data.selected_shipping_method) {
+                    this.selectedShippingMethod = data.selected_shipping_method;
+                }
             } catch (e) {
                 this.shippingSaveState = 'error';
                 this.shippingMethodsState = 'unavailable';
@@ -221,7 +279,8 @@ function initLencartaCheckout(config) {
                     method: 'POST',
                     credentials: 'same-origin',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
                     body
                 });

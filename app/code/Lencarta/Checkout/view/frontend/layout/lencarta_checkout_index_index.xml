@@ -22,6 +22,9 @@
             <block class="Magento\Framework\View\Element\Template"
                    name="lencarta.checkout.page"
                    template="Lencarta_Checkout::checkout.phtml">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">Lencarta\Checkout\ViewModel\CheckoutState</argument>
+                </arguments>
 
                 <block class="Magento\Framework\View\Element\Template"
                        name="lencarta.checkout.left.logo"
@@ -72,7 +75,6 @@
                        name="lencarta.checkout.right.cta"
                        as="right_cta"
                        template="Lencarta_Checkout::checkout/right/cta.phtml"/>
-
             </block>
         </referenceContainer>
     </body>

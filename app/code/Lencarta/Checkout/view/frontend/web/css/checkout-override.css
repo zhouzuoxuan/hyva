@@ -8,6 +8,10 @@ body.lencarta-checkout-page #maincontent {
     width: 100% !important;
 }
 
+body.lencarta-checkout-page {
+    overflow-x: hidden !important;
+}
+
 body.lencarta-checkout-page .page-main {
     min-height: 100vh !important;
     background: #ffffff !important;
@@ -36,7 +40,10 @@ body.lencarta-checkout-page .page-title-wrapper {
     display: none !important;
 }
 
-/* 商品滚动条 */
+[x-cloak] {
+    display: none !important;
+}
+
 body.lencarta-checkout-page .lencarta-products-scroll::-webkit-scrollbar {
     width: 8px;
 }

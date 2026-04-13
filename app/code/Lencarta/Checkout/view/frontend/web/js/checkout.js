@@ -19,6 +19,16 @@ function initLencartaCheckout(config) {
 
         email: initialState.email || '',
         emailSaveState: 'idle',
+        emailAutosaveTimer: null,
+        emailRequestInFlight: false,
+        emailDirty: false,
+        emailNeedsResave: false,
+        emailPendingExplicitSave: false,
+        lastSavedEmail: '',
+        emailRequestCounter: 0,
+        emailIdleSaveMs: 1200,
+        emailQuickSaveMs: 250,
+        emailAfterRequestDelayMs: 400,
 
         shipping: {
             firstname: initialShipping.firstname || '',
@@ -63,6 +73,7 @@ function initLencartaCheckout(config) {
         shippingWatcherIntervalMs: 700,
 
         init() {
+            this.lastSavedEmail = this.getNormalizedEmail();
             this.lastSavedShippingSignature = this.getShippingSignature();
             this.lastObservedShippingSignature = this.lastSavedShippingSignature;
 
@@ -75,6 +86,7 @@ function initLencartaCheckout(config) {
 
             this.loadState()
                 .then(() => {
+                    this.lastSavedEmail = this.getNormalizedEmail();
                     this.lastSavedShippingSignature = this.getShippingSignature();
                     this.lastObservedShippingSignature = this.lastSavedShippingSignature;
                     window.lencartaCheckoutState = this;
@@ -89,47 +101,6 @@ function initLencartaCheckout(config) {
                 });
         },
 
-        startShippingWatcher() {
-            if (this.shippingWatcherTimer) {
-                clearInterval(this.shippingWatcherTimer);
-            }
-
-            this.shippingWatcherTimer = setInterval(() => {
-                // 页面隐藏时跳过
-                if (document.hidden) {
-                    return;
-                }
-
-                const currentSignature = this.getShippingSignature();
-
-                // 没变化，直接跳过
-                if (currentSignature === this.lastObservedShippingSignature) {
-                    return;
-                }
-
-                this.lastObservedShippingSignature = currentSignature;
-
-                // 地址不完整时，只更新状态，不保存
-                if (!this.canLoadShippingMethods()) {
-                    this.shippingDirty = true;
-                    return;
-                }
-
-                // 如果跟已保存内容一样，也不用保存
-                if (
-                    currentSignature === this.lastSavedShippingSignature &&
-                    !this.shippingRequestInFlight
-                ) {
-                    this.shippingDirty = false;
-                    return;
-                }
-
-                // 捕获“静默改值”（典型就是 tel autofill）
-                this.shippingDirty = true;
-                this.scheduleShippingAutosave(this.shippingQuickSaveMs);
-            }, this.shippingWatcherIntervalMs);
-        },
-
         getFormKey() {
             if (window.hyva && typeof window.hyva.getFormKey === 'function') {
                 return window.hyva.getFormKey();
@@ -137,6 +108,151 @@ function initLencartaCheckout(config) {
 
             const input = document.querySelector('input[name="form_key"]');
             return input ? input.value : '';
+        },
+
+        getNormalizedEmail() {
+            return (this.email || '').trim().toLowerCase();
+        },
+
+        scheduleEmailAutosave(delay) {
+            if (this.emailAutosaveTimer) {
+                clearTimeout(this.emailAutosaveTimer);
+            }
+
+            this.emailAutosaveTimer = setTimeout(() => {
+                this.flushEmailAutosave();
+            }, delay);
+        },
+
+        markEmailDirty() {
+            this.emailDirty = true;
+            this.emailPendingExplicitSave = false;
+            this.scheduleEmailAutosave(this.emailIdleSaveMs);
+        },
+
+        queueEmailAutosave(source = 'field') {
+            this.emailDirty = true;
+            this.emailPendingExplicitSave = true;
+
+            if (source === 'change' || source === 'blur') {
+                this.scheduleEmailAutosave(this.emailQuickSaveMs);
+                return;
+            }
+
+            this.scheduleEmailAutosave(this.emailIdleSaveMs);
+        },
+
+        flushEmailAutosave() {
+            if (this.emailAutosaveTimer) {
+                clearTimeout(this.emailAutosaveTimer);
+                this.emailAutosaveTimer = null;
+            }
+
+            const normalizedEmail = this.getNormalizedEmail();
+
+            // 空邮箱：只有显式触发（blur/change）才尝试保存一次
+            if (!normalizedEmail) {
+                if (!this.emailPendingExplicitSave) {
+                    return;
+                }
+
+                if (this.emailRequestInFlight) {
+                    this.emailNeedsResave = true;
+                    return;
+                }
+
+                this.saveEmail('');
+                return;
+            }
+
+            if (
+                normalizedEmail === this.lastSavedEmail &&
+                !this.emailRequestInFlight
+            ) {
+                this.emailDirty = false;
+                this.emailPendingExplicitSave = false;
+                return;
+            }
+
+            if (this.emailRequestInFlight) {
+                this.emailNeedsResave = true;
+                return;
+            }
+
+            this.saveEmail(normalizedEmail);
+        },
+
+        async saveEmail(normalizedEmail = null) {
+            const emailToSave = normalizedEmail !== null ? normalizedEmail : this.getNormalizedEmail();
+            const requestId = ++this.emailRequestCounter;
+            let requestSucceeded = false;
+
+            this.emailRequestInFlight = true;
+            this.emailSaveState = 'saving';
+
+            const body = new URLSearchParams({
+                form_key: this.getFormKey(),
+                email: this.email
+            });
+
+            try {
+                const res = await fetch(this.config.urls.saveEmail, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body
+                });
+
+                const data = await res.json();
+
+                if (requestId !== this.emailRequestCounter) {
+                    return;
+                }
+
+                if (!data.success) {
+                    this.emailSaveState = 'error';
+                    this.message = data.message || 'Unable to save email.';
+                    return;
+                }
+
+                requestSucceeded = true;
+                this.emailSaveState = 'saved';
+                this.message = '';
+                this.lastSavedEmail = emailToSave;
+                this.emailDirty = false;
+                this.emailPendingExplicitSave = false;
+            } catch (e) {
+                if (requestId !== this.emailRequestCounter) {
+                    return;
+                }
+
+                this.emailSaveState = 'error';
+                this.message = 'Unable to save email.';
+            } finally {
+                if (requestId !== this.emailRequestCounter) {
+                    return;
+                }
+
+                this.emailRequestInFlight = false;
+
+                // 失败时不自动重试，避免死循环
+                if (!requestSucceeded) {
+                    this.emailNeedsResave = false;
+                    this.emailPendingExplicitSave = false;
+                    return;
+                }
+
+                const latestEmail = this.getNormalizedEmail();
+                const changedDuringRequest = latestEmail !== this.lastSavedEmail;
+
+                if (this.emailNeedsResave || changedDuringRequest || this.emailDirty) {
+                    this.emailNeedsResave = false;
+                    this.scheduleEmailAutosave(this.emailAfterRequestDelayMs);
+                }
+            }
         },
 
         visibleItems() {
@@ -208,9 +324,10 @@ function initLencartaCheckout(config) {
 
             this.shippingMethodsState = this.shippingMethods.length > 0 ? 'ready' : 'idle';
 
-            const signature = this.getShippingSignature();
-            this.lastSavedShippingSignature = signature;
-            this.lastObservedShippingSignature = signature;
+            const shippingSignature = this.getShippingSignature();
+            this.lastSavedShippingSignature = shippingSignature;
+            this.lastObservedShippingSignature = shippingSignature;
+            this.lastSavedEmail = this.getNormalizedEmail();
         },
 
         canLoadShippingMethods() {
@@ -243,6 +360,42 @@ function initLencartaCheckout(config) {
             return JSON.stringify(this.getShippingPayload());
         },
 
+        startShippingWatcher() {
+            if (this.shippingWatcherTimer) {
+                clearInterval(this.shippingWatcherTimer);
+            }
+
+            this.shippingWatcherTimer = setInterval(() => {
+                if (document.hidden) {
+                    return;
+                }
+
+                const currentSignature = this.getShippingSignature();
+
+                if (currentSignature === this.lastObservedShippingSignature) {
+                    return;
+                }
+
+                this.lastObservedShippingSignature = currentSignature;
+
+                if (!this.canLoadShippingMethods()) {
+                    this.shippingDirty = true;
+                    return;
+                }
+
+                if (
+                    currentSignature === this.lastSavedShippingSignature &&
+                    !this.shippingRequestInFlight
+                ) {
+                    this.shippingDirty = false;
+                    return;
+                }
+
+                this.shippingDirty = true;
+                this.scheduleShippingAutosave(this.shippingQuickSaveMs);
+            }, this.shippingWatcherIntervalMs);
+        },
+
         scheduleShippingAutosave(delay) {
             if (this.shippingAutosaveTimer) {
                 clearTimeout(this.shippingAutosaveTimer);
@@ -253,47 +406,6 @@ function initLencartaCheckout(config) {
             }, delay);
         },
 
-        async autoSaveEmail() {
-            if (!this.email) {
-                this.emailSaveState = 'idle';
-                return;
-            }
-
-            this.emailSaveState = 'saving';
-
-            const body = new URLSearchParams({
-                form_key: this.getFormKey(),
-                email: this.email
-            });
-
-            try {
-                const res = await fetch(this.config.urls.saveEmail, {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body
-                });
-
-                const data = await res.json();
-
-                if (!data.success) {
-                    this.emailSaveState = 'error';
-                    this.message = data.message || 'Unable to save email.';
-                    return;
-                }
-
-                this.emailSaveState = 'saved';
-                this.message = '';
-            } catch (e) {
-                this.emailSaveState = 'error';
-                this.message = 'Unable to save email.';
-            }
-        },
-
-        // 文本输入：只标记脏，并给一个兜底保存
         markShippingDirty() {
             this.shippingDirty = true;
             this.lastObservedShippingSignature = this.getShippingSignature();
@@ -306,7 +418,6 @@ function initLencartaCheckout(config) {
             this.scheduleShippingAutosave(this.shippingIdleSaveMs);
         },
 
-        // blur / change：快速合并保存
         queueShippingAutosave(source = 'field') {
             if (!this.canLoadShippingMethods()) {
                 this.resetShippingAutosaveStateForIncompleteAddress();
@@ -448,7 +559,6 @@ function initLencartaCheckout(config) {
 
                 this.shippingRequestInFlight = false;
 
-                // 失败时不自动重试
                 if (!requestSucceeded) {
                     this.shippingNeedsResave = false;
                     return;

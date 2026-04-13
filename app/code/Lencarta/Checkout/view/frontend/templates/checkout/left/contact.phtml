@@ -26,10 +26,12 @@ declare(strict_types=1);
             <input
                 type="email"
                 x-model="email"
-                @input.debounce.700ms="autoSaveEmail()"
-                @blur="autoSaveEmail()"
+                @input="markEmailDirty()"
+                @change="queueEmailAutosave('change')"
+                @blur="queueEmailAutosave('blur')"
                 class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
                 placeholder="Enter e-mail address"
+                autocomplete="email"
             >
         </label>
 

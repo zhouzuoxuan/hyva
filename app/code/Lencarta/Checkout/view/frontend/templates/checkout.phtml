@@ -36,34 +36,31 @@ if ($logoAlt === '') {
      x-init="init()"
      class="min-h-screen bg-white text-slate-900">
 
-    <div class="grid min-h-screen grid-cols-1 lg:grid-cols-[minmax(0,1.618fr)_minmax(360px,0.95fr)]"
-         style="--checkout-edge-gutter: clamp(56px, 10vw, 220px); --checkout-center-gutter: clamp(32px, 3.2vw, 64px);">
+    <div class="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
+        <div class="grid grid-cols-1 gap-y-8 lg:grid-cols-[minmax(0,1.55fr)_minmax(360px,0.95fr)] lg:gap-x-8 xl:gap-x-10">
 
-        <!-- LEFT -->
-        <section class="min-w-0 bg-white">
-            <div class="mr-auto max-w-[900px] py-8 lg:py-10"
-                 style="padding-left: var(--checkout-edge-gutter); padding-right: var(--checkout-center-gutter);">
-                <?= $block->getChildHtml('left_logo') ?>
-                <?= $block->getChildHtml('left_contact') ?>
-                <?= $block->getChildHtml('left_shipping_address') ?>
-                <?= $block->getChildHtml('left_delivery_options') ?>
-                <?= $block->getChildHtml('left_payment_method') ?>
-            </div>
-        </section>
+            <!-- LEFT -->
+            <section class="min-w-0 bg-white">
+                <div class="py-8 lg:py-10">
+                    <?= $block->getChildHtml('left_logo') ?>
+                    <?= $block->getChildHtml('left_contact') ?>
+                    <?= $block->getChildHtml('left_shipping_address') ?>
+                    <?= $block->getChildHtml('left_delivery_options') ?>
+                    <?= $block->getChildHtml('left_payment_method') ?>
+                </div>
+            </section>
 
-        <!-- RIGHT -->
-        <aside class="min-w-0 bg-[#f8f9fb] lg:border-l lg:border-slate-200">
-            <div class="lg:sticky lg:top-0 lg:min-h-screen">
-                <div class="py-8 lg:py-8"
-                     style="padding-left: var(--checkout-center-gutter); padding-right: var(--checkout-edge-gutter);">
+            <!-- RIGHT -->
+            <aside class="min-w-0 bg-[#f8f9fb] lg:border-l lg:border-slate-200 lg:self-start lg:sticky lg:top-6">
+                <div class="px-4 py-6 sm:px-5 lg:px-6 lg:py-8 xl:px-7">
                     <?= $block->getChildHtml('right_summary') ?>
                     <?= $block->getChildHtml('right_products') ?>
                     <?= $block->getChildHtml('right_coupon') ?>
                     <?= $block->getChildHtml('right_totals') ?>
                     <?= $block->getChildHtml('right_cta') ?>
                 </div>
-            </div>
-        </aside>
+            </aside>
 
+        </div>
     </div>
 </div>

@@ -47,15 +47,36 @@ function initLencartaCheckout(config) {
         shippingMethods: Array.isArray(initialState.shipping_methods) ? initialState.shipping_methods : [],
         selectedShippingMethod: initialState.selected_shipping_method || '',
 
+        shippingAutosaveTimer: null,
+        shippingRequestInFlight: false,
+        shippingNeedsResave: false,
+        shippingRequestCounter: 0,
+        shippingDirty: false,
+        lastSavedShippingSignature: '',
+        lastObservedShippingSignature: '',
+
+        shippingIdleSaveMs: 1500,
+        shippingQuickSaveMs: 250,
+        shippingAfterRequestDelayMs: 500,
+
+        shippingWatcherTimer: null,
+        shippingWatcherIntervalMs: 700,
+
         init() {
+            this.lastSavedShippingSignature = this.getShippingSignature();
+            this.lastObservedShippingSignature = this.lastSavedShippingSignature;
+
             if (hasInitialState) {
                 window.lencartaCheckoutState = this;
                 window.dispatchEvent(new CustomEvent('lencarta-checkout-ready'));
+                this.startShippingWatcher();
                 return;
             }
 
             this.loadState()
                 .then(() => {
+                    this.lastSavedShippingSignature = this.getShippingSignature();
+                    this.lastObservedShippingSignature = this.lastSavedShippingSignature;
                     window.lencartaCheckoutState = this;
                     window.dispatchEvent(new CustomEvent('lencarta-checkout-ready'));
                 })
@@ -64,7 +85,49 @@ function initLencartaCheckout(config) {
                 })
                 .finally(() => {
                     this.isReady = true;
+                    this.startShippingWatcher();
                 });
+        },
+
+        startShippingWatcher() {
+            if (this.shippingWatcherTimer) {
+                clearInterval(this.shippingWatcherTimer);
+            }
+
+            this.shippingWatcherTimer = setInterval(() => {
+                // 页面隐藏时跳过
+                if (document.hidden) {
+                    return;
+                }
+
+                const currentSignature = this.getShippingSignature();
+
+                // 没变化，直接跳过
+                if (currentSignature === this.lastObservedShippingSignature) {
+                    return;
+                }
+
+                this.lastObservedShippingSignature = currentSignature;
+
+                // 地址不完整时，只更新状态，不保存
+                if (!this.canLoadShippingMethods()) {
+                    this.shippingDirty = true;
+                    return;
+                }
+
+                // 如果跟已保存内容一样，也不用保存
+                if (
+                    currentSignature === this.lastSavedShippingSignature &&
+                    !this.shippingRequestInFlight
+                ) {
+                    this.shippingDirty = false;
+                    return;
+                }
+
+                // 捕获“静默改值”（典型就是 tel autofill）
+                this.shippingDirty = true;
+                this.scheduleShippingAutosave(this.shippingQuickSaveMs);
+            }, this.shippingWatcherIntervalMs);
         },
 
         getFormKey() {
@@ -77,11 +140,7 @@ function initLencartaCheckout(config) {
         },
 
         visibleItems() {
-            if (this.itemsExpanded) {
-                return this.items;
-            }
-
-            return this.items.slice(0, this.maxVisibleItems);
+            return this.itemsExpanded ? this.items : this.items.slice(0, this.maxVisibleItems);
         },
 
         hasHiddenItems() {
@@ -148,6 +207,10 @@ function initLencartaCheckout(config) {
             };
 
             this.shippingMethodsState = this.shippingMethods.length > 0 ? 'ready' : 'idle';
+
+            const signature = this.getShippingSignature();
+            this.lastSavedShippingSignature = signature;
+            this.lastObservedShippingSignature = signature;
         },
 
         canLoadShippingMethods() {
@@ -159,6 +222,35 @@ function initLencartaCheckout(config) {
                 this.shipping.postcode &&
                 this.shipping.country_id
             );
+        },
+
+        getShippingPayload() {
+            return {
+                firstname: (this.shipping.firstname || '').trim(),
+                lastname: (this.shipping.lastname || '').trim(),
+                company: (this.shipping.company || '').trim(),
+                telephone: (this.shipping.telephone || '').trim(),
+                street_1: (this.shipping.street_1 || '').trim(),
+                street_2: (this.shipping.street_2 || '').trim(),
+                city: (this.shipping.city || '').trim(),
+                postcode: (this.shipping.postcode || '').trim(),
+                region: (this.shipping.region || '').trim(),
+                country_id: (this.shipping.country_id || 'GB').trim().toUpperCase()
+            };
+        },
+
+        getShippingSignature() {
+            return JSON.stringify(this.getShippingPayload());
+        },
+
+        scheduleShippingAutosave(delay) {
+            if (this.shippingAutosaveTimer) {
+                clearTimeout(this.shippingAutosaveTimer);
+            }
+
+            this.shippingAutosaveTimer = setTimeout(() => {
+                this.flushShippingAutosave();
+            }, delay);
         },
 
         async autoSaveEmail() {
@@ -201,34 +293,107 @@ function initLencartaCheckout(config) {
             }
         },
 
-        async queueShippingAutosave() {
+        // 文本输入：只标记脏，并给一个兜底保存
+        markShippingDirty() {
+            this.shippingDirty = true;
+            this.lastObservedShippingSignature = this.getShippingSignature();
+
             if (!this.canLoadShippingMethods()) {
-                this.shippingSaveState = 'idle';
-                this.shippingMethodsState = 'idle';
-                this.shippingMethods = [];
-                this.selectedShippingMethod = '';
+                this.resetShippingAutosaveStateForIncompleteAddress();
                 return;
             }
 
-            await this.saveShippingAddress();
+            this.scheduleShippingAutosave(this.shippingIdleSaveMs);
         },
 
-        async saveShippingAddress() {
+        // blur / change：快速合并保存
+        queueShippingAutosave(source = 'field') {
+            if (!this.canLoadShippingMethods()) {
+                this.resetShippingAutosaveStateForIncompleteAddress();
+                return;
+            }
+
+            this.shippingDirty = true;
+            this.lastObservedShippingSignature = this.getShippingSignature();
+
+            if (source === 'country') {
+                this.scheduleShippingAutosave(300);
+                return;
+            }
+
+            this.scheduleShippingAutosave(this.shippingQuickSaveMs);
+        },
+
+        resetShippingAutosaveStateForIncompleteAddress() {
+            if (this.shippingAutosaveTimer) {
+                clearTimeout(this.shippingAutosaveTimer);
+                this.shippingAutosaveTimer = null;
+            }
+
+            this.shippingSaveState = 'idle';
+            this.shippingMethodsState = 'idle';
+            this.shippingMethods = [];
+            this.selectedShippingMethod = '';
+            this.shippingNeedsResave = false;
+            this.shippingDirty = false;
+        },
+
+        flushShippingAutosave() {
+            if (this.shippingAutosaveTimer) {
+                clearTimeout(this.shippingAutosaveTimer);
+                this.shippingAutosaveTimer = null;
+            }
+
+            if (!this.canLoadShippingMethods()) {
+                this.resetShippingAutosaveStateForIncompleteAddress();
+                return;
+            }
+
+            const currentSignature = this.getShippingSignature();
+
+            if (
+                currentSignature === this.lastSavedShippingSignature &&
+                !this.shippingRequestInFlight
+            ) {
+                this.shippingDirty = false;
+                return;
+            }
+
+            if (this.shippingRequestInFlight) {
+                this.shippingNeedsResave = true;
+                return;
+            }
+
+            this.saveShippingAddress(currentSignature);
+        },
+
+        async saveShippingAddress(requestSignature = null) {
+            if (!this.canLoadShippingMethods()) {
+                this.resetShippingAutosaveStateForIncompleteAddress();
+                return;
+            }
+
+            const payload = this.getShippingPayload();
+            const signature = requestSignature || JSON.stringify(payload);
+            const requestId = ++this.shippingRequestCounter;
+            let requestSucceeded = false;
+
+            this.shippingRequestInFlight = true;
             this.shippingSaveState = 'saving';
             this.shippingMethodsState = 'loading';
 
             const body = new URLSearchParams({
                 form_key: this.getFormKey(),
-                firstname: this.shipping.firstname,
-                lastname: this.shipping.lastname,
-                company: this.shipping.company,
-                telephone: this.shipping.telephone,
-                street_1: this.shipping.street_1,
-                street_2: this.shipping.street_2,
-                city: this.shipping.city,
-                postcode: this.shipping.postcode,
-                region: this.shipping.region,
-                country_id: this.shipping.country_id
+                firstname: payload.firstname,
+                lastname: payload.lastname,
+                company: payload.company,
+                telephone: payload.telephone,
+                street_1: payload.street_1,
+                street_2: payload.street_2,
+                city: payload.city,
+                postcode: payload.postcode,
+                region: payload.region,
+                country_id: payload.country_id
             });
 
             try {
@@ -244,6 +409,10 @@ function initLencartaCheckout(config) {
 
                 const data = await res.json();
 
+                if (requestId !== this.shippingRequestCounter) {
+                    return;
+                }
+
                 if (!data.success) {
                     this.shippingSaveState = 'error';
                     this.shippingMethodsState = 'unavailable';
@@ -251,19 +420,47 @@ function initLencartaCheckout(config) {
                     return;
                 }
 
+                requestSucceeded = true;
                 this.shippingSaveState = 'saved';
                 this.totals = data.totals || {};
                 this.shippingMethods = Array.isArray(data.shipping_methods) ? data.shipping_methods : [];
                 this.shippingMethodsState = this.shippingMethods.length > 0 ? 'ready' : 'unavailable';
                 this.message = '';
+                this.lastSavedShippingSignature = signature;
+                this.lastObservedShippingSignature = signature;
+                this.shippingDirty = false;
 
                 if (data.selected_shipping_method) {
                     this.selectedShippingMethod = data.selected_shipping_method;
                 }
             } catch (e) {
+                if (requestId !== this.shippingRequestCounter) {
+                    return;
+                }
+
                 this.shippingSaveState = 'error';
                 this.shippingMethodsState = 'unavailable';
                 this.message = 'Unable to save shipping address.';
+            } finally {
+                if (requestId !== this.shippingRequestCounter) {
+                    return;
+                }
+
+                this.shippingRequestInFlight = false;
+
+                // 失败时不自动重试
+                if (!requestSucceeded) {
+                    this.shippingNeedsResave = false;
+                    return;
+                }
+
+                const latestSignature = this.getShippingSignature();
+                const changedDuringRequest = latestSignature !== this.lastSavedShippingSignature;
+
+                if (this.shippingNeedsResave || changedDuringRequest || this.shippingDirty) {
+                    this.shippingNeedsResave = false;
+                    this.scheduleShippingAutosave(this.shippingAfterRequestDelayMs);
+                }
             }
         },
 

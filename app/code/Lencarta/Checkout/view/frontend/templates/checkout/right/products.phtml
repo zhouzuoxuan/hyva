@@ -1,54 +1,129 @@
 <?php
 declare(strict_types=1);
 
+use Lencarta\Checkout\ViewModel\CheckoutState;
+
 /** @var \Magento\Framework\View\Element\Template $block */
+/** @var CheckoutState $viewModel */
+$viewModel = $block->getData('view_model');
+
+$state = $viewModel ? $viewModel->getInitialState() : [];
+$items = $state['items'] ?? [];
+$totalItems = count($items);
+$visibleItems = array_slice($items, 0, 2);
+$hiddenItems = array_slice($items, 2);
+$hiddenCount = count($hiddenItems);
 ?>
+
 <div class="mt-6 shrink-0">
     <div class="lencarta-products-scroll max-h-[320px] overflow-y-auto pr-1">
         <div class="space-y-4">
-            <template x-for="item in visibleItems()" :key="item.item_id">
+
+            <?php foreach ($visibleItems as $index => $item): ?>
                 <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
                     <div class="flex items-start gap-3">
                         <div class="h-20 w-20 shrink-0 overflow-hidden rounded-md border border-slate-200 bg-white">
-                            <template x-if="item.image_url">
-                                <img :src="item.image_url" :alt="item.name" class="h-full w-full object-cover">
-                            </template>
-                            <template x-if="!item.image_url">
+                            <?php if (!empty($item['image_url'])): ?>
+                                <img
+                                    src="<?= $block->escapeUrl((string) $item['image_url']) ?>"
+                                    alt="<?= $block->escapeHtmlAttr((string) ($item['name'] ?? 'Product')) ?>"
+                                    class="h-full w-full object-cover"
+                                    width="80"
+                                    height="80"
+                                    loading="<?= $index === 0 ? 'eager' : 'auto' ?>"
+                                    decoding="async"
+                                >
+                            <?php else: ?>
                                 <div class="flex h-full w-full items-center justify-center text-xs text-slate-400">No image</div>
-                            </template>
+                            <?php endif; ?>
                         </div>
 
                         <div class="min-w-0 flex-1">
-                            <div class="text-base font-semibold leading-5 text-slate-900" x-text="item.name"></div>
-
-                            <template x-if="item.sku">
-                                <div class="mt-1 text-xs text-slate-500">
-                                    SKU: <span x-text="item.sku"></span>
-                                </div>
-                            </template>
-
-                            <template x-if="item.options_summary">
-                                <div class="mt-1 text-xs text-slate-500" x-text="item.options_summary"></div>
-                            </template>
-
-                            <div class="mt-1 text-xs text-slate-500">
-                                Qty: <span x-text="item.qty"></span>
+                            <div class="text-base font-semibold leading-5 text-slate-900">
+                                <?= $block->escapeHtml((string) ($item['name'] ?? '')) ?>
                             </div>
 
-                            <div class="mt-2 text-2xl font-bold text-slate-900" x-text="item.row_total"></div>
+                            <?php if (!empty($item['sku'])): ?>
+                                <div class="mt-1 text-xs text-slate-500">
+                                    SKU: <?= $block->escapeHtml((string) $item['sku']) ?>
+                                </div>
+                            <?php endif; ?>
+
+                            <?php if (!empty($item['options_summary'])): ?>
+                                <div class="mt-1 text-xs text-slate-500">
+                                    <?= $block->escapeHtml((string) $item['options_summary']) ?>
+                                </div>
+                            <?php endif; ?>
+
+                            <div class="mt-1 text-xs text-slate-500">
+                                Qty: <?= $block->escapeHtml((string) ($item['qty'] ?? '')) ?>
+                            </div>
+
+                            <div class="mt-2 text-2xl font-bold text-slate-900">
+                                <?= $block->escapeHtml((string) ($item['row_total'] ?? '')) ?>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </template>
+            <?php endforeach; ?>
+
+            <?php foreach ($hiddenItems as $index => $item): ?>
+                <div x-cloak x-show="itemsExpanded" class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+                    <div class="flex items-start gap-3">
+                        <div class="h-20 w-20 shrink-0 overflow-hidden rounded-md border border-slate-200 bg-white">
+                            <?php if (!empty($item['image_url'])): ?>
+                                <img
+                                    src="<?= $block->escapeUrl((string) $item['image_url']) ?>"
+                                    alt="<?= $block->escapeHtmlAttr((string) ($item['name'] ?? 'Product')) ?>"
+                                    class="h-full w-full object-cover"
+                                    width="80"
+                                    height="80"
+                                    loading="lazy"
+                                    decoding="async"
+                                >
+                            <?php else: ?>
+                                <div class="flex h-full w-full items-center justify-center text-xs text-slate-400">No image</div>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="min-w-0 flex-1">
+                            <div class="text-base font-semibold leading-5 text-slate-900">
+                                <?= $block->escapeHtml((string) ($item['name'] ?? '')) ?>
+                            </div>
+
+                            <?php if (!empty($item['sku'])): ?>
+                                <div class="mt-1 text-xs text-slate-500">
+                                    SKU: <?= $block->escapeHtml((string) $item['sku']) ?>
+                                </div>
+                            <?php endif; ?>
+
+                            <?php if (!empty($item['options_summary'])): ?>
+                                <div class="mt-1 text-xs text-slate-500">
+                                    <?= $block->escapeHtml((string) $item['options_summary']) ?>
+                                </div>
+                            <?php endif; ?>
+
+                            <div class="mt-1 text-xs text-slate-500">
+                                Qty: <?= $block->escapeHtml((string) ($item['qty'] ?? '')) ?>
+                            </div>
+
+                            <div class="mt-2 text-2xl font-bold text-slate-900">
+                                <?= $block->escapeHtml((string) ($item['row_total'] ?? '')) ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+
         </div>
     </div>
 
-    <template x-if="hasHiddenItems()">
+    <?php if ($hiddenCount > 0): ?>
         <div class="mt-4">
             <button type="button"
                     @click="toggleItemsExpanded()"
                     class="inline-flex items-center gap-2 text-sm font-medium text-slate-700 transition hover:text-slate-900">
-                <span x-text="itemsToggleLabel()"></span>
+                <span x-text="itemsExpanded ? 'Show fewer items' : 'View <?= (int) $hiddenCount ?> more item<?= $hiddenCount > 1 ? 's' : '' ?>'"></span>
 
                 <span class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 bg-white shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg"
@@ -61,5 +136,5 @@ declare(strict_types=1);
                 </span>
             </button>
         </div>
-    </template>
+    <?php endif; ?>
 </div>

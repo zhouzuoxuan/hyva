@@ -59,7 +59,11 @@
                 <block class="Magento\Framework\View\Element\Template"
                        name="lencarta.checkout.right.products"
                        as="right_products"
-                       template="Lencarta_Checkout::checkout/right/products.phtml"/>
+                       template="Lencarta_Checkout::checkout/right/products.phtml">
+                    <arguments>
+                        <argument name="view_model" xsi:type="object">Lencarta\Checkout\ViewModel\CheckoutState</argument>
+                    </arguments>
+                </block>
 
                 <block class="Magento\Framework\View\Element\Template"
                        name="lencarta.checkout.right.coupon"

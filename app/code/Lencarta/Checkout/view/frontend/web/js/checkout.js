@@ -13,7 +13,7 @@ function initLencartaCheckout(config) {
         loading: false,
         isReady: hasInitialState,
         message: '',
-        termsAccepted: false,
+        termsAccepted: !!config.termsCheckedByDefault,
         couponCode: initialState.coupon_code || '',
         couponOpen: false,
 

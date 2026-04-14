@@ -6,8 +6,15 @@ declare(strict_types=1);
 <div class="mt-6 shrink-0 border-t border-slate-200 pt-5">
     <button type="button"
             @click="couponOpen = !couponOpen"
-            class="flex w-full items-center justify-between text-left">
-        <span class="text-sm font-semibold text-slate-900">Discount code</span>
+            class="flex w-full items-center justify-between gap-3 text-left">
+        <span class="flex items-center gap-2.5 text-sm font-semibold text-slate-900">
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8m-8 5h5m-7 8 11-11a2 2 0 0 0 0-2.828l-.172-.172a2 2 0 0 0-2.828 0L3 17v4h4Z"/>
+                </svg>
+            </span>
+            <span>Apply Discount Code</span>
+        </span>
 
         <span class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 bg-white shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg"
@@ -26,11 +33,11 @@ declare(strict_types=1);
                 type="text"
                 x-model="couponCode"
                 placeholder="Enter coupon code"
-                class="min-w-0 flex-1 border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-slate-900"
+                class="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-slate-900"
             >
             <button type="button"
                     @click="applyCoupon()"
-                    class="border border-slate-900 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-900 hover:text-white">
+                    class="rounded-lg border border-slate-900 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-900 hover:text-white">
                 Apply
             </button>
         </div>

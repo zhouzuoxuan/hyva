@@ -9,6 +9,7 @@ use Magento\Customer\Api\AddressMetadataInterface;
 use Magento\Directory\Helper\Data as DirectoryHelper;
 use Magento\Directory\Model\AllowedCountries;
 use Magento\Directory\Model\ResourceModel\Country\CollectionFactory as CountryCollectionFactory;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Magento\Quote\Model\Quote\Address;
@@ -23,7 +24,8 @@ class CheckoutState implements ArgumentInterface
         private readonly CountryCollectionFactory $countryCollectionFactory,
         private readonly AllowedCountries $allowedCountries,
         private readonly DirectoryHelper $directoryHelper,
-        private readonly AddressMetadataInterface $addressMetadata
+        private readonly AddressMetadataInterface $addressMetadata,
+        private readonly ScopeConfigInterface $scopeConfig
     ) {
     }
 
@@ -46,6 +48,12 @@ class CheckoutState implements ArgumentInterface
             'coupon_code' => (string) ($quote->getCouponCode() ?: ''),
             'shipping' => $this->getShippingData($shippingAddress),
         ];
+    }
+
+
+    public function isTermsCheckedByDefault(): bool
+    {
+        return $this->scopeConfig->isSetFlag('lencarta_checkout/general/terms_checked_by_default');
     }
 
     public function getCountryOptions(): array

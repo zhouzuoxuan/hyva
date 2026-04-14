@@ -9,16 +9,40 @@ $viewModel = $block->getData('view_model');
 
 $state = $viewModel ? $viewModel->getInitialState() : [];
 $items = $state['items'] ?? [];
-$totalItems = count($items);
+$itemCount = count($items);
+$totalQty = 0;
+foreach ($items as $item) {
+    $totalQty += (float) ($item['qty'] ?? 0);
+}
+
 $visibleItems = array_slice($items, 0, 2);
 $hiddenItems = array_slice($items, 2);
 $hiddenCount = count($hiddenItems);
 ?>
 
-<div class="mt-6 shrink-0">
-    <div class="lencarta-products-scroll max-h-[320px] overflow-y-auto pr-1">
-        <div class="space-y-4">
+<div class="mt-5 shrink-0 border-t border-slate-200 pt-5">
+    <div class="mb-4 flex items-start justify-between gap-3 text-slate-900">
+        <div class="flex items-center gap-2.5">
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h2l1.2 7.2A2 2 0 0 0 8.18 13H18a2 2 0 0 0 1.94-1.5L21 7H7"/>
+                    <circle cx="9" cy="19" r="1.5"/>
+                    <circle cx="18" cy="19" r="1.5"/>
+                </svg>
+            </span>
+            <div>
+                <div class="text-base font-semibold leading-5">
+                    Cart (<?= (int) $itemCount ?> item<?= $itemCount === 1 ? '' : 's' ?>)
+                </div>
+                <div class="mt-0.5 text-xs text-slate-500">
+                    Total qty: <?= rtrim(rtrim(number_format($totalQty, 2, '.', ''), '0'), '.') ?>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <div class="lencarta-products-scroll max-h-[320px] overflow-y-auto pr-1">
+        <div class="space-y-3.5">
             <?php foreach ($visibleItems as $index => $item): ?>
                 <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
                     <div class="flex items-start gap-3">
@@ -39,27 +63,27 @@ $hiddenCount = count($hiddenItems);
                         </div>
 
                         <div class="min-w-0 flex-1">
-                            <div class="text-base font-semibold leading-5 text-slate-900">
+                            <div class="text-[15px] font-semibold leading-5 text-slate-900">
                                 <?= $block->escapeHtml((string) ($item['name'] ?? '')) ?>
                             </div>
 
                             <?php if (!empty($item['sku'])): ?>
-                                <div class="mt-1 text-xs text-slate-500">
+                                <div class="mt-1 text-xs leading-5 text-slate-500">
                                     SKU: <?= $block->escapeHtml((string) $item['sku']) ?>
                                 </div>
                             <?php endif; ?>
 
                             <?php if (!empty($item['options_summary'])): ?>
-                                <div class="mt-1 text-xs text-slate-500">
+                                <div class="mt-0.5 text-xs leading-5 text-slate-500">
                                     <?= $block->escapeHtml((string) $item['options_summary']) ?>
                                 </div>
                             <?php endif; ?>
 
-                            <div class="mt-1 text-xs text-slate-500">
+                            <div class="mt-0.5 text-xs leading-5 text-slate-500">
                                 Qty: <?= $block->escapeHtml((string) ($item['qty'] ?? '')) ?>
                             </div>
 
-                            <div class="mt-2 text-2xl font-bold text-slate-900">
+                            <div class="mt-1.5 text-[2rem] font-bold leading-none text-slate-900">
                                 <?= $block->escapeHtml((string) ($item['row_total'] ?? '')) ?>
                             </div>
                         </div>
@@ -67,7 +91,7 @@ $hiddenCount = count($hiddenItems);
                 </div>
             <?php endforeach; ?>
 
-            <?php foreach ($hiddenItems as $index => $item): ?>
+            <?php foreach ($hiddenItems as $item): ?>
                 <div x-cloak x-show="itemsExpanded" class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
                     <div class="flex items-start gap-3">
                         <div class="h-20 w-20 shrink-0 overflow-hidden rounded-md border border-slate-200 bg-white">
@@ -87,34 +111,33 @@ $hiddenCount = count($hiddenItems);
                         </div>
 
                         <div class="min-w-0 flex-1">
-                            <div class="text-base font-semibold leading-5 text-slate-900">
+                            <div class="text-[15px] font-semibold leading-5 text-slate-900">
                                 <?= $block->escapeHtml((string) ($item['name'] ?? '')) ?>
                             </div>
 
                             <?php if (!empty($item['sku'])): ?>
-                                <div class="mt-1 text-xs text-slate-500">
+                                <div class="mt-1 text-xs leading-5 text-slate-500">
                                     SKU: <?= $block->escapeHtml((string) $item['sku']) ?>
                                 </div>
                             <?php endif; ?>
 
                             <?php if (!empty($item['options_summary'])): ?>
-                                <div class="mt-1 text-xs text-slate-500">
+                                <div class="mt-0.5 text-xs leading-5 text-slate-500">
                                     <?= $block->escapeHtml((string) $item['options_summary']) ?>
                                 </div>
                             <?php endif; ?>
 
-                            <div class="mt-1 text-xs text-slate-500">
+                            <div class="mt-0.5 text-xs leading-5 text-slate-500">
                                 Qty: <?= $block->escapeHtml((string) ($item['qty'] ?? '')) ?>
                             </div>
 
-                            <div class="mt-2 text-2xl font-bold text-slate-900">
+                            <div class="mt-1.5 text-[2rem] font-bold leading-none text-slate-900">
                                 <?= $block->escapeHtml((string) ($item['row_total'] ?? '')) ?>
                             </div>
                         </div>
                     </div>
                 </div>
             <?php endforeach; ?>
-
         </div>
     </div>
 

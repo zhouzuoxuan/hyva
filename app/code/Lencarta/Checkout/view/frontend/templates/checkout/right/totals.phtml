@@ -6,25 +6,25 @@ declare(strict_types=1);
 <div class="mt-5 shrink-0 border-t border-slate-200 pt-4 text-sm">
     <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div class="flex items-center justify-between gap-4 border-b border-slate-200 px-4 py-3 leading-6">
-            <span class="text-slate-600">Subtotal</span>
+            <span class="text-slate-600"><?= $block->escapeHtml(__('Subtotal')) ?></span>
             <span class="font-medium text-slate-900" x-text="totals.formatted?.subtotal || '-' "></span>
         </div>
         <div class="flex items-center justify-between gap-4 border-b border-slate-200 px-4 py-3 leading-6">
-            <span class="text-slate-600">Shipping</span>
+            <span class="text-slate-600"><?= $block->escapeHtml(__('Shipping')) ?></span>
             <span class="font-medium text-slate-900" x-text="totals.formatted?.shipping || '-' "></span>
         </div>
         <div class="flex items-center justify-between gap-4 border-b border-slate-200 px-4 py-3 leading-6">
-            <span class="text-slate-600">VAT</span>
+            <span class="text-slate-600"><?= $block->escapeHtml(__('VAT')) ?></span>
             <span class="font-medium text-slate-900" x-text="totals.formatted?.tax || '-' "></span>
         </div>
         <div class="flex items-center justify-between gap-4 px-4 py-3 leading-6">
-            <span class="text-slate-600">Discount</span>
+            <span class="text-slate-600"><?= $block->escapeHtml(__('Discount')) ?></span>
             <span class="font-medium text-slate-900" x-text="totals.formatted?.discount || '-' "></span>
         </div>
     </div>
 
     <div class="mt-4 flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white px-4 py-4 text-xl font-semibold lg:text-2xl">
-        <span class="text-slate-900">Grand Total</span>
+        <span class="text-slate-900"><?= $block->escapeHtml(__('Grand Total')) ?></span>
         <span class="text-slate-900" x-text="totals.formatted?.grand_total || '-' "></span>
     </div>
 </div>

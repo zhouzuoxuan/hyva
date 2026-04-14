@@ -6,17 +6,17 @@ declare(strict_types=1);
 <section class="pt-10">
     <div class="flex items-center justify-between border-b border-slate-200 pb-4">
         <h2 class="text-[clamp(1.7rem,2.4vw,2.5rem)] font-semibold tracking-tight text-slate-900">
-            Shipping Address
+            <?= $block->escapeHtml(__('Shipping Address')) ?>
         </h2>
 
         <template x-if="shippingSaveState === 'saving'">
-            <span class="text-xs font-semibold text-amber-700">Saving…</span>
+            <span class="text-xs font-semibold text-amber-700"><?= $block->escapeHtml(__('Saving…')) ?></span>
         </template>
         <template x-if="shippingSaveState === 'saved'">
-            <span class="text-xs font-semibold text-emerald-700">Saved</span>
+            <span class="text-xs font-semibold text-emerald-700"><?= $block->escapeHtml(__('Saved')) ?></span>
         </template>
         <template x-if="shippingSaveState === 'error'">
-            <span class="text-xs font-semibold text-rose-700">Please review</span>
+            <span class="text-xs font-semibold text-rose-700"><?= $block->escapeHtml(__('Please review')) ?></span>
         </template>
     </div>
 
@@ -28,7 +28,7 @@ declare(strict_types=1);
     <div class="grid gap-5 pt-6 sm:grid-cols-2">
         <label class="block">
             <span class="mb-1.5 block text-xs font-medium text-slate-700">
-                First name <span x-show="isAddressFieldRequired('firstname')" class="text-rose-600">*</span>
+                <?= $block->escapeHtml(__('First name')) ?> <span x-show="isAddressFieldRequired('firstname')" class="text-rose-600">*</span>
             </span>
             <input
                 x-model="shipping.firstname"
@@ -36,13 +36,13 @@ declare(strict_types=1);
                 @change="queueShippingAutosave('field')"
                 @blur="queueShippingAutosave('field')"
                 class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
-                placeholder="Enter first name"
+                placeholder="<?= $block->escapeHtmlAttr(__('Enter first name')) ?>"
             >
         </label>
 
         <label class="block">
             <span class="mb-1.5 block text-xs font-medium text-slate-700">
-                Last name <span x-show="isAddressFieldRequired('lastname')" class="text-rose-600">*</span>
+                <?= $block->escapeHtml(__('Last name')) ?> <span x-show="isAddressFieldRequired('lastname')" class="text-rose-600">*</span>
             </span>
             <input
                 x-model="shipping.lastname"
@@ -50,13 +50,13 @@ declare(strict_types=1);
                 @change="queueShippingAutosave('field')"
                 @blur="queueShippingAutosave('field')"
                 class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
-                placeholder="Enter last name"
+                placeholder="<?= $block->escapeHtmlAttr(__('Enter last name')) ?>"
             >
         </label>
 
         <label class="block sm:col-span-2">
             <span class="mb-1.5 block text-xs font-medium text-slate-700">
-                Company <span x-show="isAddressFieldRequired('company')" class="text-rose-600">*</span>
+                <?= $block->escapeHtml(__('Company')) ?> <span x-show="isAddressFieldRequired('company')" class="text-rose-600">*</span>
             </span>
             <input
                 x-model="shipping.company"
@@ -64,13 +64,13 @@ declare(strict_types=1);
                 @change="queueShippingAutosave('field')"
                 @blur="queueShippingAutosave('field')"
                 class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
-                placeholder="Company"
+                placeholder="<?= $block->escapeHtml(__('Company')) ?>"
             >
         </label>
 
         <label class="block sm:col-span-2">
             <span class="mb-1.5 block text-xs font-medium text-slate-700">
-                Street address <span x-show="isAddressFieldRequired('street_1')" class="text-rose-600">*</span>
+                <?= $block->escapeHtml(__('Street address')) ?> <span x-show="isAddressFieldRequired('street_1')" class="text-rose-600">*</span>
             </span>
             <input
                 x-model="shipping.street_1"
@@ -78,13 +78,13 @@ declare(strict_types=1);
                 @change="queueShippingAutosave('field')"
                 @blur="queueShippingAutosave('field')"
                 class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
-                placeholder="Enter street address 1"
+                placeholder="<?= $block->escapeHtmlAttr(__('Enter street address 1')) ?>"
             >
         </label>
 
         <label class="block sm:col-span-2">
             <span class="mb-1.5 block text-xs font-medium text-slate-700">
-                Address line 2 <span x-show="isAddressFieldRequired('street_2')" class="text-rose-600">*</span>
+                <?= $block->escapeHtml(__('Address line 2')) ?> <span x-show="isAddressFieldRequired('street_2')" class="text-rose-600">*</span>
             </span>
             <input
                 x-model="shipping.street_2"
@@ -92,13 +92,13 @@ declare(strict_types=1);
                 @change="queueShippingAutosave('field')"
                 @blur="queueShippingAutosave('field')"
                 class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
-                placeholder="Enter street address 2"
+                placeholder="<?= $block->escapeHtmlAttr(__('Enter street address 2')) ?>"
             >
         </label>
 
         <label class="block">
             <span class="mb-1.5 block text-xs font-medium text-slate-700">
-                Country <span x-show="isAddressFieldRequired('country_id')" class="text-rose-600">*</span>
+                <?= $block->escapeHtml(__('Country')) ?> <span x-show="isAddressFieldRequired('country_id')" class="text-rose-600">*</span>
             </span>
             <select
                 x-model="shipping.country_id"
@@ -113,7 +113,7 @@ declare(strict_types=1);
 
         <label class="block">
             <span class="mb-1.5 block text-xs font-medium text-slate-700">
-                County / Region <span x-show="isAddressFieldRequired('region')" class="text-rose-600">*</span>
+                <?= $block->escapeHtml(__('County / Region')) ?> <span x-show="isAddressFieldRequired('region')" class="text-rose-600">*</span>
             </span>
             <input
                 x-model="shipping.region"
@@ -121,13 +121,13 @@ declare(strict_types=1);
                 @change="queueShippingAutosave('field')"
                 @blur="queueShippingAutosave('field')"
                 class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
-                placeholder="County / Region"
+                placeholder="<?= $block->escapeHtml(__('County / Region')) ?>"
             >
         </label>
 
         <label class="block">
             <span class="mb-1.5 block text-xs font-medium text-slate-700">
-                City <span x-show="isAddressFieldRequired('city')" class="text-rose-600">*</span>
+                <?= $block->escapeHtml(__('City')) ?> <span x-show="isAddressFieldRequired('city')" class="text-rose-600">*</span>
             </span>
             <input
                 x-model="shipping.city"
@@ -135,13 +135,13 @@ declare(strict_types=1);
                 @change="queueShippingAutosave('field')"
                 @blur="queueShippingAutosave('field')"
                 class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
-                placeholder="City"
+                placeholder="<?= $block->escapeHtml(__('City')) ?>"
             >
         </label>
 
         <label class="block">
             <span class="mb-1.5 block text-xs font-medium text-slate-700">
-                Postcode <span x-show="isAddressFieldRequired('postcode')" class="text-rose-600">*</span>
+                <?= $block->escapeHtml(__('Postcode')) ?> <span x-show="isAddressFieldRequired('postcode')" class="text-rose-600">*</span>
             </span>
             <input
                 x-model="shipping.postcode"
@@ -149,13 +149,13 @@ declare(strict_types=1);
                 @change="queueShippingAutosave('field')"
                 @blur="queueShippingAutosave('field')"
                 class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
-                placeholder="Postcode"
+                placeholder="<?= $block->escapeHtml(__('Postcode')) ?>"
             >
         </label>
 
         <label class="block sm:col-span-2">
             <span class="mb-1.5 block text-xs font-medium text-slate-700">
-                Phone number <span x-show="isAddressFieldRequired('telephone')" class="text-rose-600">*</span>
+                <?= $block->escapeHtml(__('Phone number')) ?> <span x-show="isAddressFieldRequired('telephone')" class="text-rose-600">*</span>
             </span>
             <input
                 x-model="shipping.telephone"
@@ -163,7 +163,7 @@ declare(strict_types=1);
                 @change="queueShippingAutosave('field')"
                 @blur="queueShippingAutosave('field')"
                 class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
-                placeholder="Phone number"
+                placeholder="<?= $block->escapeHtml(__('Phone number')) ?>"
             >
         </label>
     </div>

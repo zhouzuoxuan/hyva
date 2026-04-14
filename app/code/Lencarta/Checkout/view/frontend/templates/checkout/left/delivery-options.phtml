@@ -5,25 +5,25 @@ declare(strict_types=1);
 ?>
 <section class="pt-10">
     <div class="border-b border-slate-200 pb-4">
-        <h2 class="text-2xl font-semibold text-slate-900">Delivery Options</h2>
+        <h2 class="text-2xl font-semibold text-slate-900"><?= $block->escapeHtml(__('Delivery Options')) ?></h2>
     </div>
 
     <div class="pt-6">
         <template x-if="!canLoadShippingMethods()">
             <div class="border border-slate-300 bg-white px-4 py-4 text-sm text-slate-600">
-                Enter your address to see available delivery options.
+                <?= $block->escapeHtml(__('Enter your address to see available delivery options.')) ?>
             </div>
         </template>
 
         <template x-if="canLoadShippingMethods() && shippingMethodsState === 'loading'">
             <div class="border border-slate-300 bg-white px-4 py-4 text-sm text-slate-600">
-                Loading delivery options…
+                <?= $block->escapeHtml(__('Loading delivery options…')) ?>
             </div>
         </template>
 
         <template x-if="canLoadShippingMethods() && shippingMethodsState === 'unavailable'">
             <div class="border border-amber-300 bg-amber-50 px-4 py-4 text-sm text-amber-800">
-                No delivery options are available for this address.
+                <?= $block->escapeHtml(__('No delivery options are available for this address.')) ?>
             </div>
         </template>
 

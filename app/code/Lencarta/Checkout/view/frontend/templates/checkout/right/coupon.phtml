@@ -13,7 +13,7 @@ declare(strict_types=1);
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8m-8 5h5m-7 8 11-11a2 2 0 0 0 0-2.828l-.172-.172a2 2 0 0 0-2.828 0L3 17v4h4Z"/>
                 </svg>
             </span>
-            <span>Apply Discount Code</span>
+            <span><?= $block->escapeHtml(__('Apply Discount Code')) ?></span>
         </span>
 
         <span class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 bg-white shadow-sm">
@@ -32,13 +32,13 @@ declare(strict_types=1);
             <input
                 type="text"
                 x-model="couponCode"
-                placeholder="Enter coupon code"
+                placeholder="<?= $block->escapeHtmlAttr(__('Enter coupon code')) ?>"
                 class="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-slate-900"
             >
             <button type="button"
                     @click="applyCoupon()"
                     class="rounded-lg border border-slate-900 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-900 hover:text-white">
-                Apply
+                <?= $block->escapeHtml(__('Apply')) ?>
             </button>
         </div>
     </div>

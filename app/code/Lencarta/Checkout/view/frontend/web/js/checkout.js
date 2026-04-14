@@ -13,7 +13,7 @@ function initLencartaCheckout(config) {
         loading: false,
         isReady: hasInitialState,
         message: '',
-        termsAccepted: !!config.termsCheckedByDefault,
+        termsAccepted: false,
         couponCode: initialState.coupon_code || '',
         couponOpen: false,
 
@@ -75,6 +75,10 @@ function initLencartaCheckout(config) {
             this.lastSavedShippingSignature = this.getShippingSignature();
             this.lastObservedShippingSignature = this.lastSavedShippingSignature;
 
+            if (typeof this.config.defaultTermsAccepted !== 'undefined') {
+                this.termsAccepted = !!this.config.defaultTermsAccepted;
+            }
+
             if (hasInitialState) {
                 window.lencartaCheckoutState = this;
                 window.dispatchEvent(new CustomEvent('lencarta-checkout-ready'));
@@ -91,7 +95,10 @@ function initLencartaCheckout(config) {
                     window.dispatchEvent(new CustomEvent('lencarta-checkout-ready'));
                 })
                 .catch(() => {
-                    this.message = 'Unable to initialize checkout.';
+                    this.message = this.translate(
+                        'Unable to initialize checkout.',
+                        'Unable to initialize checkout.'
+                    );
                 })
                 .finally(() => {
                     this.isReady = true;
@@ -106,6 +113,11 @@ function initLencartaCheckout(config) {
 
             const input = document.querySelector('input[name="form_key"]');
             return input ? input.value : '';
+        },
+
+        translate(key, fallback = '') {
+            const dict = this.config.i18n || {};
+            return dict[key] || fallback || key;
         },
 
         getNormalizedEmail() {
@@ -216,7 +228,9 @@ function initLencartaCheckout(config) {
 
                 if (!data.success) {
                     this.emailSaveState = 'error';
-                    this.message = data.message || 'Unable to save email.';
+                    this.message =
+                        data.message ||
+                        this.translate('Unable to save email.', 'Unable to save email.');
                     return;
                 }
 
@@ -231,7 +245,7 @@ function initLencartaCheckout(config) {
                 }
 
                 this.emailSaveState = 'error';
-                this.message = 'Unable to save email.';
+                this.message = this.translate('Unable to save email.', 'Unable to save email.');
             } finally {
                 if (requestId !== this.emailRequestCounter) {
                     return;
@@ -331,86 +345,21 @@ function initLencartaCheckout(config) {
                 return '';
             }
 
-            return `Please complete required fields: ${missing.join(', ')}.`;
-        },
-
-        visibleItems() {
-            return this.itemsExpanded ? this.items : this.items.slice(0, this.maxVisibleItems);
-        },
-
-        hasHiddenItems() {
-            return this.items.length > this.maxVisibleItems;
-        },
-
-        hiddenItemsCount() {
-            return Math.max(0, this.items.length - this.maxVisibleItems);
-        },
-
-        itemsToggleLabel() {
-            if (this.itemsExpanded) {
-                return 'Show fewer items';
-            }
-
-            const count = this.hiddenItemsCount();
-            return `View ${count} more item${count > 1 ? 's' : ''}`;
-        },
-
-        toggleItemsExpanded() {
-            this.itemsExpanded = !this.itemsExpanded;
-        },
-
-        async loadState() {
-            const res = await fetch(this.config.urls.state, {
-                credentials: 'same-origin',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
-
-            const data = await res.json();
-
-            if (!data.success) {
-                this.message = data.message || 'Unable to load checkout state.';
-                return;
-            }
-
-            this.hydrateFromState(data.data || {});
-            this.isReady = true;
-        },
-
-        hydrateFromState(state) {
-            const shipping = state.shipping || {};
-
-            this.email = state.email || '';
-            this.items = Array.isArray(state.items) ? state.items : [];
-            this.totals = state.totals || {};
-            this.shippingMethods = Array.isArray(state.shipping_methods) ? state.shipping_methods : [];
-            this.selectedShippingMethod = state.selected_shipping_method || '';
-            this.couponCode = state.coupon_code || this.couponCode || '';
-
-            this.shipping = {
-                firstname: shipping.firstname || '',
-                lastname: shipping.lastname || '',
-                company: shipping.company || '',
-                telephone: shipping.telephone || '',
-                street_1: shipping.street_1 || '',
-                street_2: shipping.street_2 || '',
-                city: shipping.city || '',
-                postcode: shipping.postcode || '',
-                region: shipping.region || '',
-                country_id: shipping.country_id || 'GB'
-            };
-
-            this.shippingMethodsState = this.shippingMethods.length > 0 ? 'ready' : 'idle';
-
-            const shippingSignature = this.getShippingSignature();
-            this.lastSavedShippingSignature = shippingSignature;
-            this.lastObservedShippingSignature = shippingSignature;
-            this.lastSavedEmail = this.getNormalizedEmail();
+            return (
+                this.translate('Please complete required fields:', 'Please complete required fields:') +
+                ' ' +
+                missing.join(', ') +
+                '.'
+            );
         },
 
         canSaveShippingAddress() {
             return this.getMissingRequiredAddressFields().length === 0;
+        },
+
+        // 兼容旧模板调用
+        canLoadShippingMethods() {
+            return this.canSaveShippingAddress();
         },
 
         getShippingPayload() {
@@ -587,7 +536,12 @@ function initLencartaCheckout(config) {
                 if (!data.success) {
                     this.shippingSaveState = 'error';
                     this.shippingMethodsState = 'unavailable';
-                    this.message = data.message || 'Unable to save shipping address.';
+                    this.message =
+                        data.message ||
+                        this.translate(
+                            'Unable to save shipping address.',
+                            'Unable to save shipping address.'
+                        );
                     return;
                 }
 
@@ -611,7 +565,10 @@ function initLencartaCheckout(config) {
 
                 this.shippingSaveState = 'error';
                 this.shippingMethodsState = 'unavailable';
-                this.message = 'Unable to save shipping address.';
+                this.message = this.translate(
+                    'Unable to save shipping address.',
+                    'Unable to save shipping address.'
+                );
             } finally {
                 if (requestId !== this.shippingRequestCounter) {
                     return;
@@ -632,6 +589,55 @@ function initLencartaCheckout(config) {
                     this.scheduleShippingAutosave(this.shippingAfterRequestDelayMs);
                 }
             }
+        },
+
+        visibleItems() {
+            return this.itemsExpanded
+                ? this.items
+                : this.items.slice(0, this.maxVisibleItems);
+        },
+
+        hasHiddenItems() {
+            return this.items.length > this.maxVisibleItems;
+        },
+
+        hiddenItemsCount() {
+            return Math.max(0, this.items.length - this.maxVisibleItems);
+        },
+
+        itemsToggleLabel() {
+            if (this.itemsExpanded) {
+                return this.translate('Show fewer items', 'Show fewer items');
+            }
+
+            const count = this.hiddenItemsCount();
+            const singular = this.translate('item', 'item');
+            const plural = this.translate('items', 'items');
+
+            return `${this.translate('View', 'View')} ${count} ${count > 1 ? plural : singular} ${this.translate('more', 'more')}`;
+        },
+
+        toggleItemsExpanded() {
+            this.itemsExpanded = !this.itemsExpanded;
+        },
+
+        async loadState() {
+            const res = await fetch(this.config.urls.state, {
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await res.json();
+
+            if (!data.success) {
+                this.message = data.message || this.translate('Unable to load checkout state.', 'Unable to load checkout state.');
+                return;
+            }
+
+            this.hydrateFromState(data.data || {});
+            this.isReady = true;
         },
 
         async selectShippingMethod(method) {
@@ -655,7 +661,9 @@ function initLencartaCheckout(config) {
                 const data = await res.json();
 
                 if (!data.success) {
-                    this.message = data.message || 'Unable to save shipping method.';
+                    this.message =
+                        data.message ||
+                        this.translate('Unable to save shipping method.', 'Unable to save shipping method.');
                     return;
                 }
 
@@ -663,12 +671,15 @@ function initLencartaCheckout(config) {
                 this.totals = data.totals || {};
                 this.message = '';
             } catch (e) {
-                this.message = 'Unable to save shipping method.';
+                this.message = this.translate('Unable to save shipping method.', 'Unable to save shipping method.');
             }
         },
 
         applyCoupon() {
-            this.message = 'Coupon application will be connected in the next step.';
+            this.message = this.translate(
+                'Coupon application will be connected in the next step.',
+                'Coupon application will be connected in the next step.'
+            );
         }
     };
 }

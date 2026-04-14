@@ -84,45 +84,45 @@ class CheckoutState implements ArgumentInterface
     {
         return [
             'firstname' => [
-                'label' => 'First name',
+                'label' => (string) __('First name'),
                 'required' => $this->isAttributeRequired('firstname', true),
             ],
             'lastname' => [
-                'label' => 'Last name',
+                'label' => (string) __('Last name'),
                 'required' => $this->isAttributeRequired('lastname', true),
             ],
             'company' => [
-                'label' => 'Company',
+                'label' => (string) __('Company'),
                 'required' => $this->isAttributeRequired('company', false),
             ],
             'street_1' => [
-                'label' => 'Street address',
+                'label' => (string) __('Street address'),
                 'required' => $this->isAttributeRequired('street', true),
             ],
             'street_2' => [
-                'label' => 'Address line 2',
+                'label' => (string) __('Address line 2'),
                 'required' => false,
             ],
             'country_id' => [
-                'label' => 'Country',
+                'label' => (string) __('Country'),
                 'required' => $this->isAttributeRequired('country_id', true),
             ],
             'region' => [
-                'label' => 'County / Region',
+                'label' => (string) __('County / Region'),
                 'required' => $this->isAttributeRequired('region', false),
                 'required_countries' => array_values($this->directoryHelper->getCountriesWithStatesRequired()),
             ],
             'city' => [
-                'label' => 'City',
+                'label' => (string) __('City'),
                 'required' => $this->isAttributeRequired('city', true),
             ],
             'postcode' => [
-                'label' => 'Postcode',
+                'label' => (string) __('Postcode'),
                 'required' => $this->isAttributeRequired('postcode', true),
                 'optional_countries' => array_values($this->directoryHelper->getCountriesWithOptionalZip()),
             ],
             'telephone' => [
-                'label' => 'Phone number',
+                'label' => (string) __('Phone number'),
                 'required' => $this->isAttributeRequired('telephone', true),
             ],
         ];

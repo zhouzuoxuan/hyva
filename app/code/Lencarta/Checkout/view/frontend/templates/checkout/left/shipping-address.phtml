@@ -20,9 +20,16 @@ declare(strict_types=1);
         </template>
     </div>
 
+    <template x-if="showAddressIncompleteNotice()">
+        <div class="mt-4 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+             x-text="getAddressIncompleteMessage()"></div>
+    </template>
+
     <div class="grid gap-5 pt-6 sm:grid-cols-2">
         <label class="block">
-            <span class="mb-1.5 block text-xs font-medium text-slate-700">First name</span>
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">
+                First name <span x-show="isAddressFieldRequired('firstname')" class="text-rose-600">*</span>
+            </span>
             <input
                 x-model="shipping.firstname"
                 @input="markShippingDirty()"
@@ -34,7 +41,9 @@ declare(strict_types=1);
         </label>
 
         <label class="block">
-            <span class="mb-1.5 block text-xs font-medium text-slate-700">Last name</span>
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">
+                Last name <span x-show="isAddressFieldRequired('lastname')" class="text-rose-600">*</span>
+            </span>
             <input
                 x-model="shipping.lastname"
                 @input="markShippingDirty()"
@@ -46,7 +55,9 @@ declare(strict_types=1);
         </label>
 
         <label class="block sm:col-span-2">
-            <span class="mb-1.5 block text-xs font-medium text-slate-700">Company</span>
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">
+                Company <span x-show="isAddressFieldRequired('company')" class="text-rose-600">*</span>
+            </span>
             <input
                 x-model="shipping.company"
                 @input="markShippingDirty()"
@@ -58,7 +69,9 @@ declare(strict_types=1);
         </label>
 
         <label class="block sm:col-span-2">
-            <span class="mb-1.5 block text-xs font-medium text-slate-700">Street address</span>
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">
+                Street address <span x-show="isAddressFieldRequired('street_1')" class="text-rose-600">*</span>
+            </span>
             <input
                 x-model="shipping.street_1"
                 @input="markShippingDirty()"
@@ -70,7 +83,9 @@ declare(strict_types=1);
         </label>
 
         <label class="block sm:col-span-2">
-            <span class="mb-1.5 block text-xs font-medium text-slate-700">Address line 2</span>
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">
+                Address line 2 <span x-show="isAddressFieldRequired('street_2')" class="text-rose-600">*</span>
+            </span>
             <input
                 x-model="shipping.street_2"
                 @input="markShippingDirty()"
@@ -82,7 +97,9 @@ declare(strict_types=1);
         </label>
 
         <label class="block">
-            <span class="mb-1.5 block text-xs font-medium text-slate-700">Country</span>
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">
+                Country <span x-show="isAddressFieldRequired('country_id')" class="text-rose-600">*</span>
+            </span>
             <select
                 x-model="shipping.country_id"
                 @change="queueShippingAutosave('country')"
@@ -95,7 +112,9 @@ declare(strict_types=1);
         </label>
 
         <label class="block">
-            <span class="mb-1.5 block text-xs font-medium text-slate-700">County / Region</span>
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">
+                County / Region <span x-show="isAddressFieldRequired('region')" class="text-rose-600">*</span>
+            </span>
             <input
                 x-model="shipping.region"
                 @input="markShippingDirty()"
@@ -107,7 +126,9 @@ declare(strict_types=1);
         </label>
 
         <label class="block">
-            <span class="mb-1.5 block text-xs font-medium text-slate-700">City</span>
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">
+                City <span x-show="isAddressFieldRequired('city')" class="text-rose-600">*</span>
+            </span>
             <input
                 x-model="shipping.city"
                 @input="markShippingDirty()"
@@ -119,7 +140,9 @@ declare(strict_types=1);
         </label>
 
         <label class="block">
-            <span class="mb-1.5 block text-xs font-medium text-slate-700">Postcode</span>
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">
+                Postcode <span x-show="isAddressFieldRequired('postcode')" class="text-rose-600">*</span>
+            </span>
             <input
                 x-model="shipping.postcode"
                 @input="markShippingDirty()"
@@ -131,7 +154,9 @@ declare(strict_types=1);
         </label>
 
         <label class="block sm:col-span-2">
-            <span class="mb-1.5 block text-xs font-medium text-slate-700">Phone number</span>
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">
+                Phone number <span x-show="isAddressFieldRequired('telephone')" class="text-rose-600">*</span>
+            </span>
             <input
                 x-model="shipping.telephone"
                 @input="markShippingDirty()"

@@ -23,12 +23,10 @@ function initLencartaCheckout(config) {
         emailRequestInFlight: false,
         emailDirty: false,
         emailNeedsResave: false,
-        emailPendingExplicitSave: false,
         lastSavedEmail: '',
         emailRequestCounter: 0,
         emailIdleSaveMs: 1200,
         emailQuickSaveMs: 250,
-        emailAfterRequestDelayMs: 400,
 
         shipping: {
             firstname: initialShipping.firstname || '',
@@ -114,6 +112,16 @@ function initLencartaCheckout(config) {
             return (this.email || '').trim().toLowerCase();
         },
 
+        isEmailValidForSave() {
+            const email = this.getNormalizedEmail();
+
+            if (!email) {
+                return false;
+            }
+
+            return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+        },
+
         scheduleEmailAutosave(delay) {
             if (this.emailAutosaveTimer) {
                 clearTimeout(this.emailAutosaveTimer);
@@ -126,13 +134,12 @@ function initLencartaCheckout(config) {
 
         markEmailDirty() {
             this.emailDirty = true;
-            this.emailPendingExplicitSave = false;
+            this.emailSaveState = 'idle';
             this.scheduleEmailAutosave(this.emailIdleSaveMs);
         },
 
         queueEmailAutosave(source = 'field') {
             this.emailDirty = true;
-            this.emailPendingExplicitSave = true;
 
             if (source === 'change' || source === 'blur') {
                 this.scheduleEmailAutosave(this.emailQuickSaveMs);
@@ -150,18 +157,13 @@ function initLencartaCheckout(config) {
 
             const normalizedEmail = this.getNormalizedEmail();
 
-            // 空邮箱：只有显式触发（blur/change）才尝试保存一次
             if (!normalizedEmail) {
-                if (!this.emailPendingExplicitSave) {
-                    return;
-                }
+                this.emailSaveState = 'idle';
+                return;
+            }
 
-                if (this.emailRequestInFlight) {
-                    this.emailNeedsResave = true;
-                    return;
-                }
-
-                this.saveEmail('');
+            if (!this.isEmailValidForSave()) {
+                this.emailSaveState = 'error';
                 return;
             }
 
@@ -170,7 +172,7 @@ function initLencartaCheckout(config) {
                 !this.emailRequestInFlight
             ) {
                 this.emailDirty = false;
-                this.emailPendingExplicitSave = false;
+                this.emailSaveState = 'saved';
                 return;
             }
 
@@ -183,7 +185,7 @@ function initLencartaCheckout(config) {
         },
 
         async saveEmail(normalizedEmail = null) {
-            const emailToSave = normalizedEmail !== null ? normalizedEmail : this.getNormalizedEmail();
+            const emailToSave = normalizedEmail || this.getNormalizedEmail();
             const requestId = ++this.emailRequestCounter;
             let requestSucceeded = false;
 
@@ -223,7 +225,6 @@ function initLencartaCheckout(config) {
                 this.message = '';
                 this.lastSavedEmail = emailToSave;
                 this.emailDirty = false;
-                this.emailPendingExplicitSave = false;
             } catch (e) {
                 if (requestId !== this.emailRequestCounter) {
                     return;
@@ -238,10 +239,8 @@ function initLencartaCheckout(config) {
 
                 this.emailRequestInFlight = false;
 
-                // 失败时不自动重试，避免死循环
                 if (!requestSucceeded) {
                     this.emailNeedsResave = false;
-                    this.emailPendingExplicitSave = false;
                     return;
                 }
 
@@ -250,9 +249,89 @@ function initLencartaCheckout(config) {
 
                 if (this.emailNeedsResave || changedDuringRequest || this.emailDirty) {
                     this.emailNeedsResave = false;
-                    this.scheduleEmailAutosave(this.emailAfterRequestDelayMs);
+                    this.scheduleEmailAutosave(this.emailQuickSaveMs);
                 }
             }
+        },
+
+        getAddressFieldConfig() {
+            return this.config.addressFieldConfig || {};
+        },
+
+        getAddressFieldLabel(field) {
+            const cfg = this.getAddressFieldConfig()[field] || {};
+            return cfg.label || field;
+        },
+
+        isAddressFieldRequired(field) {
+            const cfg = this.getAddressFieldConfig()[field] || {};
+            const country = (this.shipping.country_id || 'GB').trim().toUpperCase();
+
+            if (field === 'postcode') {
+                const optionalCountries = Array.isArray(cfg.optional_countries) ? cfg.optional_countries : [];
+                return !!cfg.required && !optionalCountries.includes(country);
+            }
+
+            if (field === 'region') {
+                const requiredCountries = Array.isArray(cfg.required_countries) ? cfg.required_countries : [];
+                return !!cfg.required || requiredCountries.includes(country);
+            }
+
+            return !!cfg.required;
+        },
+
+        isAddressFieldFilled(field) {
+            const payload = this.getShippingPayload();
+            return !!payload[field];
+        },
+
+        getRequiredAddressFieldsInOrder() {
+            return [
+                'firstname',
+                'lastname',
+                'street_1',
+                'country_id',
+                'region',
+                'city',
+                'postcode',
+                'telephone'
+            ];
+        },
+
+        getMissingRequiredAddressFields() {
+            return this.getRequiredAddressFieldsInOrder()
+                .filter((field) => this.isAddressFieldRequired(field) && !this.isAddressFieldFilled(field))
+                .map((field) => this.getAddressFieldLabel(field));
+        },
+
+        hasAddressStarted() {
+            const payload = this.getShippingPayload();
+
+            return !!(
+                payload.firstname ||
+                payload.lastname ||
+                payload.company ||
+                payload.telephone ||
+                payload.street_1 ||
+                payload.street_2 ||
+                payload.city ||
+                payload.postcode ||
+                payload.region
+            );
+        },
+
+        showAddressIncompleteNotice() {
+            return this.hasAddressStarted() && this.getMissingRequiredAddressFields().length > 0;
+        },
+
+        getAddressIncompleteMessage() {
+            const missing = this.getMissingRequiredAddressFields();
+
+            if (!missing.length) {
+                return '';
+            }
+
+            return `Please complete required fields: ${missing.join(', ')}.`;
         },
 
         visibleItems() {
@@ -330,15 +409,8 @@ function initLencartaCheckout(config) {
             this.lastSavedEmail = this.getNormalizedEmail();
         },
 
-        canLoadShippingMethods() {
-            return !!(
-                this.shipping.firstname &&
-                this.shipping.lastname &&
-                this.shipping.street_1 &&
-                this.shipping.city &&
-                this.shipping.postcode &&
-                this.shipping.country_id
-            );
+        canSaveShippingAddress() {
+            return this.getMissingRequiredAddressFields().length === 0;
         },
 
         getShippingPayload() {
@@ -378,8 +450,9 @@ function initLencartaCheckout(config) {
 
                 this.lastObservedShippingSignature = currentSignature;
 
-                if (!this.canLoadShippingMethods()) {
+                if (!this.canSaveShippingAddress()) {
                     this.shippingDirty = true;
+                    this.shippingSaveState = 'idle';
                     return;
                 }
 
@@ -410,8 +483,8 @@ function initLencartaCheckout(config) {
             this.shippingDirty = true;
             this.lastObservedShippingSignature = this.getShippingSignature();
 
-            if (!this.canLoadShippingMethods()) {
-                this.resetShippingAutosaveStateForIncompleteAddress();
+            if (!this.canSaveShippingAddress()) {
+                this.shippingSaveState = 'idle';
                 return;
             }
 
@@ -419,13 +492,13 @@ function initLencartaCheckout(config) {
         },
 
         queueShippingAutosave(source = 'field') {
-            if (!this.canLoadShippingMethods()) {
-                this.resetShippingAutosaveStateForIncompleteAddress();
-                return;
-            }
-
             this.shippingDirty = true;
             this.lastObservedShippingSignature = this.getShippingSignature();
+
+            if (!this.canSaveShippingAddress()) {
+                this.shippingSaveState = 'idle';
+                return;
+            }
 
             if (source === 'country') {
                 this.scheduleShippingAutosave(300);
@@ -435,28 +508,14 @@ function initLencartaCheckout(config) {
             this.scheduleShippingAutosave(this.shippingQuickSaveMs);
         },
 
-        resetShippingAutosaveStateForIncompleteAddress() {
-            if (this.shippingAutosaveTimer) {
-                clearTimeout(this.shippingAutosaveTimer);
-                this.shippingAutosaveTimer = null;
-            }
-
-            this.shippingSaveState = 'idle';
-            this.shippingMethodsState = 'idle';
-            this.shippingMethods = [];
-            this.selectedShippingMethod = '';
-            this.shippingNeedsResave = false;
-            this.shippingDirty = false;
-        },
-
         flushShippingAutosave() {
             if (this.shippingAutosaveTimer) {
                 clearTimeout(this.shippingAutosaveTimer);
                 this.shippingAutosaveTimer = null;
             }
 
-            if (!this.canLoadShippingMethods()) {
-                this.resetShippingAutosaveStateForIncompleteAddress();
+            if (!this.canSaveShippingAddress()) {
+                this.shippingSaveState = 'idle';
                 return;
             }
 
@@ -467,6 +526,7 @@ function initLencartaCheckout(config) {
                 !this.shippingRequestInFlight
             ) {
                 this.shippingDirty = false;
+                this.shippingSaveState = 'saved';
                 return;
             }
 
@@ -479,8 +539,8 @@ function initLencartaCheckout(config) {
         },
 
         async saveShippingAddress(requestSignature = null) {
-            if (!this.canLoadShippingMethods()) {
-                this.resetShippingAutosaveStateForIncompleteAddress();
+            if (!this.canSaveShippingAddress()) {
+                this.shippingSaveState = 'idle';
                 return;
             }
 

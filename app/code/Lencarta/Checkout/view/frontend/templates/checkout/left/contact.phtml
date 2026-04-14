@@ -22,7 +22,9 @@ declare(strict_types=1);
 
     <div class="pt-6">
         <label class="block">
-            <span class="mb-1.5 block text-xs font-medium text-slate-700">E-mail address</span>
+            <span class="mb-1.5 block text-xs font-medium text-slate-700">
+                E-mail address <span class="text-rose-600">*</span>
+            </span>
             <input
                 type="email"
                 x-model="email"
@@ -34,6 +36,12 @@ declare(strict_types=1);
                 autocomplete="email"
             >
         </label>
+
+        <template x-if="email && !isEmailValidForSave()">
+            <p class="mt-2 text-sm text-rose-600">
+                Please enter a valid email address.
+            </p>
+        </template>
 
         <p class="mt-3 text-sm text-slate-600">
             You can create an account after checkout.

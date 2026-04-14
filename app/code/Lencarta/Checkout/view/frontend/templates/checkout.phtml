@@ -23,6 +23,7 @@ if ($logoAlt === '') {
 
 $initialState = $viewModel ? $viewModel->getInitialState() : [];
 $countryOptions = $viewModel ? $viewModel->getCountryOptions() : [];
+$addressFieldConfig = $viewModel ? $viewModel->getAddressFieldConfig() : [];
 
 $initialStateJson = json_encode(
     $initialState,
@@ -31,6 +32,11 @@ $initialStateJson = json_encode(
 
 $countryOptionsJson = json_encode(
     $countryOptions,
+    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
+);
+
+$addressFieldConfigJson = json_encode(
+    $addressFieldConfig,
     JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
 );
 ?>
@@ -47,7 +53,8 @@ $countryOptionsJson = json_encode(
         logoSrc: '<?= $block->escapeJs($logoSrc) ?>',
         logoAlt: '<?= $block->escapeJs($logoAlt) ?>',
         initialState: <?= /* @noEscape */ $initialStateJson ?: '{}' ?>,
-        countryOptions: <?= /* @noEscape */ $countryOptionsJson ?: '[]' ?>
+        countryOptions: <?= /* @noEscape */ $countryOptionsJson ?: '[]' ?>,
+        addressFieldConfig: <?= /* @noEscape */ $addressFieldConfigJson ?: '{}' ?>
     };
 </script>
 

@@ -5,19 +5,25 @@ namespace Lencarta\Checkout\ViewModel;
 
 use Lencarta\Checkout\Model\Checkout\TotalsProvider;
 use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Customer\Api\AddressMetadataInterface;
+use Magento\Directory\Helper\Data as DirectoryHelper;
+use Magento\Directory\Model\AllowedCountries;
 use Magento\Directory\Model\ResourceModel\Country\CollectionFactory as CountryCollectionFactory;
-use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Magento\Quote\Model\Quote\Address;
-use Magento\Store\Model\ScopeInterface;
 
 class CheckoutState implements ArgumentInterface
 {
+    private ?array $addressMetadataMap = null;
+
     public function __construct(
         private readonly CheckoutSession $checkoutSession,
         private readonly TotalsProvider $totalsProvider,
         private readonly CountryCollectionFactory $countryCollectionFactory,
-        private readonly ScopeConfigInterface $scopeConfig
+        private readonly AllowedCountries $allowedCountries,
+        private readonly DirectoryHelper $directoryHelper,
+        private readonly AddressMetadataInterface $addressMetadata
     ) {
     }
 
@@ -44,16 +50,7 @@ class CheckoutState implements ArgumentInterface
 
     public function getCountryOptions(): array
     {
-        $allowedCountryIds = array_filter(array_map(
-            'trim',
-            explode(
-                ',',
-                (string) $this->scopeConfig->getValue(
-                    'general/country/allow',
-                    ScopeInterface::SCOPE_STORE
-                )
-            )
-        ));
+        $allowedCountryIds = $this->allowedCountries->getAllowedCountries();
 
         $collection = $this->countryCollectionFactory->create();
         $collection->loadByStore();
@@ -73,6 +70,54 @@ class CheckoutState implements ArgumentInterface
         usort($options, static fn(array $a, array $b): int => strcmp($a['label'], $b['label']));
 
         return $options;
+    }
+
+    public function getAddressFieldConfig(): array
+    {
+        return [
+            'firstname' => [
+                'label' => 'First name',
+                'required' => $this->isAttributeRequired('firstname', true),
+            ],
+            'lastname' => [
+                'label' => 'Last name',
+                'required' => $this->isAttributeRequired('lastname', true),
+            ],
+            'company' => [
+                'label' => 'Company',
+                'required' => $this->isAttributeRequired('company', false),
+            ],
+            'street_1' => [
+                'label' => 'Street address',
+                'required' => $this->isAttributeRequired('street', true),
+            ],
+            'street_2' => [
+                'label' => 'Address line 2',
+                'required' => false,
+            ],
+            'country_id' => [
+                'label' => 'Country',
+                'required' => $this->isAttributeRequired('country_id', true),
+            ],
+            'region' => [
+                'label' => 'County / Region',
+                'required' => $this->isAttributeRequired('region', false),
+                'required_countries' => array_values($this->directoryHelper->getCountriesWithStatesRequired()),
+            ],
+            'city' => [
+                'label' => 'City',
+                'required' => $this->isAttributeRequired('city', true),
+            ],
+            'postcode' => [
+                'label' => 'Postcode',
+                'required' => $this->isAttributeRequired('postcode', true),
+                'optional_countries' => array_values($this->directoryHelper->getCountriesWithOptionalZip()),
+            ],
+            'telephone' => [
+                'label' => 'Phone number',
+                'required' => $this->isAttributeRequired('telephone', true),
+            ],
+        ];
     }
 
     private function getShippingData(?Address $address): array
@@ -124,5 +169,39 @@ class CheckoutState implements ArgumentInterface
             'region' => '',
             'country_id' => 'GB',
         ];
+    }
+
+    private function isAttributeRequired(string $attributeCode, bool $default = false): bool
+    {
+        $map = $this->getAddressMetadataMap();
+
+        if (!isset($map[$attributeCode])) {
+            return $default;
+        }
+
+        return (bool) $map[$attributeCode]['required'];
+    }
+
+    private function getAddressMetadataMap(): array
+    {
+        if ($this->addressMetadataMap !== null) {
+            return $this->addressMetadataMap;
+        }
+
+        $this->addressMetadataMap = [];
+
+        try {
+            $attributes = $this->addressMetadata->getAllAttributesMetadata();
+        } catch (LocalizedException) {
+            return $this->addressMetadataMap;
+        }
+
+        foreach ($attributes as $attribute) {
+            $this->addressMetadataMap[$attribute->getAttributeCode()] = [
+                'required' => (bool) $attribute->isRequired(),
+            ];
+        }
+
+        return $this->addressMetadataMap;
     }
 }

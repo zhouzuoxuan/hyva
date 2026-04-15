@@ -8,7 +8,7 @@ use Lencarta\PaymentPaypal\Model\DebugLogger;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\HTTP\Client\Curl;
 
-class CreateOrder
+class CaptureOrder
 {
     public function __construct(
         private readonly Curl $curl,
@@ -18,11 +18,15 @@ class CreateOrder
     ) {
     }
 
-    public function execute(array $payload, ?int $storeId = null): array
+    public function execute(string $paypalOrderId, ?int $storeId = null): array
     {
+        if ($paypalOrderId === '') {
+            throw new LocalizedException(__('Missing PayPal order ID.'));
+        }
+
         $accessToken = $this->authTokenProvider->getAccessToken($storeId);
         $requestId = bin2hex(random_bytes(16));
-        $url = rtrim($this->config->getApiBaseUrl($storeId), '/') . '/v2/checkout/orders';
+        $url = rtrim($this->config->getApiBaseUrl($storeId), '/') . '/v2/checkout/orders/' . rawurlencode($paypalOrderId) . '/capture';
 
         $this->curl->reset();
         $this->curl->setHeaders([
@@ -32,27 +36,26 @@ class CreateOrder
             'Prefer' => 'return=representation',
         ]);
 
-        $this->debugLogger->debug('PayPal create order request', [
+        $this->debugLogger->debug('PayPal capture request', [
+            'paypal_order_id' => $paypalOrderId,
             'url' => $url,
-            'payload' => $payload,
             'request_id' => $requestId,
         ], $storeId);
 
-        $this->curl->post(
-            $url,
-            json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
-        );
+        $this->curl->post($url, '{}');
 
         $status = $this->curl->getStatus();
-        $body = json_decode($this->curl->getBody(), true) ?: [];
+        $rawBody = $this->curl->getBody();
+        $body = json_decode($rawBody, true) ?: [];
 
-        $this->debugLogger->debug('PayPal create order response', [
+        $this->debugLogger->debug('PayPal capture response', [
+            'paypal_order_id' => $paypalOrderId,
             'http_status' => $status,
             'response' => $body,
         ], $storeId);
 
         if ($status < 200 || $status >= 300 || empty($body['id'])) {
-            throw new LocalizedException(__('Unable to create PayPal order.'));
+            throw new LocalizedException(__('Unable to capture PayPal order.'));
         }
 
         return [

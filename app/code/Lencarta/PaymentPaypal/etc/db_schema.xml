@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="lencarta_paypal_order" resource="default" engine="innodb" comment="Lencarta PayPal Order Mapping">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="int" name="quote_id" unsigned="true" nullable="false" comment="Quote ID"/>
+        <column xsi:type="varchar" name="reserved_order_id" nullable="true" length="64" comment="Reserved Order ID"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" comment="Store ID"/>
+        <column xsi:type="int" name="order_id" unsigned="true" nullable="true" comment="Order ID"/>
+        <column xsi:type="varchar" name="paypal_order_id" nullable="false" length="64" comment="PayPal Order ID"/>
+        <column xsi:type="varchar" name="paypal_capture_id" nullable="true" length="64" comment="PayPal Capture ID"/>
+        <column xsi:type="varchar" name="paypal_request_id" nullable="true" length="64" comment="PayPal Request ID"/>
+        <column xsi:type="decimal" name="amount" scale="4" precision="20" nullable="false" default="0.0000" comment="Amount"/>
+        <column xsi:type="varchar" name="currency_code" nullable="false" length="16" comment="Currency Code"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="32" default="created" comment="Status"/>
+        <column xsi:type="text" name="last_event_type" nullable="true" comment="Last Webhook Event Type"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="false" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="LENCARTA_PAYPAL_ORDER_PAYPAL_ORDER_ID_UNQ">
+            <column name="paypal_order_id"/>
+        </constraint>
+        <index referenceId="LENCARTA_PAYPAL_ORDER_QUOTE_ID_IDX" indexType="btree">
+            <column name="quote_id"/>
+        </index>
+        <index referenceId="LENCARTA_PAYPAL_ORDER_ORDER_ID_IDX" indexType="btree">
+            <column name="order_id"/>
+        </index>
+        <index referenceId="LENCARTA_PAYPAL_ORDER_PAYPAL_CAPTURE_ID_IDX" indexType="btree">
+            <column name="paypal_capture_id"/>
+        </index>
+    </table>
+</schema>

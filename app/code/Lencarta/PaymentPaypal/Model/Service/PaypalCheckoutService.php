@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace Lencarta\PaymentPaypal\Model\Service;
 
 use Lencarta\PaymentPaypal\Model\Api\CreateOrder;
+use Lencarta\PaymentPaypal\Model\DebugLogger;
+use Lencarta\PaymentPaypal\Model\Storage\PaypalOrderStorage;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\Quote;
@@ -13,13 +15,19 @@ class PaypalCheckoutService
     public function __construct(
         private readonly PaypalOrderBuilder $paypalOrderBuilder,
         private readonly CreateOrder $createOrderApi,
-        private readonly CartRepositoryInterface $cartRepository
+        private readonly CartRepositoryInterface $cartRepository,
+        private readonly PaypalOrderStorage $paypalOrderStorage,
+        private readonly DebugLogger $debugLogger
     ) {
     }
 
     public function createPaypalOrderForQuote(Quote $quote): array
     {
         $this->validateQuote($quote);
+
+        if (!$quote->getReservedOrderId()) {
+            $quote->reserveOrderId();
+        }
 
         $payload = $this->paypalOrderBuilder->build($quote);
         $result = $this->createOrderApi->execute($payload, (int) $quote->getStoreId());
@@ -31,6 +39,14 @@ class PaypalCheckoutService
 
         $quote->setTotalsCollectedFlag(false);
         $this->cartRepository->save($quote);
+        $this->paypalOrderStorage->saveCreated($quote, (string) $result['response']['id'], (string) $result['request_id']);
+
+        $this->debugLogger->info('PayPal order created for quote', [
+            'quote_id' => (int) $quote->getId(),
+            'reserved_order_id' => (string) $quote->getReservedOrderId(),
+            'paypal_order_id' => (string) $result['response']['id'],
+            'paypal_request_id' => (string) $result['request_id'],
+        ], (int) $quote->getStoreId());
 
         return $result;
     }

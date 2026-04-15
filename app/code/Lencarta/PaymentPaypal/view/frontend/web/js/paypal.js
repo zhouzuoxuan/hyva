@@ -24,11 +24,12 @@
         }
 
         const container = document.getElementById('lencarta-paypal-button');
-        if (!container) {
+        if (!container || container.dataset.rendered === '1') {
             return;
         }
 
         const paypal = await loadPaypalSdk(config);
+        container.dataset.rendered = '1';
 
         paypal.Buttons({
             style: {
@@ -42,28 +43,55 @@
                     method: 'POST',
                     credentials: 'same-origin',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
                     body: new URLSearchParams({
-                        form_key: window.lencartaCheckoutConfig.formKey
+                        form_key: config.formKey || ''
                     })
                 });
 
                 const result = await response.json();
 
                 if (!result.success) {
-                    throw new Error(result.message || 'Unable to create PayPal order.');
+                    throw new Error(result.message || config.i18n.createOrderError || 'Unable to create PayPal order.');
                 }
 
                 return result.paypal_order_id;
             },
             onApprove: async function (data) {
-                console.log('PayPal approved order:', data.orderID);
-                alert('Approve 已拿到，下一步接 finalize。当前阶段先到这里。');
+                const response = await fetch(config.captureUrl, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: new URLSearchParams({
+                        form_key: config.formKey || '',
+                        paypal_order_id: data.orderID || '',
+                        payer_id: data.payerID || ''
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.message || config.i18n.finalizeError || 'Unable to finalize PayPal payment.');
+                }
+
+                if (result.redirect_url) {
+                    window.location.href = result.redirect_url;
+                }
             },
             onError: function (err) {
                 console.error(err);
-                alert('PayPal error');
+                const message = err && err.message ? err.message : (config.i18n.genericError || 'PayPal error');
+                if (window.lencartaCheckoutState) {
+                    window.lencartaCheckoutState.message = message;
+                } else {
+                    alert(message);
+                }
             }
         }).render('#lencarta-paypal-button');
     }

@@ -14,11 +14,19 @@ $viewModel = $block->getData('view_model');
         clientId: '<?= $block->escapeJs($viewModel->getClientId()) ?>',
         sdkUrl: '<?= $block->escapeJs($viewModel->getSdkBaseUrl()) ?>',
         currency: '<?= $block->escapeJs($viewModel->getCurrency()) ?>',
+        formKey: '<?= $block->escapeJs($viewModel->getFormKey()) ?>',
         createOrderUrl: '<?= $block->escapeJs($viewModel->getCreateOrderUrl()) ?>',
+        captureUrl: '<?= $block->escapeJs($viewModel->getCaptureUrl()) ?>',
+        webhookUrl: '<?= $block->escapeJs($viewModel->getWebhookUrl()) ?>',
         button: {
             color: '<?= $block->escapeJs($viewModel->getButtonColor()) ?>',
             shape: '<?= $block->escapeJs($viewModel->getButtonShape()) ?>',
             label: '<?= $block->escapeJs($viewModel->getButtonLabel()) ?>'
+        },
+        i18n: {
+            createOrderError: '<?= $block->escapeJs(__('Unable to create PayPal order.')) ?>',
+            finalizeError: '<?= $block->escapeJs(__('Unable to finalize PayPal payment.')) ?>',
+            genericError: '<?= $block->escapeJs(__('PayPal error')) ?>'
         }
     };
 </script>

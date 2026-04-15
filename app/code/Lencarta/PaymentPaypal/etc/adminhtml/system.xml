@@ -24,8 +24,9 @@
                     <label>Client Secret</label>
                 </field>
 
-                <field id="webhook_id" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="webhook_id" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Webhook ID</label>
+                    <comment>Use your PayPal app webhook ID. Endpoint path: /lencarta_paypal/webhook/index</comment>
                 </field>
 
                 <field id="brand_name" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">

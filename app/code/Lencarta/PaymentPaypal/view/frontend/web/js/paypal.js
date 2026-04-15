@@ -204,11 +204,22 @@
         return sdkPromise;
     }
 
-    function buildCreateOrderPayload() {
+    async function createOrderRequest() {
+        const url = getUrl([
+            'createPaypalOrder',
+            'createPayPalOrder',
+            'paypalCreateOrder',
+            'createOrder'
+        ]);
+
+        if (!url) {
+            throw new Error(translate('Unable to start PayPal checkout.', 'Unable to start PayPal checkout.'));
+        }
+
         const state = getCheckoutState();
         const shipping = state && state.shipping ? state.shipping : {};
 
-        return {
+        const body = new URLSearchParams({
             form_key: getFormKey(),
             email: state && state.email ? state.email : '',
             firstname: shipping.firstname || '',
@@ -223,23 +234,7 @@
             country_id: shipping.country_id || '',
             shipping_method: state && state.selectedShippingMethod ? state.selectedShippingMethod : '',
             terms_accepted: isTermsAccepted() ? '1' : '0'
-        };
-    }
-
-    async function createOrderRequest() {
-        const url = getUrl([
-            'createPaypalOrder',
-            'createPayPalOrder',
-            'paypalCreateOrder',
-            'createOrder'
-        ]);
-
-        if (!url) {
-            throw new Error(translate('Unable to start PayPal checkout.', 'Unable to start PayPal checkout.'));
-        }
-
-        const payload = buildCreateOrderPayload();
-        const body = new URLSearchParams(payload);
+        });
 
         const response = await fetch(url, {
             method: 'POST',
@@ -582,6 +577,11 @@
 
     function bootPaypal() {
         bindListeners();
+
+        // 先预加载 SDK，减少点击条款后的视觉跳动
+        loadPaypalSdk().catch(function () {
+            // ignore preload failure here
+        });
 
         if (booted) {
             if (isTermsAccepted()) {

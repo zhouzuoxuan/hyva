@@ -14,6 +14,8 @@ function initLencartaCheckout(config) {
         isReady: hasInitialState,
         message: '',
         termsAccepted: false,
+        termsStorageKey: config.termsStorageKey || 'lencarta_checkout_terms_accepted',
+
         couponCode: initialState.coupon_code || '',
         couponOpen: false,
 
@@ -75,9 +77,7 @@ function initLencartaCheckout(config) {
             this.lastSavedShippingSignature = this.getShippingSignature();
             this.lastObservedShippingSignature = this.lastSavedShippingSignature;
 
-            if (typeof this.config.defaultTermsAccepted !== 'undefined') {
-                this.termsAccepted = !!this.config.defaultTermsAccepted;
-            }
+            this.restoreTermsAcceptedState();
 
             if (hasInitialState) {
                 window.lencartaCheckoutState = this;
@@ -118,6 +118,43 @@ function initLencartaCheckout(config) {
         translate(key, fallback = '') {
             const dict = this.config.i18n || {};
             return dict[key] || fallback || key;
+        },
+
+        restoreTermsAcceptedState() {
+            let restored = null;
+
+            try {
+                const raw = sessionStorage.getItem(this.termsStorageKey);
+                if (raw !== null) {
+                    restored = raw === '1';
+                }
+            } catch (e) {
+                // ignore
+            }
+
+            if (restored !== null) {
+                this.termsAccepted = restored;
+                return;
+            }
+
+            if (typeof this.config.defaultTermsAccepted !== 'undefined') {
+                this.termsAccepted = !!this.config.defaultTermsAccepted;
+            } else {
+                this.termsAccepted = false;
+            }
+        },
+
+        persistTermsAcceptedState() {
+            try {
+                sessionStorage.setItem(this.termsStorageKey, this.termsAccepted ? '1' : '0');
+            } catch (e) {
+                // ignore
+            }
+        },
+
+        handleTermsAcceptedChange() {
+            this.persistTermsAcceptedState();
+            window.dispatchEvent(new CustomEvent('lencarta:paypal:terms-changed'));
         },
 
         getNormalizedEmail() {
@@ -357,7 +394,6 @@ function initLencartaCheckout(config) {
             return this.getMissingRequiredAddressFields().length === 0;
         },
 
-        // 兼容旧模板调用
         canLoadShippingMethods() {
             return this.canSaveShippingAddress();
         },

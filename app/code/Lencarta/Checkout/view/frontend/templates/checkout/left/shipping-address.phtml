@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 /** @var \Magento\Framework\View\Element\Template $block */
 ?>
-<section class="pt-10">
+<section class="pt-10" x-init="$nextTick(() => ensureShippingCountry(false))">
     <div class="flex items-center justify-between border-b border-slate-200 pb-4">
         <h2 class="text-[clamp(1.7rem,2.4vw,2.5rem)] font-semibold tracking-tight text-slate-900">
             <?= $block->escapeHtml(__('Shipping Address')) ?>
@@ -21,14 +21,17 @@ declare(strict_types=1);
     </div>
 
     <template x-if="showAddressIncompleteNotice()">
-        <div class="mt-4 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800"
-             x-text="getAddressIncompleteMessage()"></div>
+        <div
+            class="mt-4 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+            x-text="getAddressIncompleteMessage()"
+        ></div>
     </template>
 
     <div class="grid gap-5 pt-6 sm:grid-cols-2">
         <label class="block">
             <span class="mb-1.5 block text-xs font-medium text-slate-700">
-                <?= $block->escapeHtml(__('First name')) ?> <span x-show="isAddressFieldRequired('firstname')" class="text-rose-600">*</span>
+                <?= $block->escapeHtml(__('First name')) ?>
+                <span x-show="isAddressFieldRequired('firstname')" class="text-rose-600">*</span>
             </span>
             <input
                 x-model="shipping.firstname"
@@ -42,7 +45,8 @@ declare(strict_types=1);
 
         <label class="block">
             <span class="mb-1.5 block text-xs font-medium text-slate-700">
-                <?= $block->escapeHtml(__('Last name')) ?> <span x-show="isAddressFieldRequired('lastname')" class="text-rose-600">*</span>
+                <?= $block->escapeHtml(__('Last name')) ?>
+                <span x-show="isAddressFieldRequired('lastname')" class="text-rose-600">*</span>
             </span>
             <input
                 x-model="shipping.lastname"
@@ -56,7 +60,8 @@ declare(strict_types=1);
 
         <label class="block sm:col-span-2">
             <span class="mb-1.5 block text-xs font-medium text-slate-700">
-                <?= $block->escapeHtml(__('Company')) ?> <span x-show="isAddressFieldRequired('company')" class="text-rose-600">*</span>
+                <?= $block->escapeHtml(__('Company')) ?>
+                <span x-show="isAddressFieldRequired('company')" class="text-rose-600">*</span>
             </span>
             <input
                 x-model="shipping.company"
@@ -64,13 +69,14 @@ declare(strict_types=1);
                 @change="queueShippingAutosave('field')"
                 @blur="queueShippingAutosave('field')"
                 class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
-                placeholder="<?= $block->escapeHtml(__('Company')) ?>"
+                placeholder="<?= $block->escapeHtmlAttr(__('Company')) ?>"
             >
         </label>
 
         <label class="block sm:col-span-2">
             <span class="mb-1.5 block text-xs font-medium text-slate-700">
-                <?= $block->escapeHtml(__('Street address')) ?> <span x-show="isAddressFieldRequired('street_1')" class="text-rose-600">*</span>
+                <?= $block->escapeHtml(__('Street address')) ?>
+                <span x-show="isAddressFieldRequired('street_1')" class="text-rose-600">*</span>
             </span>
             <input
                 x-model="shipping.street_1"
@@ -84,7 +90,8 @@ declare(strict_types=1);
 
         <label class="block sm:col-span-2">
             <span class="mb-1.5 block text-xs font-medium text-slate-700">
-                <?= $block->escapeHtml(__('Address line 2')) ?> <span x-show="isAddressFieldRequired('street_2')" class="text-rose-600">*</span>
+                <?= $block->escapeHtml(__('Address line 2')) ?>
+                <span x-show="isAddressFieldRequired('street_2')" class="text-rose-600">*</span>
             </span>
             <input
                 x-model="shipping.street_2"
@@ -98,22 +105,29 @@ declare(strict_types=1);
 
         <label class="block">
             <span class="mb-1.5 block text-xs font-medium text-slate-700">
-                <?= $block->escapeHtml(__('Country')) ?> <span x-show="isAddressFieldRequired('country_id')" class="text-rose-600">*</span>
+                <?= $block->escapeHtml(__('Country')) ?>
+                <span x-show="isAddressFieldRequired('country_id')" class="text-rose-600">*</span>
             </span>
             <select
                 x-model="shipping.country_id"
+                x-init="$nextTick(() => ensureShippingCountry(false))"
                 @change="queueShippingAutosave('country')"
                 class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition focus:border-slate-900"
             >
-                <template x-for="option in (config.countryOptions || [])" :key="option.value">
-                    <option :value="option.value" x-text="option.label"></option>
+                <template x-for="option in (config.countryOptions || [])" :key="String(option.value)">
+                    <option
+                        :value="option.value"
+                        :selected="String(option.value).trim().toUpperCase() === String(shipping.country_id || '').trim().toUpperCase()"
+                        x-text="option.label"
+                    ></option>
                 </template>
             </select>
         </label>
 
         <label class="block">
             <span class="mb-1.5 block text-xs font-medium text-slate-700">
-                <?= $block->escapeHtml(__('County / Region')) ?> <span x-show="isAddressFieldRequired('region')" class="text-rose-600">*</span>
+                <?= $block->escapeHtml(__('County / Region')) ?>
+                <span x-show="isAddressFieldRequired('region')" class="text-rose-600">*</span>
             </span>
             <input
                 x-model="shipping.region"
@@ -121,13 +135,14 @@ declare(strict_types=1);
                 @change="queueShippingAutosave('field')"
                 @blur="queueShippingAutosave('field')"
                 class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
-                placeholder="<?= $block->escapeHtml(__('County / Region')) ?>"
+                placeholder="<?= $block->escapeHtmlAttr(__('County / Region')) ?>"
             >
         </label>
 
         <label class="block">
             <span class="mb-1.5 block text-xs font-medium text-slate-700">
-                <?= $block->escapeHtml(__('City')) ?> <span x-show="isAddressFieldRequired('city')" class="text-rose-600">*</span>
+                <?= $block->escapeHtml(__('City')) ?>
+                <span x-show="isAddressFieldRequired('city')" class="text-rose-600">*</span>
             </span>
             <input
                 x-model="shipping.city"
@@ -135,13 +150,14 @@ declare(strict_types=1);
                 @change="queueShippingAutosave('field')"
                 @blur="queueShippingAutosave('field')"
                 class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
-                placeholder="<?= $block->escapeHtml(__('City')) ?>"
+                placeholder="<?= $block->escapeHtmlAttr(__('City')) ?>"
             >
         </label>
 
         <label class="block">
             <span class="mb-1.5 block text-xs font-medium text-slate-700">
-                <?= $block->escapeHtml(__('Postcode')) ?> <span x-show="isAddressFieldRequired('postcode')" class="text-rose-600">*</span>
+                <?= $block->escapeHtml(__('Postcode')) ?>
+                <span x-show="isAddressFieldRequired('postcode')" class="text-rose-600">*</span>
             </span>
             <input
                 x-model="shipping.postcode"
@@ -149,13 +165,14 @@ declare(strict_types=1);
                 @change="queueShippingAutosave('field')"
                 @blur="queueShippingAutosave('field')"
                 class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
-                placeholder="<?= $block->escapeHtml(__('Postcode')) ?>"
+                placeholder="<?= $block->escapeHtmlAttr(__('Postcode')) ?>"
             >
         </label>
 
         <label class="block sm:col-span-2">
             <span class="mb-1.5 block text-xs font-medium text-slate-700">
-                <?= $block->escapeHtml(__('Phone number')) ?> <span x-show="isAddressFieldRequired('telephone')" class="text-rose-600">*</span>
+                <?= $block->escapeHtml(__('Phone number')) ?>
+                <span x-show="isAddressFieldRequired('telephone')" class="text-rose-600">*</span>
             </span>
             <input
                 x-model="shipping.telephone"
@@ -163,7 +180,7 @@ declare(strict_types=1);
                 @change="queueShippingAutosave('field')"
                 @blur="queueShippingAutosave('field')"
                 class="w-full border border-slate-300 bg-white px-3 py-3 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-900"
-                placeholder="<?= $block->escapeHtml(__('Phone number')) ?>"
+                placeholder="<?= $block->escapeHtmlAttr(__('Phone number')) ?>"
             >
         </label>
     </div>

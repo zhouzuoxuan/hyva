@@ -8,7 +8,7 @@ declare(strict_types=1);
         <input
             type="checkbox"
             x-model="termsAccepted"
-            @change="handleTermsAcceptedChange()"
+            @change="handleTermsAcceptedChange($event)"
             class="mt-1 rounded border-slate-300 text-slate-900 focus:ring-0"
         >
         <span class="text-sm leading-6 text-slate-600">
@@ -41,19 +41,18 @@ declare(strict_types=1);
                 </div>
             </template>
 
-            <div class="min-h-[108px]">
-                <template x-if="termsAccepted">
-                    <div x-init="$nextTick(() => window.dispatchEvent(new CustomEvent('lencarta:paypal:mount')))">
-                        <div id="lencarta-paypal-button"></div>
-                    </div>
-                </template>
+            <template x-if="getCheckoutBlockingMessage()">
+                <div class="mb-4 rounded-lg border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-sm text-rose-100"
+                     x-text="getCheckoutBlockingMessage()"></div>
+            </template>
 
-                <template x-if="!termsAccepted">
-                    <div class="grid gap-3">
-                        <div class="h-[44px] rounded-md bg-white/10"></div>
-                        <div class="h-[44px] rounded-md bg-white/5"></div>
-                    </div>
-                </template>
+            <div
+                class="transition-opacity duration-200"
+                :class="canStartPaypalCheckout()
+            ? 'opacity-100'
+            : (termsAccepted ? 'pointer-events-none opacity-40' : 'pointer-events-none opacity-50')"
+            >
+                <div id="lencarta-paypal-button" class="min-h-[96px]"></div>
             </div>
         </div>
 

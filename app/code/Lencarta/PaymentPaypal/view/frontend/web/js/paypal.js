@@ -2,11 +2,16 @@
     'use strict';
 
     var CONTAINER_ID = 'lencarta-paypal-button';
+
     var sdkPromise = null;
     var buttonsInstance = null;
     var renderTimer = null;
-    var lastRenderSignature = '';
-    var observer = null;
+    var containerObserver = null;
+
+    var isRendering = false;
+    var isRendered = false;
+    var lastButtonsSignature = '';
+    var hasBooted = false;
 
     function getPaypalConfig() {
         return window.lencartaPaypalConfig || {};
@@ -22,7 +27,9 @@
         if (!checkout || typeof checkout.getPaypalState !== 'function') {
             return {
                 canRender: false,
-                blockingMessage: 'Checkout state is not ready yet.'
+                canStart: false,
+                blockingMessage: 'Checkout state is not ready yet.',
+                signature: ''
             };
         }
 
@@ -76,6 +83,28 @@
         return 'https://www.paypal.com/sdk/js?' + params.toString();
     }
 
+    function waitForPaypalGlobal(timeoutMs) {
+        timeoutMs = typeof timeoutMs === 'number' ? timeoutMs : 10000;
+
+        return new Promise(function (resolve, reject) {
+            var startedAt = Date.now();
+
+            (function poll() {
+                if (window.paypal && typeof window.paypal.Buttons === 'function') {
+                    resolve(window.paypal);
+                    return;
+                }
+
+                if (Date.now() - startedAt >= timeoutMs) {
+                    reject(new Error('PayPal SDK loaded timeout.'));
+                    return;
+                }
+
+                window.setTimeout(poll, 50);
+            })();
+        });
+    }
+
     function loadPaypalSdk() {
         var config = getPaypalConfig();
 
@@ -96,14 +125,7 @@
             var existing = document.querySelector('script[data-lencarta-paypal-sdk="1"]');
 
             if (existing) {
-                existing.addEventListener('load', function () {
-                    resolve(window.paypal);
-                }, { once: true });
-
-                existing.addEventListener('error', function () {
-                    reject(new Error('Failed to load PayPal SDK.'));
-                }, { once: true });
-
+                waitForPaypalGlobal(10000).then(resolve).catch(reject);
                 return;
             }
 
@@ -114,12 +136,7 @@
             script.setAttribute('data-lencarta-paypal-sdk', '1');
 
             script.onload = function () {
-                if (window.paypal && typeof window.paypal.Buttons === 'function') {
-                    resolve(window.paypal);
-                    return;
-                }
-
-                reject(new Error('PayPal SDK loaded but window.paypal is unavailable.'));
+                waitForPaypalGlobal(3000).then(resolve).catch(reject);
             };
 
             script.onerror = function () {
@@ -132,10 +149,26 @@
         return sdkPromise;
     }
 
+    function containerHasContent(container) {
+        return !!(container && container.childNodes && container.childNodes.length > 0);
+    }
+
+    function setContainerState(state) {
+        var container = getContainer();
+
+        if (!container) {
+            return;
+        }
+
+        container.setAttribute('data-paypal-state', state || 'idle');
+    }
+
     function clearContainer() {
         var container = getContainer();
+
         if (container) {
             container.innerHTML = '';
+            container.removeAttribute('data-paypal-rendered');
         }
     }
 
@@ -144,26 +177,31 @@
             try {
                 buttonsInstance.close();
             } catch (e) {
-                // ignore
+                // ignore paypal internal close issues
             }
         }
 
         buttonsInstance = null;
+        isRendered = false;
+        isRendering = false;
+        lastButtonsSignature = '';
         clearContainer();
+        setContainerState('idle');
     }
 
-    function getRenderSignature() {
+    function getButtonsSignature() {
         var config = getPaypalConfig();
-        var state = getPaypalState();
 
         return JSON.stringify({
             clientId: config.clientId || '',
             currency: config.currency || 'USD',
+            intent: config.intent || 'capture',
+            locale: config.locale || '',
+            disableFunding: config.disableFunding || '',
+            enableFunding: config.enableFunding || '',
             buttonColor: config.buttonColor || 'gold',
             buttonShape: config.buttonShape || 'rect',
-            buttonLabel: config.buttonLabel || 'paypal',
-            canRender: !!state.canRender,
-            signature: state.signature || ''
+            buttonLabel: config.buttonLabel || 'paypal'
         });
     }
 
@@ -175,9 +213,29 @@
         }
     }
 
+    function canAttemptInitialRender() {
+        var config = getPaypalConfig();
+        var checkout = getCheckoutState();
+        var container = getContainer();
+
+        if (!container) {
+            return false;
+        }
+
+        if (!config.clientId) {
+            return false;
+        }
+
+        if (!checkout) {
+            return false;
+        }
+
+        return true;
+    }
+
     function scheduleRender(delay) {
         if (typeof delay === 'undefined') {
-            delay = 50;
+            delay = 60;
         }
 
         if (renderTimer) {
@@ -194,7 +252,7 @@
         var config = getPaypalConfig();
         var state = getPaypalState();
 
-        if (!state.canRender) {
+        if (!state.canStart) {
             throw new Error(state.blockingMessage || 'Unable to start PayPal checkout.');
         }
 
@@ -341,59 +399,88 @@
         });
     }
 
-    function renderPaypalButton() {
+    function renderPaypalButton(force) {
         var container = getContainer();
-        var state = getPaypalState();
+        var signature = getButtonsSignature();
 
         if (!container) {
+            startContainerObserver();
             return;
         }
 
-        if (!state.canRender) {
+        if (!canAttemptInitialRender()) {
+            startContainerObserver();
+            return;
+        }
+
+        if (!force && isRendering) {
+            return;
+        }
+
+        if (!force && isRendered && lastButtonsSignature === signature && containerHasContent(container)) {
+            setContainerState('ready');
+            return;
+        }
+
+        if (isRendered && lastButtonsSignature === signature && !containerHasContent(container)) {
+            buttonsInstance = null;
+            isRendered = false;
+        }
+
+        if (isRendered && lastButtonsSignature !== signature) {
             destroyButtons();
-            lastRenderSignature = '';
-            return;
         }
 
-        var signature = getRenderSignature();
-
-        if (
-            buttonsInstance &&
-            lastRenderSignature === signature &&
-            container.childNodes.length > 0
-        ) {
-            return;
-        }
+        isRendering = true;
+        setContainerState('loading');
 
         loadPaypalSdk()
             .then(function () {
                 var liveContainer = getContainer();
-                var liveState = getPaypalState();
 
-                if (!liveContainer || !liveState.canRender) {
-                    destroyButtons();
-                    lastRenderSignature = '';
+                if (!liveContainer) {
+                    isRendering = false;
+                    setContainerState('idle');
+                    startContainerObserver();
                     return;
                 }
 
-                destroyButtons();
+                if (isRendered && lastButtonsSignature === signature && containerHasContent(liveContainer)) {
+                    isRendering = false;
+                    setContainerState('ready');
+                    return;
+                }
 
                 var buttons = buildButtons();
 
                 if (typeof buttons.isEligible === 'function' && !buttons.isEligible()) {
                     clearContainer();
-                    lastRenderSignature = '';
+                    isRendering = false;
+                    isRendered = false;
+                    buttonsInstance = null;
+                    setContainerState('ineligible');
                     return;
                 }
 
+                clearContainer();
                 buttonsInstance = buttons;
 
                 return buttons.render(liveContainer).then(function () {
-                    lastRenderSignature = signature;
+                    isRendering = false;
+                    isRendered = true;
+                    lastButtonsSignature = signature;
+                    liveContainer.setAttribute('data-paypal-rendered', '1');
+                    setContainerState('ready');
                     notifyCheckoutMessage('');
+                    stopContainerObserver();
                 });
             })
             .catch(function (error) {
+                isRendering = false;
+                isRendered = false;
+                buttonsInstance = null;
+                setContainerState('error');
+
                 console.error('PayPal render failed:', error);
                 notifyCheckoutMessage(
                     (error && error.message) || 'Unable to load PayPal checkout.'
@@ -401,57 +488,88 @@
             });
     }
 
-    function startObserver() {
-        if (observer) {
+    function startContainerObserver() {
+        if (containerObserver) {
             return;
         }
 
-        observer = new MutationObserver(function () {
+        containerObserver = new MutationObserver(function () {
             if (getContainer()) {
                 scheduleRender(30);
             }
         });
 
-        observer.observe(document.documentElement, {
+        containerObserver.observe(document.body || document.documentElement, {
             childList: true,
             subtree: true
         });
     }
 
-    function boot() {
-        startObserver();
+    function stopContainerObserver() {
+        if (!containerObserver) {
+            return;
+        }
 
+        containerObserver.disconnect();
+        containerObserver = null;
+    }
+
+    function bindEvents() {
         document.addEventListener('DOMContentLoaded', function () {
-            scheduleRender(30);
-            scheduleRender(300);
-            scheduleRender(900);
+            scheduleRender(80);
+            scheduleRender(500);
         });
 
         window.addEventListener('lencarta-checkout-ready', function () {
-            scheduleRender(30);
+            scheduleRender(50);
             scheduleRender(250);
         });
 
         window.addEventListener('lencarta-checkout-paypal-state-changed', function () {
-            scheduleRender(20);
+            var container = getContainer();
+
+            if (!container) {
+                scheduleRender(50);
+                return;
+            }
+
+            if (!isRendered || !containerHasContent(container)) {
+                scheduleRender(30);
+            }
         });
 
         window.addEventListener('pageshow', function () {
-            scheduleRender(50);
+            scheduleRender(80);
         });
+    }
 
-        scheduleRender(50);
-        scheduleRender(400);
-        scheduleRender(1200);
+    function boot() {
+        if (hasBooted) {
+            return;
+        }
+
+        hasBooted = true;
+        bindEvents();
+        startContainerObserver();
+        scheduleRender(120);
     }
 
     window.LencartaPaypal = {
         forceRender: function () {
-            scheduleRender(0);
+            renderPaypalButton(true);
         },
         destroy: function () {
             destroyButtons();
-            lastRenderSignature = '';
+        },
+        getStatus: function () {
+            return {
+                sdkLoaded: !!(window.paypal && typeof window.paypal.Buttons === 'function'),
+                isRendering: isRendering,
+                isRendered: isRendered,
+                hasContainer: !!getContainer(),
+                hasContent: containerHasContent(getContainer()),
+                signature: lastButtonsSignature
+            };
         }
     };
 

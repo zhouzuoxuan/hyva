@@ -9,8 +9,16 @@ declare(strict_types=1);
             class="flex w-full items-center justify-between gap-3 text-left">
         <span class="flex items-center gap-2.5 text-sm font-semibold text-slate-900">
             <span class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8m-8 5h5m-7 8 11-11a2 2 0 0 0 0-2.828l-.172-.172a2 2 0 0 0-2.828 0L3 17v4h4Z"/>
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.8"
+                     class="h-4 w-4"
+                     aria-hidden="true">
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M8 7h8m-8 5h5m-7 8 11-11a2 2 0 0 0 0-2.828l-.172-.172a2 2 0 0 0-2.828 0L3 17v4h4Z"/>
                 </svg>
             </span>
             <span><?= $block->escapeHtml(__('Apply Discount Code')) ?></span>
@@ -22,12 +30,18 @@ declare(strict_types=1);
                  fill="currentColor"
                  class="h-3.5 w-3.5 transition-transform duration-200"
                  :class="couponOpen ? 'rotate-180' : ''">
-                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.512a.75.75 0 0 1-1.08 0L5.21 8.27a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd"/>
+                <path fill-rule="evenodd"
+                      d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.512a.75.75 0 0 1-1.08 0L5.21 8.27a.75.75 0 0 1 .02-1.06Z"
+                      clip-rule="evenodd"/>
             </svg>
         </span>
     </button>
 
-    <div x-show="couponOpen" class="pt-4">
+    <div x-cloak
+         x-show="couponOpen"
+         x-collapse.duration.200ms
+         style="display: none;"
+         class="pt-4">
         <div class="flex gap-3">
             <input
                 type="text"

@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Hyvä Themes - https://hyva.io
+ * Copyright © Hyvä Themes 2020-present. All rights reserved.
+ * This product is licensed per Magento install
+ * See https://hyva.io/license
+ */
+-->
+<page
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd"
+>
+    <body>
+        <referenceContainer name="content">
+            <block name="banner-b" template="Magento_Cms::elements/banner-b.phtml">
+                <arguments>
+                    <argument name="title" xsi:type="string">Hit the court in style.</argument>
+                    <!-- <argument name="subtitle" xsi:type="string"></argument> -->
+                    <!-- <argument name="content_alignment" xsi:type="string">center</argument> -->
+                    <!-- <argument name="text_align" xsi:type="string">center</argument> -->
+                    <!-- <argument name="background_color" xsi:type="string">#ff0</argument> -->
+                    <!-- <argument name="text_color" xsi:type="string">#000</argument> -->
+                    <!-- <argument name="image" xsi:type="array">
+                        <item name="src" xsi:type="string">https://unsplash.com/photos/Q-fL04RhuMg/download</item>
+                        <item name="alt" xsi:type="string">Experience the full feedback</item>
+                    </argument> -->
+                    <!-- <argument name="desktop_image" xsi:type="string">https://unsplash.com/photos/Q-fL04RhuMg/download</argument> -->
+                    <!-- <argument name="loading" xsi:type="string">lazy</argument> -->
+                    <!-- <argument name="link" xsi:type="array">
+                        <item name="url" xsi:type="string">https://www.hyva.io/</item>
+                        <item name="label" xsi:type="string">Check out Hyvä</item>
+                        <item name="open_in_new" xsi:type="boolean">true</item>
+                    </argument> -->
+                    <!-- <argument name="link_appearance" xsi:type="string">btn-primary</argument> -->
+                    <!-- <argument name="link_appearance" xsi:type="string">btn-secondary</argument> -->
+                    <!-- <argument name="link_appearance" xsi:type="string">btn</argument> -->
+                    <!-- <argument name="link_appearance" xsi:type="string">link</argument> -->
+                    <!-- <argument name="link_appearance" xsi:type="string">overlay</argument> -->
+                    <!-- <argument name="use_reverse" xsi:type="boolean">true</argument> -->
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

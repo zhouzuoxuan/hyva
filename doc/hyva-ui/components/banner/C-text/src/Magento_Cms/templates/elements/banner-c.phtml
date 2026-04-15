@@ -1,0 +1,103 @@
+<?php
+/**
+ * Hyvä Themes - https://hyva.io
+ * Copyright © Hyvä Themes 2020-present. All rights reserved.
+ * This product is licensed per Magento install
+ * See https://hyva.io/license
+ */
+
+declare(strict_types=1);
+
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
+
+/** @var Template $block */
+/** @var Escaper $escaper */
+
+$link = $block->getData('link') ?? [
+    'url' => $block->getUrl('home'),
+    'label' => __('Check it out!'),
+];
+
+$linkAppearance = $block->getLinkAppearance() ?: 'btn-primary'; // 'btn-primary', 'btn-secondary', 'btn', 'link', 'overlay'
+
+$useLinkOverlay = $block->getUseLinkOverlay() !== null ? $block->getUseLinkOverlay() : $linkAppearance === "overlay";
+$useHiddenLink = $linkAppearance === "overlay";
+
+$position = (string) $block->getContentAlignment() ?: 'center stretch';
+$textAlign = (string) $block->getTextAlign();
+$bgColor = (string) $block->getBackgroundColor() ?: '#1e293b'; // slate-800
+$fgColor = (string) $block->getTextColor() ?: '#f8fafc'; // slate-50
+$titleColor = (string) $block->getTitleColor();
+
+// Styles
+$bannerClasses = implode(' ', array_filter([
+    'relative',
+    $useHiddenLink ? 'transition-[outline-offset] focus-within:outline focus-within:outline-2 focus-within:outline-offset-4 focus-within:outline-primary' : '',
+    $block->getClasses()
+]));
+$bannerStyles = implode('; ', array_filter([
+    $bgColor ? "--banner-bg: {$bgColor}" : '',
+    $fgColor ? "--banner-color: {$fgColor}" : '',
+    ($bgColor || $fgColor) ? 'background: var(--banner-bg); color: var(--banner-color)' : '',
+]));
+
+$bannerContentClasses = implode(' ', array_filter([
+    'isolate p-6 md:p-12'
+]));
+
+$bannerContentStyles = implode('; ', array_filter([
+    $position ? "place-self: {$position}" : '',
+    $textAlign ? "text-align: {$textAlign}" : '',
+]));
+
+$bannerTitleStyles = implode('; ', array_filter([
+    $titleColor ? "color: {$titleColor}" : ''
+]));
+
+$bannerLinkClasses = implode(' ', array_filter([
+    $linkAppearance === 'btn-primary' ? 'btn btn-primary inline-flex' : '',
+    $linkAppearance === 'btn-secondary' ? 'btn btn-secondary inline-flex' : '',
+    $linkAppearance === 'btn' ? 'btn inline-flex' : '',
+    $linkAppearance === 'link' ? 'font-medium underline hover:no-underline' : '',
+    $useLinkOverlay ? 'before:absolute before:inset-0 before:transition-opacity before:duration-500 before:opacity-0 before:bg-current hover:before:opacity-10' : ''
+]));
+
+// Content
+$title = (string) $block->getTitle() ?: __("Hit the court in style.");
+$subtitle = (string) $block->getSubtitle() ?: '';
+?>
+<div
+    class="<?= $escaper->escapeHtmlAttr($bannerClasses) ?>"
+    style="<?= $escaper->escapeHtmlAttr($bannerStyles) ?>"
+>
+    <div
+        class="<?= $escaper->escapeHtmlAttr($bannerContentClasses) ?>"
+        style="<?= $escaper->escapeHtmlAttr($bannerContentStyles) ?>"
+    >
+        <p
+            class="text-3xl lg:text-6xl text-balance mb-2"
+            style="<?= $escaper->escapeHtmlAttr($bannerTitleStyles) ?>"
+        >
+            <strong><?= $escaper->escapeHtml($title) ?></strong>
+        </p>
+        <?php if ($subtitle): ?>
+            <p class="text-lg lg:text-2xl font-medium my-2">
+                <?= $escaper->escapeHtml($subtitle) ?>
+            </p>
+        <?php endif; ?>
+        <?php if ($linkUrl = $link['url'] ?? ''): ?>
+            <div <?= $useHiddenLink ? '' : 'class="mt-6 inline-flex flex-wrap items-center gap-4"' ?>>
+                <a
+                    href="<?= $escaper->escapeUrl($linkUrl) ?>"
+                    <?= ($link['open_in_new'] ?? false) ? 'target="_blank" rel="noopener"' : '' ?>
+                    class="<?= $escaper->escapeHtmlAttr($bannerLinkClasses) ?>"
+                >
+                    <span <?= $useHiddenLink ? 'class="sr-only"' : '' ?>>
+                        <?= $escaper->escapeHtml($link['label'] ?? __('Go to %1', $linkUrl)) ?>
+                    </span>
+                </a>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>

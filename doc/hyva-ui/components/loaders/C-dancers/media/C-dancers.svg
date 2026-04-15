@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 40 40">
+    <!-- Based on https://css-loaders.com/dancers/ (Version 10) -->
+    <style>
+        @keyframes animate-dancers {
+
+            0%,
+            5% {
+                rotate: 0deg;
+            }
+
+            20%,
+            30% {
+                rotate: 90deg;
+            }
+
+            45%,
+            55% {
+                rotate: 180deg;
+            }
+
+            70%,
+            80% {
+                rotate: 270deg;
+            }
+
+            95%,
+            100% {
+                rotate: 360deg;
+            }
+        }
+
+        .loader-dancers-left,
+        .loader-dancers-right {
+            transform-box: fill-box;
+            transform-origin: 50% 0%;
+            animation: animate-dancers 2s infinite linear;
+        }
+
+        .loader-dancers-left {
+            transform-origin: 100% 0%;
+            fill: #14ffaf;
+        }
+
+        .loader-dancers-right {
+            transform-origin: 0% 0%;
+            animation-delay: 0.25s;
+            fill: #0a23b9;
+        }
+    </style>
+    <rect x="6" y="20" width="14" height="14" rx="0" class="loader-dancers-left" />
+    <rect x="20" y="20" width="14" height="14" rx="0" class="loader-dancers-right" />
+</svg>

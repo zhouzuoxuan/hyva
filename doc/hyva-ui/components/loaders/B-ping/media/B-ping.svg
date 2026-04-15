@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="#14ffaf">
+    <!-- @source: https://tailwindcss.com/docs/animation -->
+    <style>
+        .animate-ping {
+            transform-origin: center;
+            transform-box: fill-box;
+            animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+
+        @keyframes ping {
+
+            75%,
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+    </style>
+    <circle cx="12" cy="12" r="6" class="animate-ping" />
+</svg>

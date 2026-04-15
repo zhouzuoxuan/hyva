@@ -1,0 +1,18 @@
+@layer utilities {
+    .details-animate {
+        /* Add me if your using Hyvä 1.3 or older */
+        /* interpolate-size: allow-keywords; */
+
+        &::details-content {
+            @apply h-0 opacity-0;
+            transition-property: height, opacity, content-visibility;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 150ms;
+            transition-behavior: allow-discrete;
+        }
+
+        &[open]::details-content {
+            @apply h-auto opacity-100;
+        }
+    }
+}

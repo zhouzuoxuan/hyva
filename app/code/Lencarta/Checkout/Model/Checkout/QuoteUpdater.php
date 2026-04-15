@@ -18,6 +18,8 @@ class QuoteUpdater
 
     public function saveEmail(Quote $quote, string $email): void
     {
+        $email = trim($email);
+
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new LocalizedException(__('Invalid email address.'));
         }
@@ -31,7 +33,7 @@ class QuoteUpdater
         }
 
         $shippingAddress = $quote->getShippingAddress();
-        $billingAddress  = $quote->getBillingAddress();
+        $billingAddress = $quote->getBillingAddress();
 
         $shippingAddress->setEmail($email);
         $billingAddress->setEmail($email);
@@ -42,6 +44,7 @@ class QuoteUpdater
     public function saveShippingAddress(Quote $quote, array $data): void
     {
         $required = ['firstname', 'lastname', 'telephone', 'street', 'city', 'postcode', 'country_id'];
+
         foreach ($required as $field) {
             if (empty($data[$field])) {
                 throw new LocalizedException(__('Missing required field: %1', $field));
@@ -50,22 +53,26 @@ class QuoteUpdater
 
         $address = $quote->getShippingAddress();
         $address->addData([
-            'firstname'  => (string) $data['firstname'],
-            'lastname'   => (string) $data['lastname'],
-            'company'    => (string) ($data['company'] ?? ''),
-            'telephone'  => (string) $data['telephone'],
-            'street'     => is_array($data['street']) ? $data['street'] : [(string) $data['street']],
-            'city'       => (string) $data['city'],
-            'postcode'   => (string) $data['postcode'],
-            'country_id' => (string) $data['country_id'],
-            'region'     => (string) ($data['region'] ?? ''),
-            'region_id'  => isset($data['region_id']) && $data['region_id'] !== '' ? (int) $data['region_id'] : null,
+            'firstname' => (string) $data['firstname'],
+            'lastname' => (string) $data['lastname'],
+            'company' => (string) ($data['company'] ?? ''),
+            'telephone' => (string) $data['telephone'],
+            'street' => is_array($data['street']) ? $data['street'] : [(string) $data['street']],
+            'city' => (string) $data['city'],
+            'postcode' => (string) $data['postcode'],
+            'country_id' => strtoupper((string) $data['country_id']),
+            'region' => (string) ($data['region'] ?? ''),
+            'region_id' => isset($data['region_id']) && $data['region_id'] !== '' ? (int) $data['region_id'] : null,
             'collect_shipping_rates' => 1,
         ]);
 
         if ($quote->getCustomerEmail()) {
             $address->setEmail((string) $quote->getCustomerEmail());
+            $quote->getBillingAddress()->setEmail((string) $quote->getCustomerEmail());
         }
+
+        $address->collectShippingRates();
+        $this->clearInvalidShippingMethod($address);
 
         $quote->setTotalsCollectedFlag(false);
         $quote->collectTotals();
@@ -77,16 +84,16 @@ class QuoteUpdater
     {
         $address = $quote->getBillingAddress();
         $address->addData([
-            'firstname'  => (string) ($data['firstname'] ?? ''),
-            'lastname'   => (string) ($data['lastname'] ?? ''),
-            'company'    => (string) ($data['company'] ?? ''),
-            'telephone'  => (string) ($data['telephone'] ?? ''),
-            'street'     => is_array($data['street'] ?? null) ? $data['street'] : [(string) ($data['street'] ?? '')],
-            'city'       => (string) ($data['city'] ?? ''),
-            'postcode'   => (string) ($data['postcode'] ?? ''),
+            'firstname' => (string) ($data['firstname'] ?? ''),
+            'lastname' => (string) ($data['lastname'] ?? ''),
+            'company' => (string) ($data['company'] ?? ''),
+            'telephone' => (string) ($data['telephone'] ?? ''),
+            'street' => is_array($data['street'] ?? null) ? $data['street'] : [(string) ($data['street'] ?? '')],
+            'city' => (string) ($data['city'] ?? ''),
+            'postcode' => (string) ($data['postcode'] ?? ''),
             'country_id' => (string) ($data['country_id'] ?? ''),
-            'region'     => (string) ($data['region'] ?? ''),
-            'region_id'  => ($data['region_id'] ?? '') !== '' ? (int) $data['region_id'] : null,
+            'region' => (string) ($data['region'] ?? ''),
+            'region_id' => ($data['region_id'] ?? '') !== '' ? (int) $data['region_id'] : null,
         ]);
 
         if ($quote->getCustomerEmail()) {
@@ -94,5 +101,25 @@ class QuoteUpdater
         }
 
         $this->cartRepository->save($quote);
+    }
+
+    private function clearInvalidShippingMethod(\Magento\Quote\Model\Quote\Address $address): void
+    {
+        $currentMethod = (string) $address->getShippingMethod();
+
+        if ($currentMethod === '') {
+            return;
+        }
+
+        $availableCodes = [];
+        foreach ((array) $address->getGroupedAllShippingRates() as $carrierRates) {
+            foreach ($carrierRates as $rate) {
+                $availableCodes[] = (string) $rate->getCode();
+            }
+        }
+
+        if (!in_array($currentMethod, $availableCodes, true)) {
+            $address->setShippingMethod('');
+        }
     }
 }

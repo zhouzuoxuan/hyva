@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Lencarta\Checkout\ViewModel;
 
-use Lencarta\Checkout\Model\Checkout\TotalsProvider;
-use Magento\Checkout\Model\Session as CheckoutSession;
+use Lencarta\Checkout\Model\Checkout\CheckoutStateProvider;
+use Lencarta\Checkout\Model\Checkout\SessionQuoteProvider;
 use Magento\Customer\Api\AddressMetadataInterface;
 use Magento\Directory\Helper\Data as DirectoryHelper;
 use Magento\Directory\Model\AllowedCountries;
@@ -12,15 +12,14 @@ use Magento\Directory\Model\ResourceModel\Country\CollectionFactory as CountryCo
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
-use Magento\Quote\Model\Quote\Address;
 
 class CheckoutState implements ArgumentInterface
 {
     private ?array $addressMetadataMap = null;
 
     public function __construct(
-        private readonly CheckoutSession $checkoutSession,
-        private readonly TotalsProvider $totalsProvider,
+        private readonly SessionQuoteProvider $sessionQuoteProvider,
+        private readonly CheckoutStateProvider $checkoutStateProvider,
         private readonly CountryCollectionFactory $countryCollectionFactory,
         private readonly AllowedCountries $allowedCountries,
         private readonly DirectoryHelper $directoryHelper,
@@ -31,25 +30,23 @@ class CheckoutState implements ArgumentInterface
 
     public function getInitialState(): array
     {
-        $quote = $this->checkoutSession->getQuote();
-
-        if (!$quote || !$quote->getId()) {
-            return $this->getEmptyState();
-        }
-
-        $shippingAddress = $quote->getShippingAddress();
-
-        return [
-            'email' => (string) ($quote->getCustomerEmail() ?: ''),
-            'items' => $this->totalsProvider->getItems($quote),
-            'totals' => $this->totalsProvider->getTotals($quote),
-            'shipping_methods' => $this->totalsProvider->getShippingMethods($quote),
-            'selected_shipping_method' => (string) ($shippingAddress?->getShippingMethod() ?: ''),
-            'coupon_code' => (string) ($quote->getCouponCode() ?: ''),
-            'shipping' => $this->getShippingData($shippingAddress),
-        ];
+        return $this->checkoutStateProvider->getState($this->sessionQuoteProvider->getQuote());
     }
 
+    public function getDefaultCountryId(): string
+    {
+        return $this->checkoutStateProvider->getDefaultCountryId();
+    }
+
+    public function getWebsiteCode(): string
+    {
+        return $this->checkoutStateProvider->getWebsiteCode();
+    }
+
+    public function getStoreCode(): string
+    {
+        return $this->checkoutStateProvider->getStoreCode();
+    }
 
     public function isTermsCheckedByDefault(): bool
     {
@@ -67,7 +64,11 @@ class CheckoutState implements ArgumentInterface
             $collection->addFieldToFilter('country_id', ['in' => $allowedCountryIds]);
         }
 
-        $options = [];
+        $options = [[
+            'value' => '',
+            'label' => (string) __('Please select'),
+        ]];
+
         foreach ($collection as $country) {
             $options[] = [
                 'value' => (string) $country->getCountryId(),
@@ -75,7 +76,9 @@ class CheckoutState implements ArgumentInterface
             ];
         }
 
+        $placeholder = array_shift($options);
         usort($options, static fn(array $a, array $b): int => strcmp($a['label'], $b['label']));
+        array_unshift($options, $placeholder);
 
         return $options;
     }
@@ -125,57 +128,6 @@ class CheckoutState implements ArgumentInterface
                 'label' => (string) __('Phone number'),
                 'required' => $this->isAttributeRequired('telephone', true),
             ],
-        ];
-    }
-
-    private function getShippingData(?Address $address): array
-    {
-        if (!$address) {
-            return $this->getEmptyShipping();
-        }
-
-        $street = $address->getStreet() ?: [];
-
-        return [
-            'firstname' => (string) ($address->getFirstname() ?: ''),
-            'lastname' => (string) ($address->getLastname() ?: ''),
-            'company' => (string) ($address->getCompany() ?: ''),
-            'telephone' => (string) ($address->getTelephone() ?: ''),
-            'street_1' => (string) ($street[0] ?? ''),
-            'street_2' => (string) ($street[1] ?? ''),
-            'city' => (string) ($address->getCity() ?: ''),
-            'postcode' => (string) ($address->getPostcode() ?: ''),
-            'region' => (string) ($address->getRegion() ?: ''),
-            'country_id' => (string) ($address->getCountryId() ?: 'GB'),
-        ];
-    }
-
-    private function getEmptyState(): array
-    {
-        return [
-            'email' => '',
-            'items' => [],
-            'totals' => [],
-            'shipping_methods' => [],
-            'selected_shipping_method' => '',
-            'coupon_code' => '',
-            'shipping' => $this->getEmptyShipping(),
-        ];
-    }
-
-    private function getEmptyShipping(): array
-    {
-        return [
-            'firstname' => '',
-            'lastname' => '',
-            'company' => '',
-            'telephone' => '',
-            'street_1' => '',
-            'street_2' => '',
-            'city' => '',
-            'postcode' => '',
-            'region' => '',
-            'country_id' => 'GB',
         ];
     }
 

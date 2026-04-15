@@ -15,7 +15,10 @@ function initLencartaCheckout(config) {
         message: '',
         termsAccepted: false,
         couponCode: initialState.coupon_code || '',
+        appliedCouponCode: initialState.coupon_code || '',
         couponOpen: false,
+        couponApplying: false,
+        couponRemoving: false,
 
         email: initialState.email || '',
         emailSaveState: 'idle',
@@ -222,6 +225,29 @@ function initLencartaCheckout(config) {
             }));
         },
 
+        hasAppliedCoupon() {
+            return !!(this.appliedCouponCode || '').trim();
+        },
+
+        canApplyCoupon() {
+            return !this.couponApplying && !!(this.couponCode || '').trim();
+        },
+
+        canRemoveCoupon() {
+            return !this.couponRemoving && this.hasAppliedCoupon();
+        },
+
+        applyServerStatePayload(payload) {
+            if (payload && payload.state && typeof payload.state === 'object') {
+                this.hydrateFromState(payload.state);
+                return;
+            }
+
+            if (payload && payload.data && typeof payload.data === 'object') {
+                this.hydrateFromState(payload.data);
+            }
+        },
+
         getNormalizedEmail() {
             return (this.email || '').trim().toLowerCase();
         },
@@ -400,9 +426,10 @@ function initLencartaCheckout(config) {
                 }
 
                 requestSucceeded = true;
+                this.applyServerStatePayload(data);
                 this.emailSaveState = 'saved';
                 this.message = '';
-                this.lastSavedEmail = emailToSave;
+                this.lastSavedEmail = this.getNormalizedEmail() || emailToSave;
                 this.emailDirty = false;
                 this.emitPaypalStateChanged();
             } catch (e) {
@@ -733,13 +760,14 @@ function initLencartaCheckout(config) {
                 }
 
                 requestSucceeded = true;
+                this.applyServerStatePayload(data);
                 this.shippingSaveState = 'saved';
-                this.totals = data.totals || {};
-                this.shippingMethods = Array.isArray(data.shipping_methods) ? data.shipping_methods : [];
+                this.totals = data.totals || this.totals || {};
+                this.shippingMethods = Array.isArray(data.shipping_methods) ? data.shipping_methods : this.shippingMethods;
                 this.shippingMethodsState = this.shippingMethods.length > 0 ? 'ready' : 'unavailable';
                 this.message = '';
-                this.lastSavedShippingSignature = signature;
-                this.lastObservedShippingSignature = signature;
+                this.lastSavedShippingSignature = this.getShippingSignature();
+                this.lastObservedShippingSignature = this.lastSavedShippingSignature;
                 this.shippingDirty = false;
 
                 if (data.selected_shipping_method) {
@@ -786,6 +814,7 @@ function initLencartaCheckout(config) {
 
             this.email = state.email || '';
             this.couponCode = state.coupon_code || '';
+            this.appliedCouponCode = state.coupon_code || '';
             this.items = Array.isArray(state.items) ? state.items : [];
             this.totals = state.totals || {};
             this.shippingMethods = Array.isArray(state.shipping_methods) ? state.shipping_methods : [];
@@ -887,8 +916,9 @@ function initLencartaCheckout(config) {
                     return;
                 }
 
-                this.selectedShippingMethod = method.code;
-                this.totals = data.totals || {};
+                this.applyServerStatePayload(data);
+                this.selectedShippingMethod = data.selected_shipping_method || method.code;
+                this.totals = data.totals || this.totals || {};
                 this.message = '';
                 this.emitPaypalStateChanged();
             } catch (e) {
@@ -897,11 +927,99 @@ function initLencartaCheckout(config) {
             }
         },
 
-        applyCoupon() {
-            this.message = this.translate(
-                'Coupon application will be connected in the next step.',
-                'Coupon application will be connected in the next step.'
-            );
+        async applyCoupon() {
+            const couponCode = (this.couponCode || '').trim();
+
+            if (!couponCode) {
+                this.message = this.translate('Please enter a coupon code.', 'Please enter a coupon code.');
+                return;
+            }
+
+            if (!this.config.urls || !this.config.urls.applyCoupon) {
+                this.message = this.translate('Unable to apply coupon.', 'Unable to apply coupon.');
+                return;
+            }
+
+            this.couponApplying = true;
+            this.message = '';
+
+            const body = new URLSearchParams({
+                form_key: this.getFormKey(),
+                coupon_code: couponCode
+            });
+
+            try {
+                const res = await fetch(this.config.urls.applyCoupon, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body
+                });
+
+                const data = await res.json();
+
+                if (!data.success) {
+                    this.message = data.message || this.translate('Unable to apply coupon.', 'Unable to apply coupon.');
+                    return;
+                }
+
+                this.applyServerStatePayload(data);
+                this.appliedCouponCode = data.coupon_code || couponCode;
+                this.couponCode = this.appliedCouponCode;
+                this.message = data.message || '';
+                this.couponOpen = false;
+                this.emitPaypalStateChanged();
+            } catch (e) {
+                this.message = this.translate('Unable to apply coupon.', 'Unable to apply coupon.');
+            } finally {
+                this.couponApplying = false;
+            }
+        },
+
+        async removeCoupon() {
+            if (!this.config.urls || !this.config.urls.removeCoupon) {
+                this.message = this.translate('Unable to remove coupon.', 'Unable to remove coupon.');
+                return;
+            }
+
+            this.couponRemoving = true;
+            this.message = '';
+
+            const body = new URLSearchParams({
+                form_key: this.getFormKey()
+            });
+
+            try {
+                const res = await fetch(this.config.urls.removeCoupon, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body
+                });
+
+                const data = await res.json();
+
+                if (!data.success) {
+                    this.message = data.message || this.translate('Unable to remove coupon.', 'Unable to remove coupon.');
+                    return;
+                }
+
+                this.applyServerStatePayload(data);
+                this.appliedCouponCode = '';
+                this.couponCode = '';
+                this.message = data.message || '';
+                this.emitPaypalStateChanged();
+            } catch (e) {
+                this.message = this.translate('Unable to remove coupon.', 'Unable to remove coupon.');
+            } finally {
+                this.couponRemoving = false;
+            }
         }
     };
 }

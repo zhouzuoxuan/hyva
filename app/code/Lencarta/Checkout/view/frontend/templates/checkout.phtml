@@ -25,6 +25,9 @@ $initialState = $viewModel ? $viewModel->getInitialState() : [];
 $countryOptions = $viewModel ? $viewModel->getCountryOptions() : [];
 $addressFieldConfig = $viewModel ? $viewModel->getAddressFieldConfig() : [];
 $termsCheckedByDefault = $viewModel ? $viewModel->isTermsCheckedByDefault() : false;
+$defaultCountryId = $viewModel ? $viewModel->getDefaultCountryId() : 'GB';
+$websiteCode = $viewModel ? $viewModel->getWebsiteCode() : '';
+$storeCode = $viewModel ? $viewModel->getStoreCode() : '';
 
 $initialStateJson = json_encode(
     $initialState,
@@ -94,6 +97,9 @@ $translationsJson = json_encode([
     'ui_apply_discount_code' => (string) __('Apply Discount Code'),
     'ui_enter_coupon_code' => (string) __('Enter coupon code'),
     'ui_apply' => (string) __('Apply'),
+    'ui_remove' => (string) __('Remove'),
+    'ui_applying' => (string) __('Applying...'),
+    'ui_removing' => (string) __('Removing...'),
     'ui_i_agree_to' => (string) __('I agree to the'),
     'ui_terms_and_conditions' => (string) __('Terms & Conditions'),
     'ui_ready_to_pay' => (string) __('Ready to pay?'),
@@ -106,6 +112,9 @@ $translationsJson = json_encode([
     'js_unable_save_shipping_address' => (string) __('Unable to save shipping address.'),
     'js_unable_save_shipping_method' => (string) __('Unable to save shipping method.'),
     'js_coupon_next_step' => (string) __('Coupon application will be connected in the next step.'),
+    'js_enter_coupon_code' => (string) __('Please enter a coupon code.'),
+    'js_unable_apply_coupon' => (string) __('Unable to apply coupon.'),
+    'js_unable_remove_coupon' => (string) __('Unable to remove coupon.'),
     'js_complete_required_fields' => (string) __('Please complete required fields:'),
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
 ?>
@@ -116,7 +125,9 @@ $translationsJson = json_encode([
             saveEmail: '<?= $block->escapeJs($block->getUrl('lencarta_checkout/ajax/saveEmail')) ?>',
             saveShippingAddress: '<?= $block->escapeJs($block->getUrl('lencarta_checkout/ajax/saveShippingAddress')) ?>',
             saveShippingMethod: '<?= $block->escapeJs($block->getUrl('lencarta_checkout/ajax/saveShippingMethod')) ?>',
-            getTotals: '<?= $block->escapeJs($block->getUrl('lencarta_checkout/ajax/getTotals')) ?>'
+            getTotals: '<?= $block->escapeJs($block->getUrl('lencarta_checkout/ajax/getTotals')) ?>',
+            applyCoupon: '<?= $block->escapeJs($block->getUrl('lencarta_checkout/ajax/applyCoupon')) ?>',
+            removeCoupon: '<?= $block->escapeJs($block->getUrl('lencarta_checkout/ajax/removeCoupon')) ?>'
         },
         homeUrl: '<?= $block->escapeJs($homeUrl) ?>',
         logoSrc: '<?= $block->escapeJs($logoSrc) ?>',
@@ -125,6 +136,9 @@ $translationsJson = json_encode([
         countryOptions: <?= /* @noEscape */ $countryOptionsJson ?: '[]' ?>,
         addressFieldConfig: <?= /* @noEscape */ $addressFieldConfigJson ?: '{}' ?>,
         termsCheckedByDefault: <?= /* @noEscape */ $termsCheckedByDefaultJson ?>,
+        defaultCountryId: '<?= $block->escapeJs($defaultCountryId) ?>',
+        websiteCode: '<?= $block->escapeJs($websiteCode) ?>',
+        storeCode: '<?= $block->escapeJs($storeCode) ?>',
         i18n: <?= /* @noEscape */ $translationsJson ?: '{}' ?>
     };
 </script>

@@ -45,6 +45,8 @@
   --color-green-500: oklch(72.3% 0.219 149.579);
   --color-green-800: oklch(44.8% 0.119 151.328);
   --color-green-900: oklch(39.3% 0.095 152.535);
+  --color-emerald-50: oklch(97.9% 0.021 166.113);
+  --color-emerald-200: oklch(90.5% 0.093 164.15);
   --color-emerald-700: oklch(50.8% 0.118 165.612);
   --color-sky-100: oklch(95.1% 0.026 236.824);
   --color-blue-50: oklch(97% 0.014 254.604);
@@ -58,6 +60,8 @@
   --color-blue-800: oklch(42.4% 0.199 265.638);
   --color-blue-900: oklch(37.9% 0.146 265.522);
   --color-indigo-500: oklch(58.5% 0.233 277.117);
+  --color-rose-50: oklch(96.9% 0.015 12.422);
+  --color-rose-200: oklch(89.2% 0.058 10.001);
   --color-rose-600: oklch(58.6% 0.253 17.585);
   --color-rose-700: oklch(51.4% 0.222 16.935);
   --color-slate-50: oklch(98.4% 0.003 247.858);
@@ -1879,6 +1883,9 @@
   .border-current {
     border-color: currentcolor;
   }
+  .border-emerald-200 {
+    border-color: var(--color-emerald-200);
+  }
   .border-gray-100 {
     border-color: var(--color-gray-100);
   }
@@ -1905,6 +1912,9 @@
   }
   .border-red-500 {
     border-color: var(--color-red-500);
+  }
+  .border-rose-200 {
+    border-color: var(--color-rose-200);
   }
   .border-slate-100 {
     border-color: var(--color-slate-100);
@@ -2030,6 +2040,9 @@
   }
   .bg-container-lighter {
     background-color: var(--color-container-lighter);
+  }
+  .bg-emerald-50 {
+    background-color: var(--color-emerald-50);
   }
   .bg-gray-50 {
     background-color: var(--color-gray-50);
@@ -3669,6 +3682,13 @@
       }
     }
   }
+  .hover\:bg-rose-50 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-rose-50);
+      }
+    }
+  }
   .hover\:bg-slate-50 {
     &:hover {
       @media (hover: hover) {
@@ -4214,6 +4234,11 @@
       visibility: hidden;
     }
   }
+  .disabled\:cursor-not-allowed {
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
   .disabled\:bg-slate-600 {
     &:disabled {
       background-color: var(--color-slate-600);
@@ -4227,6 +4252,11 @@
   .disabled\:opacity-30 {
     &:disabled {
       opacity: 30%;
+    }
+  }
+  .disabled\:opacity-50 {
+    &:disabled {
+      opacity: 50%;
     }
   }
   .disabled\:opacity-70 {

@@ -3,33 +3,30 @@ declare(strict_types=1);
 
 namespace Lencarta\Checkout\Controller\Ajax;
 
+use Lencarta\Checkout\Model\Checkout\CheckoutStateProvider;
 use Lencarta\Checkout\Model\Checkout\SessionQuoteProvider;
-use Lencarta\Checkout\Model\Checkout\TotalsProvider;
 use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
 
-class CheckoutState implements HttpGetActionInterface
+class CheckoutState extends AbstractJsonAction implements HttpGetActionInterface
 {
     public function __construct(
-        private readonly JsonFactory $resultJsonFactory,
+        JsonFactory $resultJsonFactory,
+        FormKeyValidator $formKeyValidator,
         private readonly SessionQuoteProvider $sessionQuoteProvider,
-        private readonly TotalsProvider $totalsProvider
+        private readonly CheckoutStateProvider $checkoutStateProvider
     ) {
+        parent::__construct($resultJsonFactory, $formKeyValidator);
     }
 
     public function execute()
     {
         $quote = $this->sessionQuoteProvider->getQuote();
 
-        return $this->resultJsonFactory->create()->setData([
+        return $this->createResult([
             'success' => true,
-            'data' => [
-                'email' => (string) $quote->getCustomerEmail(),
-                'items' => $this->totalsProvider->getItems($quote),
-                'totals' => $this->totalsProvider->getTotals($quote),
-                'shipping_methods' => $this->totalsProvider->getShippingMethods($quote),
-                'selected_shipping_method' => (string) $quote->getShippingAddress()->getShippingMethod(),
-            ],
+            'data' => $this->checkoutStateProvider->getState($quote),
         ]);
     }
 }

@@ -8,7 +8,6 @@ declare(strict_types=1);
         <input
             type="checkbox"
             x-model="termsAccepted"
-            @change="handleTermsAcceptedChange($event)"
             class="mt-1 rounded border-slate-300 text-slate-900 focus:ring-0"
         >
         <span class="text-sm leading-6 text-slate-600">
@@ -29,30 +28,32 @@ declare(strict_types=1);
                     <?= $block->escapeHtml(__('Continue securely with PayPal to complete your order.')) ?>
                 </div>
             </div>
+
             <div class="rounded-md bg-white/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-200">
                 <?= $block->escapeHtml(__('PayPal')) ?>
             </div>
         </div>
 
         <div class="mt-5">
-            <template x-if="!termsAccepted">
-                <div class="mb-4 rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
-                    <?= $block->escapeHtml(__('Please accept the terms before continuing to payment.')) ?>
+            <div class="relative min-h-[116px]">
+                <div
+                    class="absolute inset-0 transition-opacity duration-200"
+                    :class="canStartPaypalCheckout() ? 'opacity-0 pointer-events-none' : 'opacity-100'"
+                >
+                    <div class="flex h-full items-start">
+                        <div
+                            class="w-full rounded-lg border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-100"
+                            x-text="getPaypalState().blockingMessage || '<?= $block->escapeHtml(__('Please accept the terms before continuing to payment.')) ?>'"
+                        ></div>
+                    </div>
                 </div>
-            </template>
 
-            <template x-if="getCheckoutBlockingMessage()">
-                <div class="mb-4 rounded-lg border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-sm text-rose-100"
-                     x-text="getCheckoutBlockingMessage()"></div>
-            </template>
-
-            <div
-                class="transition-opacity duration-200"
-                :class="canStartPaypalCheckout()
-            ? 'opacity-100'
-            : (termsAccepted ? 'pointer-events-none opacity-40' : 'pointer-events-none opacity-50')"
-            >
-                <div id="lencarta-paypal-button" class="min-h-[96px]"></div>
+                <div
+                    class="absolute inset-0 transition-opacity duration-200"
+                    :class="canStartPaypalCheckout() ? 'opacity-100' : 'opacity-0 pointer-events-none'"
+                >
+                    <div id="lencarta-paypal-button" class="w-full"></div>
+                </div>
             </div>
         </div>
 
@@ -61,7 +62,11 @@ declare(strict_types=1);
         </div>
     </div>
 
-    <template x-if="message">
-        <div class="mt-4 text-sm text-slate-600" x-text="message"></div>
-    </template>
+    <div
+        x-show="message"
+        x-transition.opacity.duration.200ms
+        class="mt-4 text-sm text-slate-600"
+        x-text="message"
+        style="display: none;"
+    ></div>
 </div>

@@ -11,12 +11,9 @@ function initLencartaCheckout(config) {
     return {
         config,
         loading: false,
-        isReady: false,
+        isReady: hasInitialState,
         message: '',
-
         termsAccepted: false,
-        termsStorageKey: '',
-
         couponCode: initialState.coupon_code || '',
         couponOpen: false,
 
@@ -41,7 +38,7 @@ function initLencartaCheckout(config) {
             city: initialShipping.city || '',
             postcode: initialShipping.postcode || '',
             region: initialShipping.region || '',
-            country_id: initialShipping.country_id || ''
+            country_id: initialShipping.country_id || config.defaultCountryId || 'GB'
         },
 
         shippingSaveState: 'idle',
@@ -74,114 +71,42 @@ function initLencartaCheckout(config) {
         shippingWatcherIntervalMs: 700,
 
         init() {
-            this.termsStorageKey = this.getTermsStorageKey();
-
-            if (this.hasStoredTermsAccepted()) {
-                this.restoreTermsAccepted();
-            } else if (typeof this.config.defaultTermsAccepted !== 'undefined') {
-                this.termsAccepted = !!this.config.defaultTermsAccepted;
-            }
-
-            if (hasInitialState) {
-                this.hydrateFromState(initialState);
-                this.finishInitialization();
-                return;
-            }
-
-            this.loadState()
-                .catch(() => {
-                    this.message = this.translate(
-                        'Unable to initialize checkout.',
-                        'Unable to initialize checkout.'
-                    );
-                })
-                .finally(() => {
-                    this.finishInitialization();
-                });
-        },
-
-        finishInitialization() {
-            this.ensureShippingCountry(false);
+            this.restoreTermsAccepted();
+            this.ensureShippingCountry();
 
             this.lastSavedEmail = this.getNormalizedEmail();
             this.lastSavedShippingSignature = this.getShippingSignature();
             this.lastObservedShippingSignature = this.lastSavedShippingSignature;
 
-            this.isReady = true;
-            window.lencartaCheckoutState = this;
-            this.startShippingWatcher();
-            this.notifyPaypalStateChanged();
+            if (hasInitialState) {
+                window.lencartaCheckoutState = this;
+                window.dispatchEvent(new CustomEvent('lencarta-checkout-ready'));
+                this.emitPaypalStateChanged();
+                this.startShippingWatcher();
+                return;
+            }
 
-            window.dispatchEvent(
-                new CustomEvent('lencarta-checkout-ready', {
-                    detail: this.getPaypalState()
+            this.loadState()
+                .then(() => {
+                    this.ensureShippingCountry();
+                    this.lastSavedEmail = this.getNormalizedEmail();
+                    this.lastSavedShippingSignature = this.getShippingSignature();
+                    this.lastObservedShippingSignature = this.lastSavedShippingSignature;
+                    window.lencartaCheckoutState = this;
+                    window.dispatchEvent(new CustomEvent('lencarta-checkout-ready'));
+                    this.emitPaypalStateChanged();
                 })
-            );
-        },
-
-        getTermsStorageKey() {
-            if (this.config.termsStorageKey) {
-                return this.config.termsStorageKey;
-            }
-
-            return 'lencarta_checkout_terms_' + window.location.pathname;
-        },
-
-        hasSessionStorage() {
-            try {
-                return typeof window.sessionStorage !== 'undefined';
-            } catch (e) {
-                return false;
-            }
-        },
-
-        hasStoredTermsAccepted() {
-            if (!this.hasSessionStorage()) {
-                return false;
-            }
-
-            return window.sessionStorage.getItem(this.getTermsStorageKey()) !== null;
-        },
-
-        restoreTermsAccepted() {
-            if (!this.hasSessionStorage()) {
-                return;
-            }
-
-            const stored = window.sessionStorage.getItem(this.getTermsStorageKey());
-
-            if (stored === null) {
-                return;
-            }
-
-            this.termsAccepted = stored === '1';
-        },
-
-        persistTermsAccepted() {
-            if (!this.hasSessionStorage()) {
-                return;
-            }
-
-            window.sessionStorage.setItem(
-                this.getTermsStorageKey(),
-                this.termsAccepted ? '1' : '0'
-            );
-        },
-
-        setTermsAccepted(value) {
-            this.termsAccepted = !!value;
-            this.persistTermsAccepted();
-            this.notifyPaypalStateChanged();
-        },
-
-        handleTermsAcceptedChange(event) {
-            const checked = !!(event && event.target && event.target.checked);
-            this.setTermsAccepted(checked);
-        },
-
-        translate(key, fallback = '') {
-            const dict = this.config.i18n || {};
-            return dict[key] || fallback || key;
+                .catch(() => {
+                    this.message = this.translate(
+                        'Unable to initialize checkout.',
+                        'Unable to initialize checkout.'
+                    );
+                    this.emitPaypalStateChanged();
+                })
+                .finally(() => {
+                    this.isReady = true;
+                    this.startShippingWatcher();
+                });
         },
 
         getFormKey() {
@@ -191,6 +116,110 @@ function initLencartaCheckout(config) {
 
             const input = document.querySelector('input[name="form_key"]');
             return input ? input.value : '';
+        },
+
+        translate(key, fallback = '') {
+            const dict = this.config.i18n || {};
+            return dict[key] || fallback || key;
+        },
+
+        getCountryOptions() {
+            return Array.isArray(this.config.countryOptions) ? this.config.countryOptions : [];
+        },
+
+        getSelectableCountryOptions() {
+            return this.getCountryOptions().filter((option) => {
+                return option && typeof option.value !== 'undefined' && String(option.value).trim() !== '';
+            });
+        },
+
+        countryExists(countryId) {
+            const normalized = String(countryId || '').trim().toUpperCase();
+            if (!normalized) {
+                return false;
+            }
+
+            return this.getSelectableCountryOptions().some((option) => {
+                return String(option.value || '').trim().toUpperCase() === normalized;
+            });
+        },
+
+        getDefaultCountryId() {
+            const configured = String(this.config.defaultCountryId || '').trim().toUpperCase();
+            if (configured && this.countryExists(configured)) {
+                return configured;
+            }
+
+            const firstSelectable = this.getSelectableCountryOptions()[0];
+            if (firstSelectable && firstSelectable.value) {
+                return String(firstSelectable.value).trim().toUpperCase();
+            }
+
+            return 'GB';
+        },
+
+        normalizeCountryId(countryId) {
+            const normalized = String(countryId || '').trim().toUpperCase();
+            if (normalized && this.countryExists(normalized)) {
+                return normalized;
+            }
+
+            return this.getDefaultCountryId();
+        },
+
+        ensureShippingCountry() {
+            const normalized = this.normalizeCountryId(this.shipping.country_id);
+            if (this.shipping.country_id !== normalized) {
+                this.shipping.country_id = normalized;
+            }
+
+            return this.shipping.country_id;
+        },
+
+        getTermsStorageKey() {
+            const websiteCode = String(this.config.websiteCode || '').trim();
+            const storeCode = String(this.config.storeCode || this.config.storeViewCode || '').trim();
+
+            return ['lencarta_checkout_terms_accepted', websiteCode, storeCode]
+                .filter(Boolean)
+                .join(':');
+        },
+
+        restoreTermsAccepted() {
+            let restored = false;
+
+            try {
+                const stored = localStorage.getItem(this.getTermsStorageKey());
+                if (stored !== null) {
+                    this.termsAccepted = stored === '1';
+                    restored = true;
+                }
+            } catch (e) {}
+
+            if (!restored && typeof this.config.defaultTermsAccepted !== 'undefined') {
+                this.termsAccepted = !!this.config.defaultTermsAccepted;
+            }
+        },
+
+        persistTermsAccepted() {
+            try {
+                localStorage.setItem(
+                    this.getTermsStorageKey(),
+                    this.termsAccepted ? '1' : '0'
+                );
+            } catch (e) {}
+        },
+
+        handleTermsAcceptedChange(event) {
+            this.termsAccepted = !!(event && event.target ? event.target.checked : this.termsAccepted);
+            this.persistTermsAccepted();
+            this.emitPaypalStateChanged();
+        },
+
+        emitPaypalStateChanged() {
+            window.dispatchEvent(new CustomEvent('lencarta-checkout-paypal-state-changed', {
+                detail: this.getPaypalState()
+            }));
         },
 
         getNormalizedEmail() {
@@ -207,76 +236,202 @@ function initLencartaCheckout(config) {
             return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
         },
 
-        getCountryOptions() {
-            return Array.isArray(this.config.countryOptions)
-                ? this.config.countryOptions.filter((option) => option && typeof option.value !== 'undefined')
-                : [];
-        },
-
-        getCountryOptionMatch(value) {
-            const needle = String(value || '').trim().toUpperCase();
-            const options = this.getCountryOptions();
-
-            if (!needle) {
-                return null;
+        getCheckoutBlockingMessage() {
+            if (!this.isEmailValidForSave()) {
+                return this.translate(
+                    'Please enter a valid email address.',
+                    'Please enter a valid email address.'
+                );
             }
 
-            return options.find((option) => {
-                return String(option.value || '').trim().toUpperCase() === needle;
-            }) || null;
+            const missing = this.getMissingRequiredAddressFields();
+            if (missing.length > 0) {
+                return this.getAddressIncompleteMessage();
+            }
+
+            if (!this.selectedShippingMethod) {
+                return this.translate(
+                    'Please select a delivery option.',
+                    'Please select a delivery option.'
+                );
+            }
+
+            return '';
         },
 
-        getDefaultCountryOption() {
-            const options = this.getCountryOptions();
+        canMountPaypalButton() {
+            return this.getCheckoutBlockingMessage() === '';
+        },
 
-            const configured = String(this.config.defaultCountryId || '').trim().toUpperCase();
-            if (configured) {
-                const configuredMatch = this.getCountryOptionMatch(configured);
-                if (configuredMatch) {
-                    return configuredMatch;
+        canStartPaypalCheckout() {
+            return this.canMountPaypalButton() && !!this.termsAccepted;
+        },
+
+        getPaypalState() {
+            const blockingMessage = this.getCheckoutBlockingMessage();
+
+            return {
+                canRender: this.canMountPaypalButton(),
+                canStart: this.canStartPaypalCheckout(),
+                termsAccepted: !!this.termsAccepted,
+                emailValid: this.isEmailValidForSave(),
+                addressComplete: this.getMissingRequiredAddressFields().length === 0,
+                shippingMethodSelected: !!this.selectedShippingMethod,
+                countryId: this.ensureShippingCountry(),
+                blockingMessage: !blockingMessage && !this.termsAccepted
+                    ? this.translate(
+                        'Please accept the terms before continuing to payment.',
+                        'Please accept the terms before continuing to payment.'
+                    )
+                    : blockingMessage,
+                signature: [
+                    this.getNormalizedEmail(),
+                    this.getShippingSignature(),
+                    this.selectedShippingMethod || ''
+                ].join('|')
+            };
+        },
+
+        scheduleEmailAutosave(delay) {
+            if (this.emailAutosaveTimer) {
+                clearTimeout(this.emailAutosaveTimer);
+            }
+
+            this.emailAutosaveTimer = setTimeout(() => {
+                this.flushEmailAutosave();
+            }, delay);
+        },
+
+        markEmailDirty() {
+            this.emailDirty = true;
+            this.emailSaveState = 'idle';
+            this.scheduleEmailAutosave(this.emailIdleSaveMs);
+            this.emitPaypalStateChanged();
+        },
+
+        queueEmailAutosave(source = 'field') {
+            this.emailDirty = true;
+
+            if (source === 'change' || source === 'blur') {
+                this.scheduleEmailAutosave(this.emailQuickSaveMs);
+            } else {
+                this.scheduleEmailAutosave(this.emailIdleSaveMs);
+            }
+
+            this.emitPaypalStateChanged();
+        },
+
+        flushEmailAutosave() {
+            if (this.emailAutosaveTimer) {
+                clearTimeout(this.emailAutosaveTimer);
+                this.emailAutosaveTimer = null;
+            }
+
+            const normalizedEmail = this.getNormalizedEmail();
+
+            if (!normalizedEmail) {
+                this.emailSaveState = 'idle';
+                this.emitPaypalStateChanged();
+                return;
+            }
+
+            if (!this.isEmailValidForSave()) {
+                this.emailSaveState = 'error';
+                this.emitPaypalStateChanged();
+                return;
+            }
+
+            if (
+                normalizedEmail === this.lastSavedEmail &&
+                !this.emailRequestInFlight
+            ) {
+                this.emailDirty = false;
+                this.emailSaveState = 'saved';
+                this.emitPaypalStateChanged();
+                return;
+            }
+
+            if (this.emailRequestInFlight) {
+                this.emailNeedsResave = true;
+                return;
+            }
+
+            this.saveEmail(normalizedEmail);
+        },
+
+        async saveEmail(normalizedEmail = null) {
+            const emailToSave = normalizedEmail || this.getNormalizedEmail();
+            const requestId = ++this.emailRequestCounter;
+            let requestSucceeded = false;
+
+            this.emailRequestInFlight = true;
+            this.emailSaveState = 'saving';
+            this.emitPaypalStateChanged();
+
+            const body = new URLSearchParams({
+                form_key: this.getFormKey(),
+                email: this.email
+            });
+
+            try {
+                const res = await fetch(this.config.urls.saveEmail, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body
+                });
+
+                const data = await res.json();
+
+                if (requestId !== this.emailRequestCounter) {
+                    return;
                 }
-            }
 
-            return options.find((option) => String(option.value || '').trim() !== '') || null;
-        },
+                if (!data.success) {
+                    this.emailSaveState = 'error';
+                    this.message =
+                        data.message ||
+                        this.translate('Unable to save email.', 'Unable to save email.');
+                    this.emitPaypalStateChanged();
+                    return;
+                }
 
-        getCountryDisplayValue(value) {
-            const match = this.getCountryOptionMatch(value);
-            if (match) {
-                return String(match.value || '');
-            }
+                requestSucceeded = true;
+                this.emailSaveState = 'saved';
+                this.message = '';
+                this.lastSavedEmail = emailToSave;
+                this.emailDirty = false;
+                this.emitPaypalStateChanged();
+            } catch (e) {
+                if (requestId !== this.emailRequestCounter) {
+                    return;
+                }
 
-            const fallback = this.getDefaultCountryOption();
-            if (fallback) {
-                return String(fallback.value || '');
-            }
+                this.emailSaveState = 'error';
+                this.message = this.translate('Unable to save email.', 'Unable to save email.');
+                this.emitPaypalStateChanged();
+            } finally {
+                if (requestId !== this.emailRequestCounter) {
+                    return;
+                }
 
-            return '';
-        },
+                this.emailRequestInFlight = false;
 
-        getCountryCode(value) {
-            const match = this.getCountryOptionMatch(value);
-            if (match) {
-                return String(match.value || '').trim().toUpperCase();
-            }
+                if (!requestSucceeded) {
+                    this.emailNeedsResave = false;
+                    return;
+                }
 
-            const fallback = this.getDefaultCountryOption();
-            if (fallback) {
-                return String(fallback.value || '').trim().toUpperCase();
-            }
+                const latestEmail = this.getNormalizedEmail();
+                const changedDuringRequest = latestEmail !== this.lastSavedEmail;
 
-            return '';
-        },
-
-        ensureShippingCountry(shouldNotify = true) {
-            const displayValue = this.getCountryDisplayValue(this.shipping.country_id);
-
-            if (String(this.shipping.country_id || '') !== displayValue) {
-                this.shipping.country_id = displayValue;
-            }
-
-            if (shouldNotify) {
-                this.notifyPaypalStateChanged();
+                if (this.emailNeedsResave || changedDuringRequest || this.emailDirty) {
+                    this.emailNeedsResave = false;
+                    this.scheduleEmailAutosave(this.emailQuickSaveMs);
+                }
             }
         },
 
@@ -291,7 +446,7 @@ function initLencartaCheckout(config) {
 
         isAddressFieldRequired(field) {
             const cfg = this.getAddressFieldConfig()[field] || {};
-            const country = this.getCountryCode(this.shipping.country_id);
+            const country = this.ensureShippingCountry();
 
             if (field === 'postcode') {
                 const optionalCountries = Array.isArray(cfg.optional_countries) ? cfg.optional_countries : [];
@@ -342,8 +497,7 @@ function initLencartaCheckout(config) {
                 payload.street_2 ||
                 payload.city ||
                 payload.postcode ||
-                payload.region ||
-                payload.country_id
+                payload.region
             );
         },
 
@@ -385,237 +539,12 @@ function initLencartaCheckout(config) {
                 city: (this.shipping.city || '').trim(),
                 postcode: (this.shipping.postcode || '').trim(),
                 region: (this.shipping.region || '').trim(),
-                country_id: this.getCountryCode(this.shipping.country_id)
+                country_id: this.ensureShippingCountry()
             };
         },
 
         getShippingSignature() {
             return JSON.stringify(this.getShippingPayload());
-        },
-
-        hasSelectedShippingMethod() {
-            return !!this.selectedShippingMethod;
-        },
-
-        canStartPaypalCheckout() {
-            return !!(
-                this.isReady &&
-                this.termsAccepted &&
-                this.isEmailValidForSave() &&
-                this.canSaveShippingAddress() &&
-                this.hasSelectedShippingMethod()
-            );
-        },
-
-        getCheckoutBlockingMessage() {
-            if (!this.termsAccepted) {
-                return this.translate(
-                    'Please accept the terms before continuing to payment.',
-                    'Please accept the terms before continuing to payment.'
-                );
-            }
-
-            if (!this.isEmailValidForSave()) {
-                return this.translate(
-                    'Please enter a valid email address before continuing to payment.',
-                    'Please enter a valid email address before continuing to payment.'
-                );
-            }
-
-            const missing = this.getMissingRequiredAddressFields();
-            if (missing.length) {
-                return (
-                    this.translate('Please complete required fields:', 'Please complete required fields:') +
-                    ' ' +
-                    missing.join(', ') +
-                    '.'
-                );
-            }
-
-            if (!this.hasSelectedShippingMethod()) {
-                return this.translate(
-                    'Please select a delivery option before continuing to payment.',
-                    'Please select a delivery option before continuing to payment.'
-                );
-            }
-
-            return '';
-        },
-
-        getPaypalState() {
-            return {
-                canRender: this.canStartPaypalCheckout(),
-                termsAccepted: !!this.termsAccepted,
-                emailValid: this.isEmailValidForSave(),
-                addressComplete: this.canSaveShippingAddress(),
-                shippingMethodSelected: this.hasSelectedShippingMethod(),
-                shippingMethod: this.selectedShippingMethod || '',
-                countryId: this.getCountryCode(this.shipping.country_id),
-                blockingMessage: this.getCheckoutBlockingMessage(),
-                signature: this.getPaypalRenderSignature()
-            };
-        },
-
-        getPaypalRenderSignature() {
-            return [
-                this.termsAccepted ? '1' : '0',
-                this.getNormalizedEmail(),
-                this.getShippingSignature(),
-                this.selectedShippingMethod || '',
-                this.totals && typeof this.totals.grand_total !== 'undefined'
-                    ? String(this.totals.grand_total)
-                    : ''
-            ].join('|');
-        },
-
-        notifyPaypalStateChanged() {
-            window.dispatchEvent(
-                new CustomEvent('lencarta-paypal-state-changed', {
-                    detail: this.getPaypalState()
-                })
-            );
-        },
-
-        scheduleEmailAutosave(delay) {
-            if (this.emailAutosaveTimer) {
-                clearTimeout(this.emailAutosaveTimer);
-            }
-
-            this.emailAutosaveTimer = setTimeout(() => {
-                this.flushEmailAutosave();
-            }, delay);
-        },
-
-        markEmailDirty() {
-            this.emailDirty = true;
-            this.emailSaveState = 'idle';
-            this.scheduleEmailAutosave(this.emailIdleSaveMs);
-            this.notifyPaypalStateChanged();
-        },
-
-        queueEmailAutosave(source = 'field') {
-            this.emailDirty = true;
-
-            if (source === 'change' || source === 'blur') {
-                this.scheduleEmailAutosave(this.emailQuickSaveMs);
-            } else {
-                this.scheduleEmailAutosave(this.emailIdleSaveMs);
-            }
-
-            this.notifyPaypalStateChanged();
-        },
-
-        flushEmailAutosave() {
-            if (this.emailAutosaveTimer) {
-                clearTimeout(this.emailAutosaveTimer);
-                this.emailAutosaveTimer = null;
-            }
-
-            const normalizedEmail = this.getNormalizedEmail();
-
-            if (!normalizedEmail) {
-                this.emailSaveState = 'idle';
-                this.notifyPaypalStateChanged();
-                return;
-            }
-
-            if (!this.isEmailValidForSave()) {
-                this.emailSaveState = 'error';
-                this.notifyPaypalStateChanged();
-                return;
-            }
-
-            if (
-                normalizedEmail === this.lastSavedEmail &&
-                !this.emailRequestInFlight
-            ) {
-                this.emailDirty = false;
-                this.emailSaveState = 'saved';
-                this.notifyPaypalStateChanged();
-                return;
-            }
-
-            if (this.emailRequestInFlight) {
-                this.emailNeedsResave = true;
-                return;
-            }
-
-            this.saveEmail(normalizedEmail);
-        },
-
-        async saveEmail(normalizedEmail = null) {
-            const emailToSave = normalizedEmail || this.getNormalizedEmail();
-            const requestId = ++this.emailRequestCounter;
-            let requestSucceeded = false;
-
-            this.emailRequestInFlight = true;
-            this.emailSaveState = 'saving';
-
-            const body = new URLSearchParams({
-                form_key: this.getFormKey(),
-                email: this.email
-            });
-
-            try {
-                const res = await fetch(this.config.urls.saveEmail, {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body
-                });
-
-                const data = await res.json();
-
-                if (requestId !== this.emailRequestCounter) {
-                    return;
-                }
-
-                if (!data.success) {
-                    this.emailSaveState = 'error';
-                    this.message =
-                        data.message ||
-                        this.translate('Unable to save email.', 'Unable to save email.');
-                    this.notifyPaypalStateChanged();
-                    return;
-                }
-
-                requestSucceeded = true;
-                this.emailSaveState = 'saved';
-                this.message = '';
-                this.lastSavedEmail = emailToSave;
-                this.emailDirty = false;
-                this.notifyPaypalStateChanged();
-            } catch (e) {
-                if (requestId !== this.emailRequestCounter) {
-                    return;
-                }
-
-                this.emailSaveState = 'error';
-                this.message = this.translate('Unable to save email.', 'Unable to save email.');
-                this.notifyPaypalStateChanged();
-            } finally {
-                if (requestId !== this.emailRequestCounter) {
-                    return;
-                }
-
-                this.emailRequestInFlight = false;
-
-                if (!requestSucceeded) {
-                    this.emailNeedsResave = false;
-                    return;
-                }
-
-                const latestEmail = this.getNormalizedEmail();
-                const changedDuringRequest = latestEmail !== this.lastSavedEmail;
-
-                if (this.emailNeedsResave || changedDuringRequest || this.emailDirty) {
-                    this.emailNeedsResave = false;
-                    this.scheduleEmailAutosave(this.emailQuickSaveMs);
-                }
-            }
         },
 
         startShippingWatcher() {
@@ -640,7 +569,7 @@ function initLencartaCheckout(config) {
                     this.shippingDirty = true;
                     this.shippingSaveState = 'idle';
                     this.shippingMethodsState = 'idle';
-                    this.notifyPaypalStateChanged();
+                    this.emitPaypalStateChanged();
                     return;
                 }
 
@@ -649,12 +578,13 @@ function initLencartaCheckout(config) {
                     !this.shippingRequestInFlight
                 ) {
                     this.shippingDirty = false;
+                    this.emitPaypalStateChanged();
                     return;
                 }
 
                 this.shippingDirty = true;
                 this.scheduleShippingAutosave(this.shippingQuickSaveMs);
-                this.notifyPaypalStateChanged();
+                this.emitPaypalStateChanged();
             }, this.shippingWatcherIntervalMs);
         },
 
@@ -670,32 +600,31 @@ function initLencartaCheckout(config) {
 
         markShippingDirty() {
             this.shippingDirty = true;
-            this.shippingSaveState = 'idle';
             this.lastObservedShippingSignature = this.getShippingSignature();
 
             if (!this.canSaveShippingAddress()) {
+                this.shippingSaveState = 'idle';
                 this.shippingMethodsState = 'idle';
-                this.notifyPaypalStateChanged();
+                this.emitPaypalStateChanged();
                 return;
             }
 
             this.scheduleShippingAutosave(this.shippingIdleSaveMs);
-            this.notifyPaypalStateChanged();
+            this.emitPaypalStateChanged();
         },
 
         queueShippingAutosave(source = 'field') {
-            this.shippingDirty = true;
-            this.shippingSaveState = 'idle';
-
             if (source === 'country') {
-                this.ensureShippingCountry(false);
+                this.ensureShippingCountry();
             }
 
+            this.shippingDirty = true;
             this.lastObservedShippingSignature = this.getShippingSignature();
 
             if (!this.canSaveShippingAddress()) {
+                this.shippingSaveState = 'idle';
                 this.shippingMethodsState = 'idle';
-                this.notifyPaypalStateChanged();
+                this.emitPaypalStateChanged();
                 return;
             }
 
@@ -705,7 +634,7 @@ function initLencartaCheckout(config) {
                 this.scheduleShippingAutosave(this.shippingQuickSaveMs);
             }
 
-            this.notifyPaypalStateChanged();
+            this.emitPaypalStateChanged();
         },
 
         flushShippingAutosave() {
@@ -714,12 +643,10 @@ function initLencartaCheckout(config) {
                 this.shippingAutosaveTimer = null;
             }
 
-            this.ensureShippingCountry(false);
-
             if (!this.canSaveShippingAddress()) {
                 this.shippingSaveState = 'idle';
                 this.shippingMethodsState = 'idle';
-                this.notifyPaypalStateChanged();
+                this.emitPaypalStateChanged();
                 return;
             }
 
@@ -731,7 +658,7 @@ function initLencartaCheckout(config) {
             ) {
                 this.shippingDirty = false;
                 this.shippingSaveState = 'saved';
-                this.notifyPaypalStateChanged();
+                this.emitPaypalStateChanged();
                 return;
             }
 
@@ -744,12 +671,10 @@ function initLencartaCheckout(config) {
         },
 
         async saveShippingAddress(requestSignature = null) {
-            this.ensureShippingCountry(false);
-
             if (!this.canSaveShippingAddress()) {
                 this.shippingSaveState = 'idle';
                 this.shippingMethodsState = 'idle';
-                this.notifyPaypalStateChanged();
+                this.emitPaypalStateChanged();
                 return;
             }
 
@@ -761,7 +686,7 @@ function initLencartaCheckout(config) {
             this.shippingRequestInFlight = true;
             this.shippingSaveState = 'saving';
             this.shippingMethodsState = 'loading';
-            this.notifyPaypalStateChanged();
+            this.emitPaypalStateChanged();
 
             const body = new URLSearchParams({
                 form_key: this.getFormKey(),
@@ -803,7 +728,7 @@ function initLencartaCheckout(config) {
                             'Unable to save shipping address.',
                             'Unable to save shipping address.'
                         );
-                    this.notifyPaypalStateChanged();
+                    this.emitPaypalStateChanged();
                     return;
                 }
 
@@ -819,16 +744,9 @@ function initLencartaCheckout(config) {
 
                 if (data.selected_shipping_method) {
                     this.selectedShippingMethod = data.selected_shipping_method;
-                } else if (
-                    this.selectedShippingMethod &&
-                    !this.shippingMethods.some((method) => method.code === this.selectedShippingMethod)
-                ) {
-                    this.selectedShippingMethod = '';
-                } else if (!this.selectedShippingMethod && this.shippingMethods.length === 1) {
-                    this.selectedShippingMethod = this.shippingMethods[0].code || '';
                 }
 
-                this.notifyPaypalStateChanged();
+                this.emitPaypalStateChanged();
             } catch (e) {
                 if (requestId !== this.shippingRequestCounter) {
                     return;
@@ -840,7 +758,7 @@ function initLencartaCheckout(config) {
                     'Unable to save shipping address.',
                     'Unable to save shipping address.'
                 );
-                this.notifyPaypalStateChanged();
+                this.emitPaypalStateChanged();
             } finally {
                 if (requestId !== this.shippingRequestCounter) {
                     return;
@@ -861,6 +779,33 @@ function initLencartaCheckout(config) {
                     this.scheduleShippingAutosave(this.shippingAfterRequestDelayMs);
                 }
             }
+        },
+
+        hydrateFromState(state) {
+            const shipping = state.shipping || {};
+
+            this.email = state.email || '';
+            this.couponCode = state.coupon_code || '';
+            this.items = Array.isArray(state.items) ? state.items : [];
+            this.totals = state.totals || {};
+            this.shippingMethods = Array.isArray(state.shipping_methods) ? state.shipping_methods : [];
+            this.selectedShippingMethod = state.selected_shipping_method || '';
+            this.shippingMethodsState = this.shippingMethods.length > 0 ? 'ready' : 'idle';
+
+            this.shipping = {
+                firstname: shipping.firstname || '',
+                lastname: shipping.lastname || '',
+                company: shipping.company || '',
+                telephone: shipping.telephone || '',
+                street_1: shipping.street_1 || '',
+                street_2: shipping.street_2 || '',
+                city: shipping.city || '',
+                postcode: shipping.postcode || '',
+                region: shipping.region || '',
+                country_id: this.normalizeCountryId(shipping.country_id || this.shipping.country_id)
+            };
+
+            this.ensureShippingCountry();
         },
 
         visibleItems() {
@@ -893,49 +838,6 @@ function initLencartaCheckout(config) {
             this.itemsExpanded = !this.itemsExpanded;
         },
 
-        hydrateFromState(state) {
-            const shipping = state.shipping || {};
-
-            this.email = state.email || this.email || '';
-
-            this.shipping = {
-                firstname: shipping.firstname || '',
-                lastname: shipping.lastname || '',
-                company: shipping.company || '',
-                telephone: shipping.telephone || '',
-                street_1: shipping.street_1 || '',
-                street_2: shipping.street_2 || '',
-                city: shipping.city || '',
-                postcode: shipping.postcode || '',
-                region: shipping.region || '',
-                country_id: this.getCountryDisplayValue(
-                    shipping.country_id ||
-                    this.shipping.country_id ||
-                    this.config.defaultCountryId ||
-                    ''
-                )
-            };
-
-            this.items = Array.isArray(state.items) ? state.items : [];
-            this.totals = state.totals || {};
-            this.shippingMethods = Array.isArray(state.shipping_methods) ? state.shipping_methods : [];
-            this.selectedShippingMethod = state.selected_shipping_method || '';
-            this.couponCode = state.coupon_code || this.couponCode || '';
-
-            if (!this.selectedShippingMethod && this.shippingMethods.length === 1) {
-                this.selectedShippingMethod = this.shippingMethods[0].code || '';
-            }
-
-            if (!this.canSaveShippingAddress()) {
-                this.shippingMethodsState = 'idle';
-            } else {
-                this.shippingMethodsState = this.shippingMethods.length > 0 ? 'ready' : 'idle';
-            }
-
-            this.ensureShippingCountry(false);
-            this.notifyPaypalStateChanged();
-        },
-
         async loadState() {
             const res = await fetch(this.config.urls.state, {
                 credentials: 'same-origin',
@@ -947,13 +849,14 @@ function initLencartaCheckout(config) {
             const data = await res.json();
 
             if (!data.success) {
-                this.message =
-                    data.message ||
-                    this.translate('Unable to load checkout state.', 'Unable to load checkout state.');
+                this.message = data.message || this.translate('Unable to load checkout state.', 'Unable to load checkout state.');
+                this.emitPaypalStateChanged();
                 return;
             }
 
             this.hydrateFromState(data.data || {});
+            this.isReady = true;
+            this.emitPaypalStateChanged();
         },
 
         async selectShippingMethod(method) {
@@ -980,17 +883,17 @@ function initLencartaCheckout(config) {
                     this.message =
                         data.message ||
                         this.translate('Unable to save shipping method.', 'Unable to save shipping method.');
-                    this.notifyPaypalStateChanged();
+                    this.emitPaypalStateChanged();
                     return;
                 }
 
                 this.selectedShippingMethod = method.code;
                 this.totals = data.totals || {};
                 this.message = '';
-                this.notifyPaypalStateChanged();
+                this.emitPaypalStateChanged();
             } catch (e) {
                 this.message = this.translate('Unable to save shipping method.', 'Unable to save shipping method.');
-                this.notifyPaypalStateChanged();
+                this.emitPaypalStateChanged();
             }
         },
 

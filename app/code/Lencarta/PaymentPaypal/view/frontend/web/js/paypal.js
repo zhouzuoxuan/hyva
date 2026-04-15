@@ -163,8 +163,7 @@
             buttonShape: config.buttonShape || 'rect',
             buttonLabel: config.buttonLabel || 'paypal',
             canRender: !!state.canRender,
-            signature: state.signature || '',
-            termsAccepted: !!state.termsAccepted
+            signature: state.signature || ''
         });
     }
 
@@ -300,7 +299,7 @@
             onClick: function (data, actions) {
                 var state = getPaypalState();
 
-                if (!state.canRender) {
+                if (!state.canStart) {
                     notifyCheckoutMessage(
                         state.blockingMessage || 'Please complete checkout details first.'
                     );

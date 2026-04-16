@@ -7,35 +7,49 @@ use Magento\Framework\View\Element\Template;
 /** @var Template $block */
 /** @var PaypalConfig $viewModel */
 $viewModel = $block->getData('view_model');
+
+$config = [
+    'enabled' => $viewModel->isEnabled(),
+    'clientId' => $viewModel->getClientId(),
+    'sdkUrl' => $viewModel->getSdkBaseUrl(),
+    'currency' => $viewModel->getCurrency(),
+    'intent' => 'capture',
+    'formKey' => $viewModel->getFormKey(),
+    'createOrderUrl' => $viewModel->getCreateOrderUrl(),
+    'syncOrderUrl' => $viewModel->getSyncOrderUrl(),
+    'invalidateOrderUrl' => $viewModel->getInvalidateOrderUrl(),
+    'captureOrderUrl' => $viewModel->getCaptureUrl(),
+    'captureUrl' => $viewModel->getCaptureUrl(),
+    'webhookUrl' => $viewModel->getWebhookUrl(),
+    'successUrl' => $viewModel->getSuccessUrl(),
+    'buttonColor' => $viewModel->getButtonColor(),
+    'buttonShape' => $viewModel->getButtonShape(),
+    'buttonLabel' => $viewModel->getButtonLabel(),
+    'button' => [
+        'color' => $viewModel->getButtonColor(),
+        'shape' => $viewModel->getButtonShape(),
+        'label' => $viewModel->getButtonLabel(),
+    ],
+    'i18n' => [
+        'syncError' => (string) __('Unable to sync PayPal order.'),
+        'createOrderError' => (string) __('Unable to create PayPal order.'),
+        'finalizeError' => (string) __('Unable to finalize PayPal payment.'),
+        'genericError' => (string) __('PayPal error'),
+    ],
+];
+
+$json = json_encode(
+    $config,
+    JSON_UNESCAPED_SLASHES
+    | JSON_UNESCAPED_UNICODE
+    | JSON_HEX_TAG
+    | JSON_HEX_APOS
+    | JSON_HEX_AMP
+    | JSON_HEX_QUOT
+);
 ?>
-<script>
-    window.lencartaPaypalConfig = {
-        enabled: <?= $viewModel->isEnabled() ? 'true' : 'false' ?>,
-        clientId: '<?= $block->escapeJs($viewModel->getClientId()) ?>',
-        sdkUrl: '<?= $block->escapeJs($viewModel->getSdkBaseUrl()) ?>',
-        currency: '<?= $block->escapeJs($viewModel->getCurrency()) ?>',
-        intent: 'capture',
-        formKey: '<?= $block->escapeJs($viewModel->getFormKey()) ?>',
-        createOrderUrl: '<?= $block->escapeJs($viewModel->getCreateOrderUrl()) ?>',
-        syncOrderUrl: '<?= $block->escapeJs($viewModel->getSyncOrderUrl()) ?>',
-        invalidateOrderUrl: '<?= $block->escapeJs($viewModel->getInvalidateOrderUrl()) ?>',
-        captureOrderUrl: '<?= $block->escapeJs($viewModel->getCaptureUrl()) ?>',
-        captureUrl: '<?= $block->escapeJs($viewModel->getCaptureUrl()) ?>',
-        webhookUrl: '<?= $block->escapeJs($viewModel->getWebhookUrl()) ?>',
-        successUrl: '<?= $block->escapeJs($viewModel->getSuccessUrl()) ?>',
-        buttonColor: '<?= $block->escapeJs($viewModel->getButtonColor()) ?>',
-        buttonShape: '<?= $block->escapeJs($viewModel->getButtonShape()) ?>',
-        buttonLabel: '<?= $block->escapeJs($viewModel->getButtonLabel()) ?>',
-        button: {
-            color: '<?= $block->escapeJs($viewModel->getButtonColor()) ?>',
-            shape: '<?= $block->escapeJs($viewModel->getButtonShape()) ?>',
-            label: '<?= $block->escapeJs($viewModel->getButtonLabel()) ?>'
-        },
-        i18n: {
-            syncError: '<?= $block->escapeJs(__('Unable to sync PayPal order.')) ?>',
-            createOrderError: '<?= $block->escapeJs(__('Unable to create PayPal order.')) ?>',
-            finalizeError: '<?= $block->escapeJs(__('Unable to finalize PayPal payment.')) ?>',
-            genericError: '<?= $block->escapeJs(__('PayPal error')) ?>'
-        }
-    };
-</script>
+<div
+    id="lencarta-paypal-config"
+    data-config="<?= $block->escapeHtmlAttr((string) $json) ?>"
+    hidden
+></div>

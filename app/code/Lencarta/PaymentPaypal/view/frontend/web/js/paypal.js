@@ -13,7 +13,27 @@
     var invalidatePromise = null;
 
     function getPaypalConfig() {
-        return window.lencartaPaypalConfig || {};
+        if (window.lencartaPaypalConfig && typeof window.lencartaPaypalConfig === 'object') {
+            return window.lencartaPaypalConfig;
+        }
+
+        var node = document.getElementById('lencarta-paypal-config');
+        if (!node) {
+            return {};
+        }
+
+        var raw = node.getAttribute('data-config') || '';
+        if (!raw) {
+            return {};
+        }
+
+        try {
+            window.lencartaPaypalConfig = JSON.parse(raw);
+            return window.lencartaPaypalConfig || {};
+        } catch (e) {
+            console.error('Unable to parse PayPal config.', e);
+            return {};
+        }
     }
 
     function getCheckoutState() {

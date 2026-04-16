@@ -118,32 +118,34 @@ $translationsJson = json_encode([
     'js_complete_required_fields' => (string) __('Please complete required fields:'),
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
 ?>
-<script>
-    window.lencartaCheckoutConfig = {
-        urls: {
-            state: '<?= $block->escapeJs($block->getUrl('lencarta_checkout/ajax/checkoutState')) ?>',
-            saveEmail: '<?= $block->escapeJs($block->getUrl('lencarta_checkout/ajax/saveEmail')) ?>',
-            saveShippingAddress: '<?= $block->escapeJs($block->getUrl('lencarta_checkout/ajax/saveShippingAddress')) ?>',
-            saveShippingMethod: '<?= $block->escapeJs($block->getUrl('lencarta_checkout/ajax/saveShippingMethod')) ?>',
-            getTotals: '<?= $block->escapeJs($block->getUrl('lencarta_checkout/ajax/getTotals')) ?>',
-            applyCoupon: '<?= $block->escapeJs($block->getUrl('lencarta_checkout/ajax/applyCoupon')) ?>',
-            removeCoupon: '<?= $block->escapeJs($block->getUrl('lencarta_checkout/ajax/removeCoupon')) ?>'
-        },
-        homeUrl: '<?= $block->escapeJs($homeUrl) ?>',
-        logoSrc: '<?= $block->escapeJs($logoSrc) ?>',
-        logoAlt: '<?= $block->escapeJs($logoAlt) ?>',
-        initialState: <?= /* @noEscape */ $initialStateJson ?: '{}' ?>,
-        countryOptions: <?= /* @noEscape */ $countryOptionsJson ?: '[]' ?>,
-        addressFieldConfig: <?= /* @noEscape */ $addressFieldConfigJson ?: '{}' ?>,
-        termsCheckedByDefault: <?= /* @noEscape */ $termsCheckedByDefaultJson ?>,
-        defaultCountryId: '<?= $block->escapeJs($defaultCountryId) ?>',
-        websiteCode: '<?= $block->escapeJs($websiteCode) ?>',
-        storeCode: '<?= $block->escapeJs($storeCode) ?>',
-        i18n: <?= /* @noEscape */ $translationsJson ?: '{}' ?>
-    };
-</script>
+<?php
+$configJson = json_encode([
+    'urls' => [
+        'state' => $block->getUrl('checkout/ajax/checkoutState'),
+        'saveEmail' => $block->getUrl('checkout/ajax/saveEmail'),
+        'saveShippingAddress' => $block->getUrl('checkout/ajax/saveShippingAddress'),
+        'saveShippingMethod' => $block->getUrl('checkout/ajax/saveShippingMethod'),
+        'getTotals' => $block->getUrl('checkout/ajax/getTotals'),
+        'applyCoupon' => $block->getUrl('checkout/ajax/applyCoupon'),
+        'removeCoupon' => $block->getUrl('checkout/ajax/removeCoupon')
+    ],
+    'homeUrl' => $homeUrl,
+    'logoSrc' => $logoSrc,
+    'logoAlt' => $logoAlt,
+    'initialState' => $initialState,
+    'countryOptions' => $countryOptions,
+    'addressFieldConfig' => $addressFieldConfig,
+    'defaultTermsAccepted' => $termsCheckedByDefault,
+    'termsCheckedByDefault' => $termsCheckedByDefault,
+    'defaultCountryId' => $defaultCountryId,
+    'websiteCode' => $websiteCode,
+    'storeCode' => $storeCode,
+    'i18n' => json_decode($translationsJson ?: '{}', true) ?: []
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+?>
 
-<div x-data="initLencartaCheckout(window.lencartaCheckoutConfig)"
+<div data-checkout-config="<?= $block->escapeHtmlAttr($configJson ?: '{}') ?>"
+     x-data="initLencartaCheckout(JSON.parse($el.dataset.checkoutConfig || '{}'))"
      x-init="init()"
      class="min-h-screen bg-white text-slate-900">
 

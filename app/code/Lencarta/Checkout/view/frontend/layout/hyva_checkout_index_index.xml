@@ -9,6 +9,7 @@
     <body>
         <attribute name="class" value="lencarta-checkout-page"/>
 
+        <referenceBlock name="fallback.module.missing" remove="true"/>
         <referenceBlock name="page.main.title" remove="true"/>
         <referenceBlock name="header.container" remove="true"/>
         <referenceBlock name="header" remove="true"/>

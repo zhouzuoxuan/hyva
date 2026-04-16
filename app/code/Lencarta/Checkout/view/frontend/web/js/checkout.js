@@ -1,5 +1,22 @@
 function initLencartaCheckout(config) {
-    const initialState = config.initialState || {};
+    if (typeof config === 'string') {
+        try {
+            config = JSON.parse(config);
+        } catch (e) {
+            config = {};
+        }
+    }
+
+    config = config && typeof config === 'object' ? config : {};
+    config.i18n = config.i18n && typeof config.i18n === 'object' ? config.i18n : {};
+    config.countryOptions = Array.isArray(config.countryOptions) ? config.countryOptions : [];
+    config.addressFieldConfig = config.addressFieldConfig && typeof config.addressFieldConfig === 'object'
+        ? config.addressFieldConfig
+        : {};
+
+    const initialState = config.initialState && typeof config.initialState === 'object'
+        ? config.initialState
+        : {};
     const hasInitialState =
         initialState &&
         typeof initialState === 'object' &&
@@ -202,8 +219,12 @@ function initLencartaCheckout(config) {
                 }
             } catch (e) {}
 
-            if (!restored && typeof this.config.defaultTermsAccepted !== 'undefined') {
-                this.termsAccepted = !!this.config.defaultTermsAccepted;
+            if (!restored) {
+                if (typeof this.config.defaultTermsAccepted !== 'undefined') {
+                    this.termsAccepted = !!this.config.defaultTermsAccepted;
+                } else if (typeof this.config.termsCheckedByDefault !== 'undefined') {
+                    this.termsAccepted = !!this.config.termsCheckedByDefault;
+                }
             }
         },
 

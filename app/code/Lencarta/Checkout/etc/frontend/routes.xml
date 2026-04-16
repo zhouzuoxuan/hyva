@@ -2,8 +2,8 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
     <router id="standard">
-        <route id="lencarta_checkout" frontName="lencarta_checkout">
-            <module name="Lencarta_Checkout"/>
+        <route id="checkout" frontName="checkout">
+            <module name="Lencarta_Checkout" before="Magento_Checkout"/>
         </route>
     </router>
 </config>

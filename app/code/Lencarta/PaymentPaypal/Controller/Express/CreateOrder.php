@@ -33,11 +33,13 @@ class CreateOrder implements HttpPostActionInterface
 
             $quote = $this->sessionQuoteProvider->getQuote();
             $paypalResult = $this->paypalCheckoutService->createPaypalOrderForQuote($quote);
+            $paypalOrderId = (string) ($paypalResult['response']['id'] ?? '');
 
             return $result->setData([
                 'success' => true,
-                'paypal_order_id' => $paypalResult['response']['id'],
-                'request_id' => $paypalResult['request_id'],
+                'order_id' => $paypalOrderId,
+                'paypal_order_id' => $paypalOrderId,
+                'request_id' => $paypalResult['request_id'] ?? '',
             ]);
         } catch (LocalizedException $e) {
             return $result->setData([

@@ -7,6 +7,10 @@
     var renderTimer = null;
     var lastRenderSignature = '';
     var observer = null;
+    var activePaypalOrderId = '';
+    var activeSyncSignature = '';
+    var syncPromise = null;
+    var invalidatePromise = null;
 
     function getPaypalConfig() {
         return window.lencartaPaypalConfig || {};
@@ -33,6 +37,18 @@
         return document.getElementById(CONTAINER_ID);
     }
 
+    function isReadyForSync(state) {
+        return !!(state && state.canRender && state.canStart);
+    }
+
+    function buildStateNotReadyError(state, fallback) {
+        var error = new Error((state && state.blockingMessage) || fallback || 'PayPal checkout is not ready yet.');
+        error.code = 'PAYPAL_STATE_NOT_READY';
+        error.silent = true;
+
+        return error;
+    }
+
     function getFormKey() {
         var checkout = getCheckoutState();
 
@@ -46,6 +62,18 @@
 
         var input = document.querySelector('input[name="form_key"]');
         return input ? input.value : '';
+    }
+
+    function getButtonStyleValue(config, key, fallback) {
+        if (config[key]) {
+            return config[key];
+        }
+
+        if (config.button && config.button[key]) {
+            return config.button[key];
+        }
+
+        return fallback;
     }
 
     function buildSdkUrl(config) {
@@ -73,7 +101,7 @@
             params.set('debug', 'true');
         }
 
-        return 'https://www.paypal.com/sdk/js?' + params.toString();
+        return (config.sdkUrl || 'https://www.paypal.com/sdk/js') + '?' + params.toString();
     }
 
     function loadPaypalSdk() {
@@ -159,11 +187,12 @@
         return JSON.stringify({
             clientId: config.clientId || '',
             currency: config.currency || 'USD',
-            buttonColor: config.buttonColor || 'gold',
-            buttonShape: config.buttonShape || 'rect',
-            buttonLabel: config.buttonLabel || 'paypal',
+            buttonColor: getButtonStyleValue(config, 'color', 'gold'),
+            buttonShape: getButtonStyleValue(config, 'shape', 'rect'),
+            buttonLabel: getButtonStyleValue(config, 'label', 'paypal'),
             canRender: !!state.canRender,
-            signature: state.signature || ''
+            signature: state.signature || '',
+            activePaypalOrderId: activePaypalOrderId || ''
         });
     }
 
@@ -204,29 +233,8 @@
         });
     }
 
-    function createOrderRequest() {
-        var config = getPaypalConfig();
-        var state = getPaypalState();
-
-        if (!state.canRender) {
-            throw new Error(state.blockingMessage || 'Unable to start PayPal checkout.');
-        }
-
-        var createUrl =
-            config.createOrderUrl ||
-            (config.urls && config.urls.createOrder) ||
-            '';
-
-        if (!createUrl) {
-            throw new Error('PayPal create order URL is missing.');
-        }
-
-        var body = new URLSearchParams({
-            form_key: getFormKey(),
-            checkout_signature: state.signature || ''
-        });
-
-        return fetch(createUrl, {
+    function postForm(url, body) {
+        return fetch(url, {
             method: 'POST',
             credentials: 'same-origin',
             headers: {
@@ -234,25 +242,111 @@
                 'X-Requested-With': 'XMLHttpRequest'
             },
             body: body.toString()
-        })
-            .then(function (response) {
-                return parseJsonResponse(response);
-            })
+        }).then(function (response) {
+            return parseJsonResponse(response);
+        });
+    }
+
+    function resetActiveOrder() {
+        activePaypalOrderId = '';
+        activeSyncSignature = '';
+        syncPromise = null;
+    }
+
+    function syncOrderRequest(force) {
+        var config = getPaypalConfig();
+        var state = getPaypalState();
+        var signature = state.signature || '';
+        var syncUrl = config.syncOrderUrl || config.createOrderUrl || (config.urls && config.urls.syncOrder) || '';
+
+        if (!state.canRender) {
+            return Promise.reject(buildStateNotReadyError(state, 'PayPal checkout is not ready to render yet.'));
+        }
+
+        if (!isReadyForSync(state)) {
+            return Promise.reject(buildStateNotReadyError(state, 'Please complete your contact, shipping address, and shipping method first.'));
+        }
+
+        if (!syncUrl) {
+            return Promise.reject(new Error('PayPal sync order URL is missing.'));
+        }
+
+        if (!force && activePaypalOrderId && activeSyncSignature === signature) {
+            return Promise.resolve(activePaypalOrderId);
+        }
+
+        if (!force && syncPromise) {
+            return syncPromise;
+        }
+
+        var body = new URLSearchParams({
+            form_key: getFormKey(),
+            checkout_signature: signature
+        });
+
+        syncPromise = postForm(syncUrl, body)
             .then(function (data) {
                 var orderId = data && (data.order_id || data.paypal_order_id || data.id) || '';
 
                 if (!data || !data.success || !orderId) {
-                    throw new Error((data && data.message) || 'Unable to start PayPal checkout.');
+                    throw new Error((data && data.message) || (config.i18n && config.i18n.syncError) || 'Unable to sync PayPal order.');
                 }
 
+                activePaypalOrderId = orderId;
+                activeSyncSignature = data.checkout_signature || signature;
                 return orderId;
+            })
+            .finally(function () {
+                syncPromise = null;
             });
+
+        return syncPromise;
+    }
+
+    function invalidateOrderRequest(reason) {
+        var config = getPaypalConfig();
+        var invalidateUrl = config.invalidateOrderUrl || (config.urls && config.urls.invalidateOrder) || '';
+
+        if (!activePaypalOrderId && !activeSyncSignature) {
+            resetActiveOrder();
+            return Promise.resolve();
+        }
+
+        if (!invalidateUrl) {
+            resetActiveOrder();
+            return Promise.resolve();
+        }
+
+        if (invalidatePromise) {
+            return invalidatePromise;
+        }
+
+        var body = new URLSearchParams({
+            form_key: getFormKey(),
+            reason: reason || 'invalidated'
+        });
+
+        invalidatePromise = postForm(invalidateUrl, body)
+            .catch(function () {
+                return {};
+            })
+            .finally(function () {
+                resetActiveOrder();
+                invalidatePromise = null;
+            });
+
+        return invalidatePromise;
+    }
+
+    function createOrderRequest() {
+        return syncOrderRequest(false);
     }
 
     function captureOrderRequest(paypalOrderId) {
         var config = getPaypalConfig();
         var captureUrl =
             config.captureOrderUrl ||
+            config.captureUrl ||
             (config.urls && config.urls.captureOrder) ||
             '';
 
@@ -265,22 +359,13 @@
             paypal_order_id: paypalOrderId || ''
         });
 
-        return fetch(captureUrl, {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: body.toString()
-        })
-            .then(function (response) {
-                return parseJsonResponse(response);
-            })
+        return postForm(captureUrl, body)
             .then(function (data) {
                 if (!data || !data.success) {
                     throw new Error((data && data.message) || 'Unable to finalize PayPal payment.');
                 }
+
+                resetActiveOrder();
 
                 if (data.redirect_url) {
                     window.location.href = data.redirect_url;
@@ -302,9 +387,9 @@
         return window.paypal.Buttons({
             style: {
                 layout: 'vertical',
-                color: config.buttonColor || 'gold',
-                shape: config.buttonShape || 'rect',
-                label: config.buttonLabel || 'paypal',
+                color: getButtonStyleValue(config, 'color', 'gold'),
+                shape: getButtonStyleValue(config, 'shape', 'rect'),
+                label: getButtonStyleValue(config, 'label', 'paypal'),
                 tagline: false
             },
 
@@ -323,11 +408,23 @@
 
                 notifyCheckoutMessage('');
 
-                if (actions && typeof actions.resolve === 'function') {
-                    return actions.resolve();
-                }
+                return syncOrderRequest(false)
+                    .then(function () {
+                        if (actions && typeof actions.resolve === 'function') {
+                            return actions.resolve();
+                        }
 
-                return true;
+                        return true;
+                    })
+                    .catch(function (error) {
+                        notifyCheckoutMessage((error && error.message) || 'Unable to sync PayPal checkout.');
+
+                        if (actions && typeof actions.reject === 'function') {
+                            return actions.reject();
+                        }
+
+                        return false;
+                    });
             },
 
             createOrder: function () {
@@ -340,6 +437,9 @@
 
             onCancel: function () {
                 notifyCheckoutMessage('');
+                return invalidateOrderRequest('cancelled').finally(function () {
+                    scheduleRender(50);
+                });
             },
 
             onError: function (err) {
@@ -358,46 +458,73 @@
         }
 
         if (!state.canRender) {
+            if (activePaypalOrderId || activeSyncSignature) {
+                invalidateOrderRequest('state_not_renderable');
+            }
+
             destroyButtons();
             lastRenderSignature = '';
+            notifyCheckoutMessage('');
             return;
         }
 
-        var signature = getRenderSignature();
+        if (!isReadyForSync(state)) {
+            if (activePaypalOrderId || activeSyncSignature) {
+                invalidateOrderRequest('state_not_ready');
+            }
 
-        if (buttonsInstance && lastRenderSignature === signature && container.childNodes.length > 0) {
+            destroyButtons();
+            lastRenderSignature = '';
+            notifyCheckoutMessage('');
             return;
         }
 
-        loadPaypalSdk()
+        syncOrderRequest(false)
             .then(function () {
-                var liveContainer = getContainer();
-                var liveState = getPaypalState();
+                var signature = getRenderSignature();
 
-                if (!liveContainer || !liveState.canRender) {
-                    destroyButtons();
-                    lastRenderSignature = '';
+                if (buttonsInstance && lastRenderSignature === signature && container.childNodes.length > 0) {
                     return;
                 }
 
-                destroyButtons();
+                return loadPaypalSdk()
+                    .then(function () {
+                        var liveContainer = getContainer();
+                        var liveState = getPaypalState();
 
-                var buttons = buildButtons();
+                        if (!liveContainer || !liveState.canRender) {
+                            destroyButtons();
+                            lastRenderSignature = '';
+                            return;
+                        }
 
-                if (typeof buttons.isEligible === 'function' && !buttons.isEligible()) {
-                    clearContainer();
-                    lastRenderSignature = '';
-                    return;
-                }
+                        destroyButtons();
 
-                buttonsInstance = buttons;
+                        var buttons = buildButtons();
 
-                return buttons.render(liveContainer).then(function () {
-                    lastRenderSignature = signature;
-                    notifyCheckoutMessage('');
-                });
+                        if (typeof buttons.isEligible === 'function' && !buttons.isEligible()) {
+                            clearContainer();
+                            lastRenderSignature = '';
+                            return;
+                        }
+
+                        buttonsInstance = buttons;
+
+                        return buttons.render(liveContainer).then(function () {
+                            lastRenderSignature = signature;
+                            notifyCheckoutMessage('');
+                        });
+                    });
             })
             .catch(function (error) {
+                destroyButtons();
+                lastRenderSignature = '';
+
+                if (error && error.silent) {
+                    notifyCheckoutMessage('');
+                    return;
+                }
+
                 console.error('PayPal render failed:', error);
                 notifyCheckoutMessage((error && error.message) || 'Unable to load PayPal checkout.');
             });
@@ -435,6 +562,28 @@
         });
 
         window.addEventListener('lencarta-checkout-paypal-state-changed', function () {
+            var state = getPaypalState();
+            var currentSignature = state.signature || '';
+
+            if (!state.canRender || !isReadyForSync(state)) {
+                if (activePaypalOrderId || activeSyncSignature) {
+                    invalidateOrderRequest('checkout_state_not_ready').finally(function () {
+                        scheduleRender(20);
+                    });
+                    return;
+                }
+
+                scheduleRender(20);
+                return;
+            }
+
+            if (activeSyncSignature && activeSyncSignature !== currentSignature) {
+                invalidateOrderRequest('checkout_state_changed').finally(function () {
+                    scheduleRender(20);
+                });
+                return;
+            }
+
             scheduleRender(20);
         });
 
@@ -452,8 +601,15 @@
             scheduleRender(0);
         },
         destroy: function () {
+            invalidateOrderRequest('manual_destroy');
             destroyButtons();
             lastRenderSignature = '';
+        },
+        invalidate: function (reason) {
+            return invalidateOrderRequest(reason || 'manual_invalidate');
+        },
+        sync: function () {
+            return syncOrderRequest(true);
         }
     };
 

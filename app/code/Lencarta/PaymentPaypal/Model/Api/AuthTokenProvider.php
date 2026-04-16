@@ -5,12 +5,12 @@ namespace Lencarta\PaymentPaypal\Model\Api;
 
 use Lencarta\PaymentPaypal\Model\Config;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\HTTP\Client\Curl;
+use Magento\Framework\HTTP\Client\CurlFactory;
 
 class AuthTokenProvider
 {
     public function __construct(
-        private readonly Curl $curl,
+        private readonly CurlFactory $curlFactory,
         private readonly Config $config
     ) {
     }
@@ -24,19 +24,19 @@ class AuthTokenProvider
             throw new LocalizedException(__('PayPal API credentials are not configured.'));
         }
 
-        $this->curl->reset();
-        $this->curl->setHeaders([
+        $curl = $this->curlFactory->create();
+        $curl->setHeaders([
             'Authorization' => 'Basic ' . base64_encode($clientId . ':' . $clientSecret),
             'Content-Type'  => 'application/x-www-form-urlencoded',
         ]);
 
-        $this->curl->post(
+        $curl->post(
             rtrim($this->config->getApiBaseUrl($storeId), '/') . '/v1/oauth2/token',
             'grant_type=client_credentials'
         );
 
-        $status = $this->curl->getStatus();
-        $body = json_decode($this->curl->getBody(), true);
+        $status = $curl->getStatus();
+        $body = json_decode($curl->getBody(), true);
 
         if ($status < 200 || $status >= 300 || empty($body['access_token'])) {
             throw new LocalizedException(__('Unable to retrieve PayPal access token.'));

@@ -10,9 +10,8 @@ use Lencarta\PaymentPaypal\Model\Service\PaypalOrderSyncService;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Magento\Framework\Exception\LocalizedException;
 
-class CreateOrder implements HttpPostActionInterface
+class InvalidateOrder implements HttpPostActionInterface
 {
     public function __construct(
         private readonly JsonFactory $resultJsonFactory,
@@ -30,35 +29,25 @@ class CreateOrder implements HttpPostActionInterface
 
         try {
             if (!$this->config->isActive()) {
-                throw new LocalizedException(__('PayPal is currently unavailable.'));
+                return $result->setData(['success' => true]);
             }
 
             $quote = $this->sessionQuoteProvider->getQuote();
-            $checkoutSignature = trim((string) $this->request->getParam('checkout_signature', ''));
-            $syncResult = $this->paypalOrderSyncService->sync($quote, $checkoutSignature);
-            $paypalOrderId = (string) $syncResult['paypal_order_id'];
+            $reason = trim((string) $this->request->getParam('reason', 'invalidated')) ?: 'invalidated';
+            $this->paypalOrderSyncService->invalidate($quote, $reason);
 
             return $result->setData([
                 'success' => true,
-                'order_id' => $paypalOrderId,
-                'paypal_order_id' => $paypalOrderId,
-                'request_id' => $syncResult['request_id'] ?? '',
-                'checkout_signature' => $syncResult['checkout_signature'] ?? '',
-                'reused' => (bool) ($syncResult['reused'] ?? false),
-            ]);
-        } catch (LocalizedException $e) {
-            return $result->setData([
-                'success' => false,
-                'message' => $e->getMessage(),
+                'reason' => $reason,
             ]);
         } catch (\Throwable $e) {
-            $this->debugLogger->error('PayPal create order controller failure', [
+            $this->debugLogger->error('PayPal invalidate order controller failure', [
                 'exception' => $e,
             ]);
 
             return $result->setData([
                 'success' => false,
-                'message' => __('Unable to start PayPal checkout.'),
+                'message' => __('Unable to invalidate PayPal checkout.'),
             ]);
         }
     }

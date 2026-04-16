@@ -6,12 +6,12 @@ namespace Lencarta\PaymentPaypal\Model\Api;
 use Lencarta\PaymentPaypal\Model\Config;
 use Lencarta\PaymentPaypal\Model\DebugLogger;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\HTTP\Client\Curl;
+use Magento\Framework\HTTP\Client\CurlFactory;
 
 class CreateOrder
 {
     public function __construct(
-        private readonly Curl $curl,
+        private readonly CurlFactory $curlFactory,
         private readonly Config $config,
         private readonly AuthTokenProvider $authTokenProvider,
         private readonly DebugLogger $debugLogger
@@ -24,8 +24,8 @@ class CreateOrder
         $requestId = bin2hex(random_bytes(16));
         $url = rtrim($this->config->getApiBaseUrl($storeId), '/') . '/v2/checkout/orders';
 
-        $this->curl->reset();
-        $this->curl->setHeaders([
+        $curl = $this->curlFactory->create();
+        $curl->setHeaders([
             'Authorization' => 'Bearer ' . $accessToken,
             'Content-Type' => 'application/json',
             'PayPal-Request-Id' => $requestId,
@@ -38,13 +38,13 @@ class CreateOrder
             'request_id' => $requestId,
         ], $storeId);
 
-        $this->curl->post(
+        $curl->post(
             $url,
             json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
         );
 
-        $status = $this->curl->getStatus();
-        $body = json_decode($this->curl->getBody(), true) ?: [];
+        $status = $curl->getStatus();
+        $body = json_decode($curl->getBody(), true) ?: [];
 
         $this->debugLogger->debug('PayPal create order response', [
             'http_status' => $status,

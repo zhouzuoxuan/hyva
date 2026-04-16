@@ -6,12 +6,12 @@ namespace Lencarta\PaymentPaypal\Model\Api;
 use Lencarta\PaymentPaypal\Model\Config;
 use Lencarta\PaymentPaypal\Model\DebugLogger;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\HTTP\Client\Curl;
+use Magento\Framework\HTTP\Client\CurlFactory;
 
 class VerifyWebhookSignature
 {
     public function __construct(
-        private readonly Curl $curl,
+        private readonly CurlFactory $curlFactory,
         private readonly Config $config,
         private readonly AuthTokenProvider $authTokenProvider,
         private readonly DebugLogger $debugLogger
@@ -52,15 +52,15 @@ class VerifyWebhookSignature
 
         $url = rtrim($this->config->getApiBaseUrl($storeId), '/') . '/v1/notifications/verify-webhook-signature';
 
-        $this->curl->reset();
-        $this->curl->setHeaders([
+        $curl = $this->curlFactory->create();
+        $curl->setHeaders([
             'Authorization' => 'Bearer ' . $accessToken,
             'Content-Type' => 'application/json',
         ]);
-        $this->curl->post($url, json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        $curl->post($url, json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 
-        $status = $this->curl->getStatus();
-        $response = json_decode($this->curl->getBody(), true) ?: [];
+        $status = $curl->getStatus();
+        $response = json_decode($curl->getBody(), true) ?: [];
 
         $this->debugLogger->debug('PayPal webhook signature verification response', [
             'http_status' => $status,

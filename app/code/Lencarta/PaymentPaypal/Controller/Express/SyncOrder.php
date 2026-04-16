@@ -12,7 +12,7 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Exception\LocalizedException;
 
-class CreateOrder implements HttpPostActionInterface
+class SyncOrder implements HttpPostActionInterface
 {
     public function __construct(
         private readonly JsonFactory $resultJsonFactory,
@@ -36,15 +36,14 @@ class CreateOrder implements HttpPostActionInterface
             $quote = $this->sessionQuoteProvider->getQuote();
             $checkoutSignature = trim((string) $this->request->getParam('checkout_signature', ''));
             $syncResult = $this->paypalOrderSyncService->sync($quote, $checkoutSignature);
-            $paypalOrderId = (string) $syncResult['paypal_order_id'];
 
             return $result->setData([
                 'success' => true,
-                'order_id' => $paypalOrderId,
-                'paypal_order_id' => $paypalOrderId,
-                'request_id' => $syncResult['request_id'] ?? '',
-                'checkout_signature' => $syncResult['checkout_signature'] ?? '',
-                'reused' => (bool) ($syncResult['reused'] ?? false),
+                'paypal_order_id' => $syncResult['paypal_order_id'],
+                'order_id' => $syncResult['paypal_order_id'],
+                'request_id' => $syncResult['request_id'],
+                'checkout_signature' => $syncResult['checkout_signature'],
+                'reused' => (bool) $syncResult['reused'],
             ]);
         } catch (LocalizedException $e) {
             return $result->setData([
@@ -52,13 +51,13 @@ class CreateOrder implements HttpPostActionInterface
                 'message' => $e->getMessage(),
             ]);
         } catch (\Throwable $e) {
-            $this->debugLogger->error('PayPal create order controller failure', [
+            $this->debugLogger->error('PayPal sync order controller failure', [
                 'exception' => $e,
             ]);
 
             return $result->setData([
                 'success' => false,
-                'message' => __('Unable to start PayPal checkout.'),
+                'message' => __('Unable to sync PayPal checkout.'),
             ]);
         }
     }

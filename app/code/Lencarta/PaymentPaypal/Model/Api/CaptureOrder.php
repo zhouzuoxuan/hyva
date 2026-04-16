@@ -6,12 +6,12 @@ namespace Lencarta\PaymentPaypal\Model\Api;
 use Lencarta\PaymentPaypal\Model\Config;
 use Lencarta\PaymentPaypal\Model\DebugLogger;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\HTTP\Client\Curl;
+use Magento\Framework\HTTP\Client\CurlFactory;
 
 class CaptureOrder
 {
     public function __construct(
-        private readonly Curl $curl,
+        private readonly CurlFactory $curlFactory,
         private readonly Config $config,
         private readonly AuthTokenProvider $authTokenProvider,
         private readonly DebugLogger $debugLogger
@@ -28,8 +28,8 @@ class CaptureOrder
         $requestId = bin2hex(random_bytes(16));
         $url = rtrim($this->config->getApiBaseUrl($storeId), '/') . '/v2/checkout/orders/' . rawurlencode($paypalOrderId) . '/capture';
 
-        $this->curl->reset();
-        $this->curl->setHeaders([
+        $curl = $this->curlFactory->create();
+        $curl->setHeaders([
             'Authorization' => 'Bearer ' . $accessToken,
             'Content-Type' => 'application/json',
             'PayPal-Request-Id' => $requestId,
@@ -42,10 +42,10 @@ class CaptureOrder
             'request_id' => $requestId,
         ], $storeId);
 
-        $this->curl->post($url, '{}');
+        $curl->post($url, '{}');
 
-        $status = $this->curl->getStatus();
-        $rawBody = $this->curl->getBody();
+        $status = $curl->getStatus();
+        $rawBody = $curl->getBody();
         $body = json_decode($rawBody, true) ?: [];
 
         $this->debugLogger->debug('PayPal capture response', [

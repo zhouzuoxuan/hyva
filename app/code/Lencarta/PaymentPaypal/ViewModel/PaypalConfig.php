@@ -49,6 +49,16 @@ class PaypalConfig implements ArgumentInterface
         return $this->urlBuilder->getUrl('lencarta_paypal/express/createOrder');
     }
 
+    public function getSyncOrderUrl(): string
+    {
+        return $this->urlBuilder->getUrl('lencarta_paypal/express/syncOrder');
+    }
+
+    public function getInvalidateOrderUrl(): string
+    {
+        return $this->urlBuilder->getUrl('lencarta_paypal/express/invalidateOrder');
+    }
+
     public function getCaptureUrl(): string
     {
         return $this->urlBuilder->getUrl('lencarta_paypal/express/capture');
@@ -57,6 +67,11 @@ class PaypalConfig implements ArgumentInterface
     public function getWebhookUrl(): string
     {
         return $this->urlBuilder->getUrl('lencarta_paypal/webhook/index');
+    }
+
+    public function getSuccessUrl(): string
+    {
+        return $this->urlBuilder->getUrl('checkout/onepage/success');
     }
 
     public function getButtonColor(): string

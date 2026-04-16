@@ -17,7 +17,7 @@ class PaypalOrderStorage
     ) {
     }
 
-    public function saveCreated(Quote $quote, string $paypalOrderId, string $paypalRequestId): void
+    public function saveCreated(Quote $quote, string $paypalOrderId, string $paypalRequestId, string $checkoutSignature): void
     {
         $connection = $this->resourceConnection->getConnection();
         $table = $this->resourceConnection->getTableName(self::TABLE);
@@ -29,9 +29,11 @@ class PaypalOrderStorage
             'store_id' => (int) $quote->getStoreId(),
             'paypal_order_id' => $paypalOrderId,
             'paypal_request_id' => $paypalRequestId,
+            'checkout_signature' => $checkoutSignature,
             'amount' => (float) $quote->getGrandTotal(),
             'currency_code' => (string) $quote->getQuoteCurrencyCode(),
             'status' => 'created',
+            'is_active' => 1,
             'updated_at' => $now,
         ];
 
@@ -43,6 +45,39 @@ class PaypalOrderStorage
 
         $data['created_at'] = $now;
         $connection->insert($table, $data);
+    }
+
+    public function getReusableCreatedOrder(int $quoteId, string $checkoutSignature): ?array
+    {
+        $connection = $this->resourceConnection->getConnection();
+        $table = $this->resourceConnection->getTableName(self::TABLE);
+        $select = $connection->select()
+            ->from($table)
+            ->where('quote_id = ?', $quoteId)
+            ->where('checkout_signature = ?', $checkoutSignature)
+            ->where('status = ?', 'created')
+            ->where('is_active = ?', 1)
+            ->order('entity_id DESC')
+            ->limit(1);
+
+        $row = $connection->fetchRow($select);
+
+        return $row ?: null;
+    }
+
+    public function deactivateActiveQuoteOrders(int $quoteId, string $status = 'superseded'): void
+    {
+        $connection = $this->resourceConnection->getConnection();
+        $table = $this->resourceConnection->getTableName(self::TABLE);
+        $connection->update($table, [
+            'status' => $status,
+            'is_active' => 0,
+            'updated_at' => $this->dateTime->gmtDate(),
+        ], [
+            'quote_id = ?' => $quoteId,
+            'is_active = ?' => 1,
+            'status IN (?)' => ['created', 'synced', 'cancelled'],
+        ]);
     }
 
     public function getByPaypalOrderId(string $paypalOrderId): ?array
@@ -70,6 +105,7 @@ class PaypalOrderStorage
         $this->updateByPaypalOrderId($paypalOrderId, [
             'paypal_capture_id' => $paypalCaptureId,
             'status' => 'captured',
+            'is_active' => 0,
             'updated_at' => $this->dateTime->gmtDate(),
         ]);
     }
@@ -79,6 +115,7 @@ class PaypalOrderStorage
         $this->updateByPaypalOrderId($paypalOrderId, [
             'order_id' => $orderId,
             'status' => 'ordered',
+            'is_active' => 0,
             'updated_at' => $this->dateTime->gmtDate(),
         ]);
     }

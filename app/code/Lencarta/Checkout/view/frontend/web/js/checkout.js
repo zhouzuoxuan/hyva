@@ -16,9 +16,12 @@ function initLencartaCheckout(config) {
         termsAccepted: false,
         couponCode: initialState.coupon_code || '',
         appliedCouponCode: initialState.coupon_code || '',
+        appliedCouponLabel: initialState.coupon_name || initialState.coupon_code || '',
         couponOpen: false,
         couponApplying: false,
         couponRemoving: false,
+        couponMessage: '',
+        couponMessageType: 'info',
 
         email: initialState.email || '',
         emailSaveState: 'idle',
@@ -235,6 +238,20 @@ function initLencartaCheckout(config) {
 
         canRemoveCoupon() {
             return !this.couponRemoving && this.hasAppliedCoupon();
+        },
+
+        getAppliedCouponDisplayLabel() {
+            return (this.appliedCouponLabel || this.appliedCouponCode || '').trim();
+        },
+
+        setCouponMessage(message, type = 'info') {
+            this.couponMessage = message || '';
+            this.couponMessageType = type || 'info';
+        },
+
+        clearCouponMessage() {
+            this.couponMessage = '';
+            this.couponMessageType = 'info';
         },
 
         applyServerStatePayload(payload) {
@@ -815,6 +832,7 @@ function initLencartaCheckout(config) {
             this.email = state.email || '';
             this.couponCode = state.coupon_code || '';
             this.appliedCouponCode = state.coupon_code || '';
+            this.appliedCouponLabel = state.coupon_name || state.coupon_code || '';
             this.items = Array.isArray(state.items) ? state.items : [];
             this.totals = state.totals || {};
             this.shippingMethods = Array.isArray(state.shipping_methods) ? state.shipping_methods : [];
@@ -931,17 +949,17 @@ function initLencartaCheckout(config) {
             const couponCode = (this.couponCode || '').trim();
 
             if (!couponCode) {
-                this.message = this.translate('Please enter a coupon code.', 'Please enter a coupon code.');
+                this.setCouponMessage(this.translate('Please enter a coupon code.', 'Please enter a coupon code.'), 'error');
                 return;
             }
 
             if (!this.config.urls || !this.config.urls.applyCoupon) {
-                this.message = this.translate('Unable to apply coupon.', 'Unable to apply coupon.');
+                this.setCouponMessage(this.translate('Unable to apply coupon.', 'Unable to apply coupon.'), 'error');
                 return;
             }
 
             this.couponApplying = true;
-            this.message = '';
+            this.clearCouponMessage();
 
             const body = new URLSearchParams({
                 form_key: this.getFormKey(),
@@ -962,18 +980,21 @@ function initLencartaCheckout(config) {
                 const data = await res.json();
 
                 if (!data.success) {
-                    this.message = data.message || this.translate('Unable to apply coupon.', 'Unable to apply coupon.');
+                    this.applyServerStatePayload(data);
+                    this.setCouponMessage(data.message || this.translate('Unable to apply coupon.', 'Unable to apply coupon.'), 'error');
+                    this.couponOpen = true;
                     return;
                 }
 
                 this.applyServerStatePayload(data);
                 this.appliedCouponCode = data.coupon_code || couponCode;
+                this.appliedCouponLabel = data.coupon_name || this.appliedCouponCode;
                 this.couponCode = this.appliedCouponCode;
-                this.message = data.message || '';
+                this.setCouponMessage(data.message || '', 'success');
                 this.couponOpen = false;
                 this.emitPaypalStateChanged();
             } catch (e) {
-                this.message = this.translate('Unable to apply coupon.', 'Unable to apply coupon.');
+                this.setCouponMessage(this.translate('Unable to apply coupon.', 'Unable to apply coupon.'), 'error');
             } finally {
                 this.couponApplying = false;
             }
@@ -981,12 +1002,12 @@ function initLencartaCheckout(config) {
 
         async removeCoupon() {
             if (!this.config.urls || !this.config.urls.removeCoupon) {
-                this.message = this.translate('Unable to remove coupon.', 'Unable to remove coupon.');
+                this.setCouponMessage(this.translate('Unable to remove coupon.', 'Unable to remove coupon.'), 'error');
                 return;
             }
 
             this.couponRemoving = true;
-            this.message = '';
+            this.clearCouponMessage();
 
             const body = new URLSearchParams({
                 form_key: this.getFormKey()
@@ -1006,17 +1027,20 @@ function initLencartaCheckout(config) {
                 const data = await res.json();
 
                 if (!data.success) {
-                    this.message = data.message || this.translate('Unable to remove coupon.', 'Unable to remove coupon.');
+                    this.applyServerStatePayload(data);
+                    this.setCouponMessage(data.message || this.translate('Unable to remove coupon.', 'Unable to remove coupon.'), 'error');
+                    this.couponOpen = true;
                     return;
                 }
 
                 this.applyServerStatePayload(data);
                 this.appliedCouponCode = '';
+                this.appliedCouponLabel = '';
                 this.couponCode = '';
-                this.message = data.message || '';
+                this.setCouponMessage(data.message || '', 'success');
                 this.emitPaypalStateChanged();
             } catch (e) {
-                this.message = this.translate('Unable to remove coupon.', 'Unable to remove coupon.');
+                this.setCouponMessage(this.translate('Unable to remove coupon.', 'Unable to remove coupon.'), 'error');
             } finally {
                 this.couponRemoving = false;
             }

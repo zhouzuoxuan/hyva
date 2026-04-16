@@ -6,11 +6,15 @@ namespace Lencarta\Checkout\Model\Checkout;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\Quote;
+use Magento\SalesRule\Model\CouponFactory;
+use Magento\SalesRule\Model\ResourceModel\Rule\CollectionFactory as RuleCollectionFactory;
 
 class CouponManager
 {
     public function __construct(
-        private readonly CartRepositoryInterface $cartRepository
+        private readonly CartRepositoryInterface $cartRepository,
+        private readonly RuleCollectionFactory $ruleCollectionFactory,
+        private readonly CouponFactory $couponFactory
     ) {
     }
 
@@ -40,5 +44,67 @@ class CouponManager
         $quote->setTotalsCollectedFlag(false);
         $quote->collectTotals();
         $this->cartRepository->save($quote);
+    }
+
+    public function getAppliedCouponLabel(Quote $quote): string
+    {
+        $couponCode = trim((string) ($quote->getCouponCode() ?: ''));
+
+        if ($couponCode !== '') {
+            $couponRuleName = $this->getCouponRuleNameByCode($couponCode);
+            if ($couponRuleName !== '') {
+                return $couponRuleName;
+            }
+        }
+
+        $appliedRuleIds = array_values(array_filter(array_map(
+            'intval',
+            explode(',', (string) $quote->getAppliedRuleIds())
+        )));
+
+        if ($appliedRuleIds === []) {
+            return $couponCode;
+        }
+
+        $collection = $this->ruleCollectionFactory->create();
+        $collection->addFieldToFilter('rule_id', ['in' => $appliedRuleIds]);
+
+        $namesById = [];
+        foreach ($collection as $rule) {
+            $namesById[(int) $rule->getRuleId()] = trim((string) $rule->getName());
+        }
+
+        foreach ($appliedRuleIds as $ruleId) {
+            $name = $namesById[$ruleId] ?? '';
+            if ($name !== '') {
+                return $name;
+            }
+        }
+
+        return $couponCode;
+    }
+
+    private function getCouponRuleNameByCode(string $couponCode): string
+    {
+        if ($couponCode === '') {
+            return '';
+        }
+
+        try {
+            $coupon = $this->couponFactory->create()->loadByCode($couponCode);
+            $ruleId = (int) $coupon->getRuleId();
+
+            if ($ruleId <= 0) {
+                return '';
+            }
+
+            $collection = $this->ruleCollectionFactory->create();
+            $collection->addFieldToFilter('rule_id', $ruleId);
+            $rule = $collection->getFirstItem();
+
+            return trim((string) $rule->getName());
+        } catch (\Throwable) {
+            return '';
+        }
     }
 }

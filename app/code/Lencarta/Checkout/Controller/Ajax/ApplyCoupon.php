@@ -35,20 +35,46 @@ class ApplyCoupon extends AbstractJsonAction implements HttpPostActionInterface
 
             $this->couponManager->apply($quote, $couponCode);
             $state = $this->checkoutStateProvider->getState($quote);
+            $couponName = (string) ($state['coupon_name'] ?? $state['coupon_code'] ?? $couponCode);
 
             return $this->createResult([
                 'success' => true,
-                'message' => __('Coupon code "%1" was applied.', $state['coupon_code'] ?: $couponCode),
+                'message' => __('Discount "%1" was applied successfully.', $couponName),
                 'coupon_code' => $state['coupon_code'] ?? $couponCode,
+                'coupon_name' => $couponName,
                 'state' => $state,
                 'totals' => $state['totals'] ?? [],
                 'shipping_methods' => $state['shipping_methods'] ?? [],
                 'selected_shipping_method' => $state['selected_shipping_method'] ?? '',
             ]);
         } catch (LocalizedException $e) {
-            return $this->createResult(['success' => false, 'message' => $e->getMessage()]);
+            $quote = $this->sessionQuoteProvider->getQuote();
+            $state = $this->checkoutStateProvider->getState($quote);
+
+            return $this->createResult([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'coupon_code' => $state['coupon_code'] ?? '',
+                'coupon_name' => $state['coupon_name'] ?? '',
+                'state' => $state,
+                'totals' => $state['totals'] ?? [],
+                'shipping_methods' => $state['shipping_methods'] ?? [],
+                'selected_shipping_method' => $state['selected_shipping_method'] ?? '',
+            ]);
         } catch (\Throwable) {
-            return $this->createResult(['success' => false, 'message' => __('Unable to apply coupon.')]);
+            $quote = $this->sessionQuoteProvider->getQuote();
+            $state = $this->checkoutStateProvider->getState($quote);
+
+            return $this->createResult([
+                'success' => false,
+                'message' => __('Unable to apply coupon.'),
+                'coupon_code' => $state['coupon_code'] ?? '',
+                'coupon_name' => $state['coupon_name'] ?? '',
+                'state' => $state,
+                'totals' => $state['totals'] ?? [],
+                'shipping_methods' => $state['shipping_methods'] ?? [],
+                'selected_shipping_method' => $state['selected_shipping_method'] ?? '',
+            ]);
         }
     }
 }

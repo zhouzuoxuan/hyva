@@ -31,22 +31,50 @@ class RemoveCoupon extends AbstractJsonAction implements HttpPostActionInterface
             $this->validateFormKey($this->request);
 
             $quote = $this->sessionQuoteProvider->getQuote();
+            $couponName = $this->couponManager->getAppliedCouponLabel($quote);
             $this->couponManager->remove($quote);
             $state = $this->checkoutStateProvider->getState($quote);
 
             return $this->createResult([
                 'success' => true,
-                'message' => __('Coupon code was removed.'),
+                'message' => $couponName !== ''
+                    ? __('Discount "%1" was removed.', $couponName)
+                    : __('Coupon code was removed.'),
                 'coupon_code' => '',
+                'coupon_name' => '',
                 'state' => $state,
                 'totals' => $state['totals'] ?? [],
                 'shipping_methods' => $state['shipping_methods'] ?? [],
                 'selected_shipping_method' => $state['selected_shipping_method'] ?? '',
             ]);
         } catch (LocalizedException $e) {
-            return $this->createResult(['success' => false, 'message' => $e->getMessage()]);
+            $quote = $this->sessionQuoteProvider->getQuote();
+            $state = $this->checkoutStateProvider->getState($quote);
+
+            return $this->createResult([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'coupon_code' => $state['coupon_code'] ?? '',
+                'coupon_name' => $state['coupon_name'] ?? '',
+                'state' => $state,
+                'totals' => $state['totals'] ?? [],
+                'shipping_methods' => $state['shipping_methods'] ?? [],
+                'selected_shipping_method' => $state['selected_shipping_method'] ?? '',
+            ]);
         } catch (\Throwable) {
-            return $this->createResult(['success' => false, 'message' => __('Unable to remove coupon.')]);
+            $quote = $this->sessionQuoteProvider->getQuote();
+            $state = $this->checkoutStateProvider->getState($quote);
+
+            return $this->createResult([
+                'success' => false,
+                'message' => __('Unable to remove coupon.'),
+                'coupon_code' => $state['coupon_code'] ?? '',
+                'coupon_name' => $state['coupon_name'] ?? '',
+                'state' => $state,
+                'totals' => $state['totals'] ?? [],
+                'shipping_methods' => $state['shipping_methods'] ?? [],
+                'selected_shipping_method' => $state['selected_shipping_method'] ?? '',
+            ]);
         }
     }
 }

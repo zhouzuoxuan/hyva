@@ -12,7 +12,8 @@ class CheckoutStateProvider
     public function __construct(
         private readonly TotalsProvider $totalsProvider,
         private readonly ScopeConfigInterface $scopeConfig,
-        private readonly StoreManagerInterface $storeManager
+        private readonly StoreManagerInterface $storeManager,
+        private readonly CouponManager $couponManager
     ) {
     }
 
@@ -32,6 +33,7 @@ class CheckoutStateProvider
             'shipping_methods' => $this->totalsProvider->getShippingMethods($quote),
             'selected_shipping_method' => (string) ($shippingAddress?->getShippingMethod() ?: ''),
             'coupon_code' => (string) ($quote->getCouponCode() ?: ''),
+            'coupon_name' => $this->couponManager->getAppliedCouponLabel($quote),
             'shipping' => [
                 'firstname' => (string) ($shippingAddress?->getFirstname() ?: ''),
                 'lastname' => (string) ($shippingAddress?->getLastname() ?: ''),
@@ -78,6 +80,7 @@ class CheckoutStateProvider
             'shipping_methods' => [],
             'selected_shipping_method' => '',
             'coupon_code' => '',
+            'coupon_name' => '',
             'shipping' => [
                 'firstname' => '',
                 'lastname' => '',

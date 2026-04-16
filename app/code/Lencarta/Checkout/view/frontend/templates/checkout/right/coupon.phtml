@@ -3,22 +3,14 @@ declare(strict_types=1);
 
 /** @var \Magento\Framework\View\Element\Template $block */
 ?>
-<div class="mt-6 shrink-0 border-t border-slate-200 pt-5">
+<div class="mt-6 shrink-0 border-t border-slate-200 pt-5" x-cloak>
     <button type="button"
             @click="couponOpen = !couponOpen"
             class="flex w-full items-center justify-between gap-3 text-left">
         <span class="flex items-center gap-2.5 text-sm font-semibold text-slate-900">
             <span class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg"
-                     viewBox="0 0 24 24"
-                     fill="none"
-                     stroke="currentColor"
-                     stroke-width="1.8"
-                     class="h-4 w-4"
-                     aria-hidden="true">
-                    <path stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="M8 7h8m-8 5h5m-7 8 11-11a2 2 0 0 0 0-2.828l-.172-.172a2 2 0 0 0-2.828 0L3 17v4h4Z"/>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8m-8 5h5m-7 8 11-11a2 2 0 0 0 0-2.828l-.172-.172a2 2 0 0 0-2.828 0L3 17v4h4Z"/>
                 </svg>
             </span>
             <span><?= $block->escapeHtml(__('Apply Discount Code')) ?></span>
@@ -37,8 +29,7 @@ declare(strict_types=1);
         </span>
     </button>
 
-    <div x-cloak
-         x-show="couponOpen"
+    <div x-show="couponOpen"
          x-collapse.duration.200ms
          style="display: none;"
          class="pt-4">
@@ -70,12 +61,21 @@ declare(strict_types=1);
                 </button>
             </template>
         </div>
-
-        <template x-if="hasAppliedCoupon()">
-            <div class="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-                <span class="font-medium"><?= $block->escapeHtml(__('Applied code:')) ?></span>
-                <span x-text="appliedCouponCode"></span>
-            </div>
-        </template>
     </div>
+
+    <div x-show="couponMessage"
+         x-transition.opacity.duration.200ms
+         class="mt-3 rounded-lg border px-3 py-2 text-sm"
+         :class="couponMessageType === 'error'
+            ? 'border-rose-200 bg-rose-50 text-rose-700'
+            : 'border-emerald-200 bg-emerald-50 text-emerald-700'"
+         x-text="couponMessage"
+         style="display: none;"></div>
+
+    <template x-if="hasAppliedCoupon()">
+        <div class="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+            <span class="font-medium"><?= $block->escapeHtml(__('Applied discount:')) ?></span>
+            <span x-text="getAppliedCouponDisplayLabel()"></span>
+        </div>
+    </template>
 </div>

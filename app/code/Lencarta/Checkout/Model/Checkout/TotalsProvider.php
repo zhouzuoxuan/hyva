@@ -11,7 +11,8 @@ class TotalsProvider
 {
     public function __construct(
         private readonly PriceHelper $priceHelper,
-        private readonly ImageHelper $imageHelper
+        private readonly ImageHelper $imageHelper,
+        private readonly CouponManager $couponManager
     ) {
     }
 
@@ -19,18 +20,26 @@ class TotalsProvider
     {
         $quote->collectTotals();
 
+        $shippingAddress = $quote->getShippingAddress();
+        $discountAmount = (float) abs((float) $shippingAddress->getDiscountAmount());
+        $discountRuleNames = $discountAmount > 0.0001
+            ? $this->couponManager->getAppliedRuleNames($quote)
+            : [];
+
         return [
-            'currency'    => $quote->getQuoteCurrencyCode(),
-            'subtotal'    => (float) $quote->getSubtotal(),
-            'shipping'    => (float) $quote->getShippingAddress()->getShippingAmount(),
-            'tax'         => (float) $quote->getShippingAddress()->getTaxAmount(),
-            'discount'    => (float) abs((float) $quote->getShippingAddress()->getDiscountAmount()),
+            'currency' => $quote->getQuoteCurrencyCode(),
+            'subtotal' => (float) $quote->getSubtotal(),
+            'shipping' => (float) $shippingAddress->getShippingAmount(),
+            'tax' => (float) $shippingAddress->getTaxAmount(),
+            'discount' => $discountAmount,
+            'discount_rule_names' => $discountRuleNames,
+            'discount_rule_names_text' => implode(', ', $discountRuleNames),
             'grand_total' => (float) $quote->getGrandTotal(),
-            'formatted'   => [
-                'subtotal'    => $this->priceHelper->currency((float) $quote->getSubtotal(), true, false),
-                'shipping'    => $this->priceHelper->currency((float) $quote->getShippingAddress()->getShippingAmount(), true, false),
-                'tax'         => $this->priceHelper->currency((float) $quote->getShippingAddress()->getTaxAmount(), true, false),
-                'discount'    => $this->priceHelper->currency(abs((float) $quote->getShippingAddress()->getDiscountAmount()), true, false),
+            'formatted' => [
+                'subtotal' => $this->priceHelper->currency((float) $quote->getSubtotal(), true, false),
+                'shipping' => $this->priceHelper->currency((float) $shippingAddress->getShippingAmount(), true, false),
+                'tax' => $this->priceHelper->currency((float) $shippingAddress->getTaxAmount(), true, false),
+                'discount' => $this->priceHelper->currency($discountAmount, true, false),
                 'grand_total' => $this->priceHelper->currency((float) $quote->getGrandTotal(), true, false),
             ],
         ];

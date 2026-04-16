@@ -17,9 +17,20 @@ declare(strict_types=1);
             <span class="text-slate-600"><?= $block->escapeHtml(__('VAT')) ?></span>
             <span class="font-medium text-slate-900" x-text="totals.formatted?.tax || '-' "></span>
         </div>
-        <div class="flex items-center justify-between gap-4 px-4 py-3 leading-6">
-            <span class="text-slate-600"><?= $block->escapeHtml(__('Discount')) ?></span>
-            <span class="font-medium text-slate-900" x-text="totals.formatted?.discount || '-' "></span>
+        <div class="flex items-center justify-between gap-4 px-4 py-3 leading-6"
+             :class="Number(totals.discount || 0) > 0 ? 'bg-emerald-50/70' : ''">
+            <div class="min-w-0 pr-3">
+                <span :class="Number(totals.discount || 0) > 0 ? 'font-semibold text-emerald-800' : 'text-slate-600'">
+                    <?= $block->escapeHtml(__('Discount')) ?>
+                </span>
+                <template x-if="Number(totals.discount || 0) > 0 && totals.discount_rule_names_text">
+                    <span class="mt-0.5 block text-xs font-medium text-emerald-700"
+                          x-text="'(' + totals.discount_rule_names_text + ')'">
+                    </span>
+                </template>
+            </div>
+            <span :class="Number(totals.discount || 0) > 0 ? 'font-semibold text-emerald-800' : 'font-medium text-slate-900'"
+                  x-text="totals.formatted?.discount || '-' "></span>
         </div>
     </div>
 

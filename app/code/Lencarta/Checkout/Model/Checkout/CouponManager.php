@@ -57,13 +57,23 @@ class CouponManager
             }
         }
 
+        $appliedRuleNames = $this->getAppliedRuleNames($quote);
+        if ($appliedRuleNames !== []) {
+            return (string) reset($appliedRuleNames);
+        }
+
+        return $couponCode;
+    }
+
+    public function getAppliedRuleNames(Quote $quote): array
+    {
         $appliedRuleIds = array_values(array_filter(array_map(
             'intval',
             explode(',', (string) $quote->getAppliedRuleIds())
         )));
 
         if ($appliedRuleIds === []) {
-            return $couponCode;
+            return [];
         }
 
         $collection = $this->ruleCollectionFactory->create();
@@ -71,17 +81,21 @@ class CouponManager
 
         $namesById = [];
         foreach ($collection as $rule) {
-            $namesById[(int) $rule->getRuleId()] = trim((string) $rule->getName());
-        }
-
-        foreach ($appliedRuleIds as $ruleId) {
-            $name = $namesById[$ruleId] ?? '';
+            $name = trim((string) $rule->getName());
             if ($name !== '') {
-                return $name;
+                $namesById[(int) $rule->getRuleId()] = $name;
             }
         }
 
-        return $couponCode;
+        $names = [];
+        foreach ($appliedRuleIds as $ruleId) {
+            $name = $namesById[$ruleId] ?? '';
+            if ($name !== '') {
+                $names[] = $name;
+            }
+        }
+
+        return array_values(array_unique($names));
     }
 
     private function getCouponRuleNameByCode(string $couponCode): string

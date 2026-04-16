@@ -13,7 +13,7 @@ declare(strict_types=1);
         >
         <span class="text-sm leading-6 text-slate-600">
             <?= $block->escapeHtml(__('I agree to the')) ?>
-            <a href="<?php echo $block->getUrl('terms-and-conditions') ?>" class="font-medium text-slate-900 underline underline-offset-2">
+            <a href="<?php echo $block->getUrl('terms-and-conditions') ?>" target="_blank" class="font-medium text-slate-900 underline underline-offset-2">
                 <?= $block->escapeHtml(__('Terms & Conditions')) ?>
             </a>.
         </span>

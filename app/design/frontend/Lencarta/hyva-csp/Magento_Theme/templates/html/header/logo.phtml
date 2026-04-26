@@ -1,0 +1,86 @@
+<?php
+/**
+ * Hyva Themes - https://hyva.io
+ * Copyright © Hyva Themes 2020-present. All rights reserved.
+ * This product is licensed per Magento install
+ * See https://hyva.io/license
+ */
+
+declare(strict_types=1);
+
+use Hyva\Theme\Model\ViewModelRegistry;
+use Hyva\Theme\ViewModel\Logo\LogoPathResolver;
+use Hyva\Theme\ViewModel\Logo\LogoSizeResolver;
+use Hyva\Theme\ViewModel\StoreConfig;
+use Magento\Framework\Escaper;
+use Magento\Theme\Block\Html\Header\Logo;
+
+/** @var Logo $block */
+/** @var Escaper $escaper */
+/** @var ViewModelRegistry $viewModels */
+
+/** @var StoreConfig $storeConfig */
+$storeConfig = $viewModels->require(StoreConfig::class);
+$storeName = $block->getThemeName() ?: $storeConfig->getStoreConfig('general/store_information/name') ?: __('Store logo');
+
+/** @var LogoSizeResolver $logoSizeResolver */
+$logoSizeResolver = $viewModels->require(LogoSizeResolver::class);
+
+// Prefer theme/layout arguments first so this theme can control the rendered logo box.
+$logoWidth = (int) ($block->getLogoWidth() ?: 0);
+if ($logoWidth < 1) {
+    $logoWidth = (int) ($logoSizeResolver && $logoSizeResolver->getWidth() ? $logoSizeResolver->getWidth() : 200);
+}
+
+$logoHeight = (int) ($block->getLogoHeight() ?: 0);
+if ($logoHeight < 1) {
+    $logoHeight = (int) ($logoSizeResolver && $logoSizeResolver->getHeight() ? $logoSizeResolver->getHeight() : 150);
+}
+
+/** @var LogoPathResolver $logoPathResolver */
+$logoPathResolver = $block->getData('logoPathResolver');
+$logoSrc = $logoPathResolver && method_exists($logoPathResolver, 'getLogoSrc')
+    ? $logoPathResolver->getLogoSrc($block->getData('logo_file'))
+    : $block->getLogoSrc();
+
+$themeLogoPath = dirname(__DIR__, 4) . '/web/images/logo.svg';
+$inlineLogoSvg = '';
+
+if (is_string($logoSrc) && str_ends_with($logoSrc, '/images/logo.svg') && is_file($themeLogoPath)) {
+    $inlineLogoSvg = (string) file_get_contents($themeLogoPath);
+
+    if ($inlineLogoSvg !== '') {
+        $inlineLogoSvg = preg_replace(
+            '/<svg\b/',
+            sprintf(
+                '<svg width="%d" height="%d" class="block h-auto w-auto"',
+                $logoWidth,
+                $logoHeight
+            ),
+            $inlineLogoSvg,
+            1
+        ) ?: '';
+    }
+}
+?>
+<a
+    class="flex items-center justify-center text-xl font-medium"
+    href="<?= $escaper->escapeUrl($block->getUrl('')) ?>"
+    aria-label="<?= $escaper->escapeHtmlAttr(__('Go to Home page')) ?>"
+>
+    <?php if ($inlineLogoSvg): ?>
+        <span class="block" aria-hidden="true"><?= /** @noEscape */ $inlineLogoSvg ?></span>
+    <?php else: ?>
+        <img
+            class="block h-auto w-auto"
+            src="<?= $escaper->escapeUrl($logoSrc) ?>"
+            alt="<?= $escaper->escapeHtmlAttr($block->getLogoAlt() ?: $storeName) ?>"
+            width="<?= $escaper->escapeHtmlAttr((string) $logoWidth) ?>"
+            height="<?= $escaper->escapeHtmlAttr((string) $logoHeight) ?>"
+            loading="eager"
+        >
+    <?php endif; ?>
+    <?php if (!$logoSrc): ?>
+        <?= $escaper->escapeHtml($storeName) ?>
+    <?php endif; ?>
+</a>

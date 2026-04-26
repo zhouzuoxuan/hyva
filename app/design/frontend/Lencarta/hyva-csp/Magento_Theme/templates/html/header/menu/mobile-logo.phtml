@@ -36,7 +36,7 @@ $logoBaseHeight = $logoSizeResolver && $logoSizeResolver->getHeight()
     ? $logoSizeResolver->getHeight()
     : ($block->getLogoHeight() ?: 150);
 $logoMaxHeight = $block->getMaxHeight() ?: $logoBaseHeight;
-$logoHeight = $logoBaseHeight > $logoMaxHeight ? $logoBaseHeight : $logoBaseHeight;
+$logoHeight = $logoBaseHeight > $logoMaxHeight ? $logoMaxHeight : $logoBaseHeight;
 
 /** @var LogoPathResolver $logoPathResolver */
 $logoPathResolver = $viewModels->require(LogoPathResolver::class);

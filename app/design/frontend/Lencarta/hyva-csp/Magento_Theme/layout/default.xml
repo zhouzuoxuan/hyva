@@ -3,6 +3,13 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <!-- header ui-->
+        <referenceBlock name="logo">
+            <arguments>
+                <argument name="logo_width" xsi:type="number">179</argument>
+                <argument name="logo_height" xsi:type="number">50</argument>
+            </arguments>
+        </referenceBlock>
+
         <!-- menu ui-->
         <referenceBlock name="topmenu_desktop">
             <arguments>

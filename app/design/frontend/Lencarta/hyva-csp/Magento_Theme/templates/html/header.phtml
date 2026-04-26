@@ -156,21 +156,21 @@ $showWishlist = $block->getShowWishlist() !== null ? (bool) $block->getShowWishl
 <?php $hyvaCsp->registerInlineScript() ?>
 <div
     id="header"
-    class="z-30 relative mb-4"
+    class="z-30 relative w-full bg-white"
     x-data="initHeader"
     @private-content-loaded.window="getData"
     @resize.window.debounce="checkHeaderSize"
 >
     <div class="relative container flex gap-4 lg:gap-8 items-center w-full px-6 py-3 mx-auto mt-0 leading-none">
-        <div class="flex shrink-0 items-center self-stretch">
+        <div class="header-logo flex shrink-0 items-center self-stretch">
             <?= $block->getChildHtml('logo'); ?>
         </div>
 
-        <div class="order-first flex shrink-0 items-center self-stretch lg:order-none">
+        <div class="header-menu order-first flex shrink-0 items-center self-stretch lg:order-none">
             <?= $block->getChildHtml('topmenu') ?>
         </div>
 
-        <div class="ml-auto flex shrink-0 items-center self-stretch gap-2">
+        <div class="header-actions ml-auto flex shrink-0 items-center self-stretch gap-2">
             <?php if ($showCompare): ?>
                 <?= $block->getChildHtml('compare'); ?>
             <?php endif; ?>

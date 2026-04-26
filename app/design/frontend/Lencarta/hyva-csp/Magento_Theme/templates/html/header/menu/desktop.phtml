@@ -32,6 +32,25 @@ $topMenuCtaItem = $block->getTopMenuCtaItem();
 // Order is important here: 1. build the menu data, 2. then set the cache tags from the view model identities
 $menu = $viewModelNavigation->getNavigation(5);
 $block->setData('cache_tags', $viewModelNavigation->getIdentities());
+
+$menuLayoutMap = array_merge(
+    [
+        // 'category-node-20' => 'editorial_cards',
+        // 'category-node-11' => 'catalog_columns',
+    ],
+    (array) $block->getData('menu_layout_map')
+);
+
+$normalizeMenuEntityId = static function (string $menuItemId): string {
+    return str_replace('-node', '', $menuItemId);
+};
+
+$renderCmsBlock = static function (string $identifier) use ($block): string {
+    return trim((string) $block->getLayout()
+        ->createBlock(CmsBlock::class)
+        ->setIdentifier($identifier)
+        ->toHtml());
+};
 ?>
 
 <nav
@@ -46,8 +65,42 @@ $block->setData('cache_tags', $viewModelNavigation->getIdentities());
             <?php if (!empty($item['childData'])): ?>
                 <?php
                 $subMenuItems = array_values($item['childData']);
-                $menuId = 'desktop-menu-' . str_replace('-node', '', $item['id']);
-                $firstSubMenuId = $menuId . '-sub-0';
+                $menuEntityId = $normalizeMenuEntityId($item['id']);
+                $menuId = 'desktop-menu-' . $menuEntityId;
+                $panels = [];
+                $hasEditorialBlocks = false;
+
+                foreach ($subMenuItems as $subMenuIndex => $subMenu) {
+                    $subMenuPanelId = $menuId . '-sub-' . $subMenuIndex;
+                    $subMenuEntityId = $normalizeMenuEntityId($subMenu['id']);
+                    $editorialBlockHtml = '';
+
+                    foreach (
+                        [
+                            $menuId . '-' . $subMenuEntityId . '-editorial',
+                            'desktop-menu-' . $subMenuEntityId . '-editorial',
+                        ] as $editorialBlockIdentifier
+                    ) {
+                        $editorialBlockHtml = $renderCmsBlock($editorialBlockIdentifier);
+                        if ($editorialBlockHtml !== '') {
+                            $hasEditorialBlocks = true;
+                            break;
+                        }
+                    }
+
+                    $panels[] = [
+                        'item' => $subMenu,
+                        'panel_id' => $subMenuPanelId,
+                        'editorial_block_html' => $editorialBlockHtml,
+                    ];
+                }
+
+                $menuLayoutType = $menuLayoutMap[$item['id']]
+                    ?? $menuLayoutMap[$menuEntityId]
+                    ?? $menuLayoutMap[$menuId]
+                    ?? ($hasEditorialBlocks ? 'editorial_cards' : 'catalog_columns');
+                $firstSubMenuId = $panels[0]['panel_id'] ?? null;
+                $featureBlockHtml = $menuLayoutType === 'catalog_columns' ? $renderCmsBlock($menuId) : '';
                 ?>
                 <li
                     class="level-0"
@@ -94,8 +147,11 @@ $block->setData('cache_tags', $viewModelNavigation->getIdentities());
                                 aria-label="<?= $escaper->escapeHtmlAttr(__('%1 categories', $item['name'])) ?>"
                             >
                                 <ul class="header-mega-menu__nav">
-                                    <?php foreach ($subMenuItems as $subMenuIndex => $subMenu): ?>
-                                        <?php $subMenuId = $menuId . '-sub-' . $subMenuIndex; ?>
+                                    <?php foreach ($panels as $panel): ?>
+                                        <?php
+                                        $subMenu = $panel['item'];
+                                        $subMenuId = $panel['panel_id'];
+                                        ?>
                                         <li>
                                             <button
                                                 type="button"
@@ -124,59 +180,16 @@ $block->setData('cache_tags', $viewModelNavigation->getIdentities());
                                 <?php endif; ?>
                             </nav>
 
-                            <div class="header-mega-menu__content">
-                                <?php foreach ($subMenuItems as $subMenuIndex => $subMenu): ?>
-                                    <?php $subMenuId = $menuId . '-sub-' . $subMenuIndex; ?>
-                                    <section
-                                        class="header-mega-menu__panel"
-                                        x-show="activeSubMenu === '<?= $escaper->escapeJs($subMenuId) ?>'"
-                                        x-cloak
-                                    >
-                                        <div class="header-mega-menu__panel-header">
-                                            <a
-                                                href="<?= $escaper->escapeUrl($subMenu['url']) ?>"
-                                                class="header-mega-menu__panel-title"
-                                            >
-                                                <?= $escaper->escapeHtml($subMenu['name']) ?>
-                                            </a>
-                                        </div>
-
-                                        <?php if (!empty($subMenu['childData'])): ?>
-                                            <div class="header-mega-menu__panel-grid">
-                                                <?php foreach ($subMenu['childData'] as $subMenuItem): ?>
-                                                    <a
-                                                        href="<?= $escaper->escapeUrl($subMenuItem['url']) ?>"
-                                                        class="header-mega-menu__panel-link"
-                                                    >
-                                                        <?= $escaper->escapeHtml($subMenuItem['name']) ?>
-                                                    </a>
-                                                <?php endforeach; ?>
-                                            </div>
-                                        <?php else: ?>
-                                            <div class="header-mega-menu__panel-empty">
-                                                <a
-                                                    href="<?= $escaper->escapeUrl($subMenu['url']) ?>"
-                                                    class="header-mega-menu__panel-link"
-                                                >
-                                                    <?= $escaper->escapeHtml(__('Explore %1', $subMenu['name'])) ?>
-                                                </a>
-                                            </div>
-                                        <?php endif; ?>
-                                    </section>
-                                <?php endforeach; ?>
-                            </div>
-
-                                <?php
-                                $cmsBlockHtml = $this->getLayout()
-                                    ->createBlock(CmsBlock::class)
-                                    ->setIdentifier($menuId)
-                                    ->toHtml();
-                                if (!empty($cmsBlockHtml)):
-                                ?>
-                                    <aside class="header-mega-menu__feature">
-                                        <?= /** @noEscape */ $cmsBlockHtml ?>
-                                    </aside>
-                                <?php endif; ?>
+                            <?= /** @noEscape */ $block->getLayout()
+                                ->createBlock(Template::class)
+                                ->setTemplate(
+                                    $menuLayoutType === 'editorial_cards'
+                                        ? 'Magento_Theme::html/header/menu/desktop/editorial.phtml'
+                                        : 'Magento_Theme::html/header/menu/desktop/catalog.phtml'
+                                )
+                                ->setData('panels', $panels)
+                                ->setData('feature_block_html', $featureBlockHtml)
+                                ->toHtml() ?>
                             </div>
                         </div>
                     </div>

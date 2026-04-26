@@ -1,0 +1,67 @@
+<?php
+/**
+ * Hyvä Themes - https://hyva.io
+ * Copyright © Hyvä Themes 2020-present. All rights reserved.
+ * This product is licensed per Magento install
+ * See https://hyva.io/license
+ */
+
+use Magento\Framework\View\Element\Template;
+use Magento\Framework\Escaper;
+
+/** @var Template $block */
+/** @var Escaper $escaper */
+
+$panels = (array) $block->getData('panels');
+$featureBlockHtml = (string) $block->getData('feature_block_html');
+?>
+<div class="header-mega-menu__content">
+    <?php foreach ($panels as $panel): ?>
+        <?php
+        $subMenu = $panel['item'];
+        $subMenuId = $panel['panel_id'];
+        ?>
+        <section
+            class="header-mega-menu__panel"
+            x-show="activeSubMenu === '<?= $escaper->escapeJs($subMenuId) ?>'"
+            x-cloak
+        >
+            <div class="header-mega-menu__panel-header">
+                <a
+                    href="<?= $escaper->escapeUrl($subMenu['url']) ?>"
+                    class="header-mega-menu__panel-title"
+                >
+                    <?= $escaper->escapeHtml($subMenu['name']) ?>
+                </a>
+            </div>
+
+            <?php if (!empty($subMenu['childData'])): ?>
+                <div class="header-mega-menu__panel-grid">
+                    <?php foreach ($subMenu['childData'] as $subMenuItem): ?>
+                        <a
+                            href="<?= $escaper->escapeUrl($subMenuItem['url']) ?>"
+                            class="header-mega-menu__panel-link"
+                        >
+                            <?= $escaper->escapeHtml($subMenuItem['name']) ?>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <div class="header-mega-menu__panel-empty">
+                    <a
+                        href="<?= $escaper->escapeUrl($subMenu['url']) ?>"
+                        class="header-mega-menu__panel-link"
+                    >
+                        <?= $escaper->escapeHtml(__('Explore %1', $subMenu['name'])) ?>
+                    </a>
+                </div>
+            <?php endif; ?>
+        </section>
+    <?php endforeach; ?>
+</div>
+
+<?php if ($featureBlockHtml !== ''): ?>
+    <aside class="header-mega-menu__feature">
+        <?= /** @noEscape */ $featureBlockHtml ?>
+    </aside>
+<?php endif; ?>

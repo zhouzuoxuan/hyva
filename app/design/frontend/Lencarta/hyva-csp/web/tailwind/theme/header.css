@@ -113,6 +113,18 @@
         gap: 1.5rem;
     }
 
+    #header .header-mega-menu__panel-rich {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    #header .header-mega-menu__panel-rich img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+    }
+
     #header .header-mega-menu__panel-header {
         padding-bottom: 0.25rem;
         border-bottom: 1px solid var(--color-slate-100);
